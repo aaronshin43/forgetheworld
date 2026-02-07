@@ -16,7 +16,12 @@ def read_root():
     return {"Hello": "Forge the World"}
 
 from fastapi import UploadFile, File, Form
-from ai_service import analyze_image_with_gemini, generate_flavor_text_with_featherless
+from fastapi import UploadFile, File, Form, Body
+from pydantic import BaseModel
+from ai_service import analyze_image_with_gemini, generate_flavor_text_with_featherless, generate_item_image, generate_item_image_v2
+
+class ImageRequest(BaseModel):
+    prompt: str
 
 @app.post("/scan")
 async def scan_item(
@@ -40,3 +45,8 @@ async def scan_item(
         "analysis": gemini_result,
         "flavor": flavor_text
     }
+
+@app.post("/generate-image")
+async def generate_image(request: ImageRequest):
+    image_url = await generate_item_image_v2(request.prompt)
+    return {"image": image_url}
