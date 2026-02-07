@@ -14,7 +14,19 @@ export const CommandCenter = () => {
                     {inventory.map((item, index) => (
                         <div key={index} className="aspect-square bg-white/5 border border-white/10 rounded-md flex items-center justify-center hover:bg-white/10 transition-colors cursor-pointer relative overflow-hidden group">
                             {item ? (
-                                <span className="text-2xl drop-shadow-md">{item}</span>
+                                <>
+                                    {item.status === 'loading' ? (
+                                        <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
+                                            <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                                        </div>
+                                    ) : null}
+
+                                    {item.image ? (
+                                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <span className="text-xs text-center px-1 truncate w-full">{item.name}</span>
+                                    )}
+                                </>
                             ) : (
                                 <img
                                     src="/ui/anvil.webp"
@@ -30,7 +42,11 @@ export const CommandCenter = () => {
             {/* Action Bar */}
             <div className="grid grid-cols-3 gap-4 h-24">
                 <button
-                    onClick={() => { useGameStore.getState().setViewMode('camera'); useGameStore.getState().setTimeScale(0.1); }}
+                    onClick={() => {
+                        useGameStore.getState().setViewMode('camera');
+                        useGameStore.getState().setTimeScale(0.1);
+                        useGameStore.getState().setScanMode('craft');
+                    }}
                     className="group relative bg-indigo-600/20 backdrop-blur-md border border-indigo-500/30 rounded-2xl flex flex-col items-center justify-center active:scale-95 transition-all hover:bg-indigo-600/30">
                     <div className="text-3xl mb-1 group-hover:scale-110 transition-transform">🔨</div>
                     <span className="text-xs font-bold text-indigo-200 tracking-wider">CRAFT</span>
@@ -38,7 +54,11 @@ export const CommandCenter = () => {
                 </button>
 
                 <button
-                    onClick={() => { useGameStore.getState().setViewMode('camera'); useGameStore.getState().setTimeScale(0.1); }}
+                    onClick={() => {
+                        useGameStore.getState().setViewMode('camera');
+                        useGameStore.getState().setTimeScale(0.1);
+                        useGameStore.getState().setScanMode('skill');
+                    }}
                     className="group relative bg-rose-600/20 backdrop-blur-md border border-rose-500/30 rounded-2xl flex flex-col items-center justify-center active:scale-95 transition-all hover:bg-rose-600/30">
                     <div className="text-3xl mb-1 group-hover:scale-110 transition-transform">⚡</div>
                     <span className="text-xs font-bold text-rose-200 tracking-wider">SKILL</span>
@@ -46,7 +66,11 @@ export const CommandCenter = () => {
                 </button>
 
                 <button
-                    onClick={() => { useGameStore.getState().setViewMode('camera'); useGameStore.getState().setTimeScale(0.1); }}
+                    onClick={() => {
+                        useGameStore.getState().setViewMode('camera');
+                        useGameStore.getState().setTimeScale(0.1);
+                        useGameStore.getState().setScanMode('enhance');
+                    }}
                     className="group relative bg-purple-600/20 backdrop-blur-md border border-purple-500/30 rounded-2xl flex flex-col items-center justify-center active:scale-95 transition-all hover:bg-purple-600/30">
                     <div className="text-3xl mb-1 group-hover:scale-110 transition-transform">✨</div>
                     <span className="text-xs font-bold text-purple-200 tracking-wider">ENHANCE</span>

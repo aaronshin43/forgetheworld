@@ -1,6 +1,7 @@
 import React, { useRef, useCallback } from 'react';
 import Webcam from 'react-webcam';
 import { useGameStore } from '../store/gameStore';
+import { SKILL_CONFIGS } from '../constants/assetRegistry';
 
 const videoConstraints = {
     facingMode: { ideal: "environment" }
@@ -8,7 +9,7 @@ const videoConstraints = {
 
 export const CameraView = () => {
     const webcamRef = useRef<Webcam>(null);
-    const { film, setIsAnalyzing, setScanResult, setTimeScale, useFilm } = useGameStore();
+    const { film, setIsAnalyzing, setScanResult, setTimeScale, useFilm, setInventoryItem, inventory, scanMode } = useGameStore();
 
     const capture = useCallback(async () => {
         const imageSrc = webcamRef.current?.getScreenshot();
@@ -22,13 +23,19 @@ export const CameraView = () => {
             setTimeScale(0.0); // Stop time
 
             try {
+                // 1. Prepare Image
                 const res = await fetch(imageSrc);
                 const blob = await res.blob();
                 const file = new File([blob], "capture.jpg", { type: "image/jpeg" });
 
                 const formData = new FormData();
                 formData.append("file", file);
-                formData.append("mode", "craft");
+                formData.append("mode", scanMode || "craft");
+
+                // 2. Scan Item (Vision + Flavor Text)
+                // Return to battle immediately so overlay shows there
+                useGameStore.getState().setViewMode('battle');
+                useGameStore.getState().setTimeScale(1.0);
 
                 const response = await fetch("http://localhost:8000/scan", {
                     method: "POST",
@@ -36,18 +43,89 @@ export const CameraView = () => {
                 });
 
                 const data = await response.json();
+
+                // SKILL MODE LOGIC
+                if (scanMode === 'skill') {
+                    setIsAnalyzing(false);
+                    // Trigger Random Skill Effect
+                    const skillKeys = Object.keys(SKILL_CONFIGS);
+                    const randomSkill = skillKeys[Math.floor(Math.random() * skillKeys.length)];
+                    const config = SKILL_CONFIGS[randomSkill];
+
+                    // Add effect to center of screen (or randomized slightly?)
+                    useGameStore.getState().addEffect(randomSkill, {
+                        x: 50, // Center
+                        y: 50,
+                        scale: config.scale
+                    });
+
+                    // Do NOT show ResultOverlay
+                    return;
+                }
+
+                // CRAFT / ENHANCE LOGIC
+                // 3. Add Placeholder to Inventory
+                // Find first empty slot or overwrite last? Let's find first empty.
+                let targetIndex = inventory.findIndex(item => item === null);
+                if (targetIndex === -1) targetIndex = 0; // Overwrite first if full
+
+                const newItemId = Date.now().toString();
+
+                // Set Loading State
+                setInventoryItem(targetIndex, {
+                    id: newItemId,
+                    name: data.flavor.name || data.analysis.item,
+                    image: null,
+                    status: 'loading'
+                });
+
                 setScanResult(data);
                 setIsAnalyzing(false);
+
+                // 4. Trigger Image Generation (Async)
+                generateImage(data.flavor.description || data.analysis.item, targetIndex, newItemId);
+
             } catch (err) {
                 console.error("Scan failed", err);
                 setIsAnalyzing(false);
                 setTimeScale(0.1);
             }
         }
-    }, [webcamRef, film, setIsAnalyzing, setScanResult, setTimeScale, useFilm]);
+    }, [webcamRef, film, setIsAnalyzing, setScanResult, setTimeScale, useFilm, inventory]);
+
+    const generateImage = async (prompt: string, index: number, itemId: string) => {
+        try {
+            const response = await fetch("http://localhost:8000/generate-image", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt })
+            });
+            const data = await response.json();
+
+            if (data.image) {
+                // Update Inventory with Real Image
+                // We need to fetch current inventory again to ensure we don't overwrite other changes? 
+                // Zustand setInventoryItem handles array copy, but index might be risky if items moved.
+                // For this prototype, index locking is acceptable.
+
+                // Check if the item at this index is still the one we created
+                const currentItem = useGameStore.getState().inventory[index];
+                if (currentItem && currentItem.id === itemId) {
+                    useGameStore.getState().setInventoryItem(index, {
+                        ...currentItem,
+                        image: data.image,
+                        status: 'ready'
+                    });
+                }
+            }
+        } catch (e) {
+            console.error("Image generation failed", e);
+            // Could set status to 'error' or keep placeholder
+        }
+    };
 
     return (
-        <div className="relative w-full h-full bg-black overflow-hidden rounded-lg">
+        <div className="relative w-full h-full bg-black overflow-hidden">
             <Webcam
                 audio={false}
                 ref={webcamRef}
@@ -55,10 +133,9 @@ export const CameraView = () => {
                 videoConstraints={videoConstraints}
                 className="object-cover w-full h-full"
             />
-            <div className="absolute inset-0 border-[2px] border-white/30 pointer-events-none rounded-lg" />
 
             {/* Button Overlay */}
-            <div className="absolute bottom-8 left-0 right-0 flex justify-center items-center pb-8 z-30 gap-8">
+            <div className="absolute bottom-8 left-0 right-0 flex justify-center items-center pb-8 z-30 gap-8 pointer-events-auto">
                 {/* Cancel Button */}
                 <button
                     onClick={() => {

@@ -16,6 +16,13 @@ export interface ActiveMonster {
     y: number;
 }
 
+export interface InventoryItem {
+    id: string;
+    name: string;
+    image: string | null; // Base64 or URL
+    status: 'loading' | 'ready';
+}
+
 interface GameState {
     hp: number;
     maxHp: number;
@@ -23,9 +30,10 @@ interface GameState {
     maxFilm: number;
     timeScale: number;
     viewMode: 'battle' | 'camera';
+    scanMode: 'craft' | 'skill' | 'enhance' | null;
     isAnalyzing: boolean;
     scanResult: any | null;
-    inventory: (string | null)[];
+    inventory: (InventoryItem | null)[];
     lastFilmRecharge: number;
 
     // Visuals State
@@ -40,6 +48,7 @@ interface GameState {
     addFilm: (amount: number) => void;
     setTimeScale: (scale: number) => void;
     setViewMode: (mode: 'battle' | 'camera') => void;
+    setScanMode: (mode: 'craft' | 'skill' | 'enhance' | null) => void;
     setIsAnalyzing: (isAnalyzing: boolean) => void;
     setScanResult: (result: any) => void;
     updateFilmRecharge: (time: number) => void;
@@ -51,6 +60,7 @@ interface GameState {
     clearMonsters: () => void;
     triggerCharacterAttack: () => void;
     setCharacterAction: (action: string) => void;
+    setInventoryItem: (index: number, item: InventoryItem | null) => void;
     setBackground: (background: string) => void;
     setAppMode: (mode: 'intro' | 'game' | 'dev') => void;
 }
@@ -62,6 +72,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     maxFilm: 3,
     timeScale: 1.0,
     viewMode: 'battle',
+    scanMode: null,
     isAnalyzing: false,
     scanResult: null,
     inventory: Array(6).fill(null),
@@ -84,6 +95,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     addFilm: (amount) => set((state) => ({ film: Math.min(state.film + amount, state.maxFilm) })),
     setTimeScale: (timeScale) => set({ timeScale }),
     setViewMode: (viewMode) => set({ viewMode }),
+    setScanMode: (scanMode) => set({ scanMode }),
     setIsAnalyzing: (isAnalyzing) => set({ isAnalyzing }),
     setScanResult: (scanResult) => set({ scanResult }),
     updateFilmRecharge: (time) => {
@@ -126,6 +138,12 @@ export const useGameStore = create<GameState>((set, get) => ({
                 set({ characterAction: 'stand1' });
             }
         }, duration);
+    },
+
+    setInventoryItem: (index, item) => {
+        const newInventory = [...get().inventory];
+        newInventory[index] = item;
+        set({ inventory: newInventory });
     },
 
     setBackground: (background) => set({ currentBackground: background }),

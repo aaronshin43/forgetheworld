@@ -3,13 +3,19 @@ import { motion } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
 
 export const ResultOverlay = () => {
-    const { scanResult, setScanResult, setViewMode, setTimeScale, setIsAnalyzing } = useGameStore();
+    const { scanResult, setScanResult, setViewMode, setTimeScale, setIsAnalyzing, inventory } = useGameStore();
 
     if (!scanResult) return null;
+
+    const matchingItem = inventory.find(item => item && (item.name === scanResult.flavor.name || item.name === scanResult.analysis.item) && item.image);
+
+    const displayImage = matchingItem?.image;
 
     const handleClose = () => {
         setScanResult(null);
         setIsAnalyzing(false);
+        // Note: View transition is now handled in CameraView immediately after capture, 
+        // but we might want to ensure we are in battle mode here too just in case.
         setViewMode('battle');
         setTimeScale(1.0);
     };
@@ -21,12 +27,25 @@ export const ResultOverlay = () => {
                 animate={{ scale: 1, opacity: 1 }}
                 className="w-full max-w-sm bg-gray-800 rounded-xl overflow-hidden border border-yellow-500/30 shadow-[0_0_50px_rgba(234,179,8,0.2)]"
             >
-                <div className="bg-gray-900 p-8 flex items-center justify-center relative overflow-hidden">
+                <div className="bg-gray-900 p-8 flex items-center justify-center relative overflow-hidden h-64">
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-yellow-900/40 via-transparent to-transparent" />
-                    <span className="text-6xl relative z-10 drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]">
-                        {/* Fallback Icon based on type */}
-                        {scanResult.analysis.type === 'weapon' ? '⚔️' : scanResult.analysis.type === 'armor' ? '🛡️' : '🧪'}
-                    </span>
+
+                    {displayImage ? (
+                        <motion.img
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            src={displayImage}
+                            alt="Generated Item"
+                            className="relative z-10 w-48 h-48 object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]"
+                        />
+                    ) : (
+                        <div className="relative z-10 flex flex-col items-center">
+                            <span className="text-6xl mb-4 animate-pulse">
+                                {scanResult.analysis.type === 'weapon' ? '⚔️' : scanResult.analysis.type === 'armor' ? '🛡️' : '🧪'}
+                            </span>
+                            <span className="text-xs text-yellow-500/70 uppercase tracking-widest animate-pulse">Forging...</span>
+                        </div>
+                    )}
                 </div>
 
                 <div className="p-6">

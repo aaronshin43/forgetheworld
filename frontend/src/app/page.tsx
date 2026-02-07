@@ -7,6 +7,8 @@ import { CameraView } from '../components/CameraView';
 import { GameMenu } from '../components/GameMenu';
 import { IntroScreen } from '../views/IntroScreen';
 import { DebugPanel } from '../components/DebugPanel';
+import { AnalysisOverlay } from '../views/AnalysisOverlay';
+import { ResultOverlay } from '../views/ResultOverlay';
 import { useGameStore } from '../store/gameStore';
 
 export default function Home() {
@@ -39,6 +41,10 @@ export default function Home() {
       <div className="relative w-full h-full max-w-[430px] max-h-[932px] bg-black shadow-2xl overflow-hidden flex flex-col border-x border-zinc-800">
 
         {renderContent()}
+
+        {/* Global Overlays */}
+        {useGameStore.getState().isAnalyzing && <AnalysisOverlay />}
+        <ResultOverlay />
 
         {/* Game Menu (Hamburger) - Visible in Game/Dev modes */}
         {appMode !== 'intro' && <GameMenu />}
