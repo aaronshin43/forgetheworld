@@ -1,15 +1,16 @@
 import os
 import json
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 import requests
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Configure Gemini
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+# Configure Gemini Client
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
-# Featherless / Vultr Inference (Placeholder URL, user needs to provide)
+# Featherless / Vultr Inference
 FEATHERLESS_API_URL = os.getenv("FEATHERLESS_API_URL", "https://api.featherless.ai/v1/chat/completions")
 FEATHERLESS_API_KEY = os.getenv("FEATHERLESS_API_KEY")
 
@@ -17,13 +18,6 @@ FEATHERLESS_API_KEY = os.getenv("FEATHERLESS_API_KEY")
 FEATHERLESS_MODEL = "meta-llama/Meta-Llama-3-8B-Instruct"
 # FEATHERLESS_MODEL = "mistralai/Mistral-Nemo-Instruct-2407"
 
-generation_config = {
-  "temperature": 0.7,
-  "top_p": 0.95,
-  "top_k": 40,
-  "max_output_tokens": 1024,
-  "response_mime_type": "application/json",
-}
 
 GEMINI_SYSTEM_PROMPT = """
 You are a Fantasy Blacksmith AI. 
@@ -42,25 +36,27 @@ Output strict JSON.
 
 async def analyze_image_with_gemini(image_bytes: bytes, mode: str):
     try:
-        model = genai.GenerativeModel(
-            model_name="gemini-2.0-flash-lite-preview-02-05", # Or current valid model
-            generation_config=generation_config,
-            system_instruction=GEMINI_SYSTEM_PROMPT
+        response = client.models.generate_content(
+            model="gemini-2.5-flash-lite",
+            contents=[
+                types.Content(
+                    role="user",
+                    parts=[
+                        types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg"),
+                        types.Part.from_text(text=f"User selected action: {mode}. Analyze accordingly."),
+                    ],
+                ),
+            ],
+            config=types.GenerateContentConfig(
+                system_instruction=GEMINI_SYSTEM_PROMPT,
+                response_mime_type="application/json",
+                temperature=0.7,
+            ),
         )
-        
-        # Gemini expects image parts. 
-        # In a real implementation, we might need to look up proper mime type or just use generic implementation
-        # creating a Part object
-        
-        response = model.generate_content([
-            {"mime_type": "image/jpeg", "data": image_bytes},
-            f"User selected action: {mode}. Analyze accordingly."
-        ])
         
         return json.loads(response.text)
     except Exception as e:
         print(f"Gemini Error: {e}")
-        # Fallback for hackathon demo if API fails
         return {
             "item": "Unknown Artifact",
             "material": "Unknown",
@@ -70,7 +66,6 @@ async def analyze_image_with_gemini(image_bytes: bytes, mode: str):
         }
 
 async def generate_flavor_text_with_featherless(item_data: dict):
-    # If no key, return placeholder
     if not FEATHERLESS_API_KEY:
         return {
             "name": f"Ancient {item_data['item']}",
@@ -101,7 +96,7 @@ async def generate_flavor_text_with_featherless(item_data: dict):
         }
         
         response = requests.post(FEATHERLESS_API_URL, headers=headers, json=data)
-        return response.json()['choices'][0]['message']['content'] # Needs parsing if string
+        return response.json()['choices'][0]['message']['content']
     except Exception as e:
         print(f"Featherless Error: {e}")
         return {
