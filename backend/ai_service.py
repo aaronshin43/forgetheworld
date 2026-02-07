@@ -18,8 +18,8 @@ client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 FEATHERLESS_API_URL = os.getenv("FEATHERLESS_API_URL", "https://api.featherless.ai/v1/chat/completions")
 FEATHERLESS_API_KEY = os.getenv("FEATHERLESS_API_KEY")
 
-FEATHERLESS_MODEL = "google/gemma-2-2b-it"
-# FEATHERLESS_MODEL = "google/gemma-3-1b-it"
+# FEATHERLESS_MODEL = "google/gemma-2-2b-it"
+FEATHERLESS_MODEL = "deepseek-ai/DeepSeek-V3-0324"
 # FEATHERLESS_MODEL = "microsoft/Phi-4-mini-instruct"
 
 
