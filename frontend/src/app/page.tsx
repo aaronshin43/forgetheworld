@@ -17,14 +17,17 @@ export default function Home() {
       return <IntroScreen />;
     }
 
-    if (viewMode === 'camera') {
-      return <CameraView />;
-    }
-
     return (
       <>
-        <BattleStage />
-        <CommandCenter />
+        {/* Battle Stage (Always visible, shrinks in camera mode) */}
+        <div className={`w-full overflow-hidden transition-all duration-300 ${viewMode === 'camera' ? 'h-[40%]' : 'h-1/2'}`}>
+          <BattleStage />
+        </div>
+
+        {/* Bottom Panel (Command Center or Camera) */}
+        <div className={`w-full transition-all duration-300 ${viewMode === 'camera' ? 'h-[60%]' : 'h-1/2'}`}>
+          {viewMode === 'camera' ? <CameraView /> : <CommandCenter />}
+        </div>
       </>
     );
   };

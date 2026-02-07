@@ -17,7 +17,7 @@ export const BattleStage = () => {
     } = useGameStore();
 
     return (
-        <div className="h-1/2 bg-gray-900 relative flex items-center justify-center z-10">
+        <div className="h-full bg-gray-900 relative flex items-center justify-center z-10">
 
             {/* Game World Clipping Container */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">

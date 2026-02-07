@@ -5,7 +5,7 @@ export const CommandCenter = () => {
     const { inventory } = useGameStore();
 
     return (
-        <div className="h-1/2 bg-gray-950 text-white p-6 flex flex-col justify-between border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.5)] z-20">
+        <div className="h-full bg-gray-950 text-white p-6 flex flex-col justify-between border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.5)] z-20">
 
             {/* Inventory Grid (3x2) */}
             <div className="w-full">
