@@ -1,0 +1,26 @@
+'use client';
+
+import { useGameLoop } from '@/hooks/useGameLoop';
+import { BattleStage } from '@/views/BattleStage';
+import { CommandCenter } from '@/views/CommandCenter';
+
+import { useGameStore } from '@/store/gameStore';
+import { CameraView } from '@/components/CameraView';
+import { AnalysisOverlay } from '@/views/AnalysisOverlay';
+import { ResultOverlay } from '@/views/ResultOverlay';
+
+export default function Home() {
+  useGameLoop();
+  const { viewMode, isAnalyzing, scanResult } = useGameStore();
+
+  return (
+    <main className="flex flex-col h-[100dvh] w-full bg-black overflow-hidden select-none touch-none overscroll-none relative">
+      <BattleStage />
+      {viewMode === 'battle' ? <CommandCenter /> : <CameraView />}
+
+      {/* Overlays */}
+      {isAnalyzing && <AnalysisOverlay />}
+      {scanResult && <ResultOverlay />}
+    </main>
+  );
+}
