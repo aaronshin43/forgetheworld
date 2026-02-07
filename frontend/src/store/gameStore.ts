@@ -33,6 +33,7 @@ interface GameState {
     monsters: ActiveMonster[];
     characterAction: string;
     currentBackground: string;
+    appMode: 'intro' | 'game' | 'dev';
 
     setHp: (hp: number) => void;
     useFilm: () => boolean;
@@ -51,6 +52,7 @@ interface GameState {
     triggerCharacterAttack: () => void;
     setCharacterAction: (action: string) => void;
     setBackground: (background: string) => void;
+    setAppMode: (mode: 'intro' | 'game' | 'dev') => void;
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -126,5 +128,9 @@ export const useGameStore = create<GameState>((set, get) => ({
         }, duration);
     },
 
-    setBackground: (background) => set({ currentBackground: background })
+    setBackground: (background) => set({ currentBackground: background }),
+
+    // App Mode State
+    appMode: 'intro',
+    setAppMode: (mode: 'intro' | 'game' | 'dev') => set({ appMode: mode })
 }));

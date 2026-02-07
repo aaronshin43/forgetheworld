@@ -1,32 +1,44 @@
 'use client';
 
-import { useGameLoop } from '@/hooks/useGameLoop';
-import { BattleStage } from '@/views/BattleStage';
-import { CommandCenter } from '@/views/CommandCenter';
-
-import { useGameStore } from '@/store/gameStore';
-import { CameraView } from '@/components/CameraView';
-import { AnalysisOverlay } from '@/views/AnalysisOverlay';
-import { ResultOverlay } from '@/views/ResultOverlay';
-import { DebugPanel } from '@/components/DebugPanel';
+import React from 'react';
+import { BattleStage } from '../views/BattleStage';
+import { CommandCenter } from '../views/CommandCenter';
+import { CameraView } from '../components/CameraView';
+import { IntroScreen } from '../views/IntroScreen';
+import { DebugPanel } from '../components/DebugPanel';
+import { useGameStore } from '../store/gameStore';
 
 export default function Home() {
-  useGameLoop();
-  const { viewMode, isAnalyzing, scanResult } = useGameStore();
+  const { viewMode, appMode } = useGameStore();
+
+  const renderContent = () => {
+    if (appMode === 'intro') {
+      return <IntroScreen />;
+    }
+
+    if (viewMode === 'camera') {
+      return <CameraView />;
+    }
+
+    return (
+      <>
+        <BattleStage />
+        <CommandCenter />
+      </>
+    );
+  };
 
   return (
-    <div className="min-h-[100dvh] w-full bg-neutral-900 flex justify-center overflow-hidden">
-      <main className="flex flex-col h-[100dvh] w-full max-w-[480px] bg-black relative shadow-2xl overflow-hidden select-none touch-none overscroll-none border-x border-white/5">
-        <BattleStage />
-        {viewMode === 'battle' ? <CommandCenter /> : <CameraView />}
+    // Letterbox Container
+    <main className="flex h-screen w-full items-center justify-center bg-zinc-900">
+      {/* Mobile Aspect Ratio Wrapper */}
+      <div className="relative w-full h-full max-w-[430px] max-h-[932px] bg-black shadow-2xl overflow-hidden flex flex-col border-x border-zinc-800">
 
-        {/* Overlays */}
-        {isAnalyzing && <AnalysisOverlay />}
-        {scanResult && <ResultOverlay />}
+        {renderContent()}
 
-        {/* Debug Panel - Global Overlay */}
-        <DebugPanel />
-      </main>
-    </div>
+        {/* Debug Panel only in Dev Mode */}
+        {appMode === 'dev' && <DebugPanel />}
+      </div>
+    </main>
   );
 }
