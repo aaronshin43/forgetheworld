@@ -4,6 +4,7 @@ import React from 'react';
 import { BattleStage } from '../views/BattleStage';
 import { CommandCenter } from '../views/CommandCenter';
 import { CameraView } from '../components/CameraView';
+import { GameMenu } from '../components/GameMenu';
 import { IntroScreen } from '../views/IntroScreen';
 import { DebugPanel } from '../components/DebugPanel';
 import { useGameStore } from '../store/gameStore';
@@ -35,6 +36,9 @@ export default function Home() {
       <div className="relative w-full h-full max-w-[430px] max-h-[932px] bg-black shadow-2xl overflow-hidden flex flex-col border-x border-zinc-800">
 
         {renderContent()}
+
+        {/* Game Menu (Hamburger) - Visible in Game/Dev modes */}
+        {appMode !== 'intro' && <GameMenu />}
 
         {/* Debug Panel only in Dev Mode */}
         {appMode === 'dev' && <DebugPanel />}
