@@ -1,36 +1,78 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useGameStore } from '../store/gameStore';
+import { Character } from '../components/Character';
+import { SkillEffect } from '../components/SkillEffect';
+import { Monster } from '../components/Monster';
 
 export const BattleStage = () => {
-    const { hp, maxHp, film: storeFilm, maxFilm } = useGameStore();
-
-    // Simple local subscription to film updates for animation/reactivity if needed, 
-    // currently we just use the store value which re-renderscomponent on change.
+    const { hp, maxHp, film: storeFilm, maxFilm, activeEffects, monsters, removeEffect } = useGameStore();
 
     return (
-        <div className="h-1/2 bg-gray-900 relative overflow-hidden flex items-center justify-center">
+        <div className="h-1/2 bg-gray-900 relative flex items-center justify-center z-10">
 
-            {/* Background (Placeholder for Game View) */}
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-gray-800 via-gray-900 to-black opacity-80" />
+            {/* Game World Clipping Container */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                {/* Background */}
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-gray-800 via-gray-900 to-black opacity-80 z-0" />
 
-            {/* HUD Layer */}
-            <div className="absolute top-4 left-4 flex gap-3 items-center z-20">
-                {/* Portrait */}
+                {/* Game World Container - where action happens */}
+                <div className="absolute inset-0 z-10">
+
+                    {/* Monsters Layer */}
+                    {monsters.map(monster => (
+                        <div
+                            key={monster.id}
+                            className="absolute z-20 transition-all duration-500 ease-out"
+                            style={{
+                                left: `${monster.x}%`,
+                                top: `${monster.y}%`,
+                                transform: 'translate(-50%, -50%)'
+                            }}
+                        >
+                            <Monster name={monster.name} action="stand" />
+                        </div>
+                    ))}
+
+                    {/* Character - Centered Left */}
+                    <div className="absolute bottom-[20%] left-[20%] z-30">
+                        <Character />
+                    </div>
+
+                    {/* Skill Effects Layer */}
+                    {activeEffects.map(effect => (
+                        <div
+                            key={effect.id}
+                            className="absolute pointer-events-none z-40"
+                            style={{
+                                left: `${effect.x}%`,
+                                top: `${effect.y}%`,
+                                transform: 'translate(-50%, -50%)'
+                            }}
+                        >
+                            <div style={{ transform: `scale(${effect.scale})` }}>
+                                <SkillEffect
+                                    name={effect.name}
+                                    x={0} y={0} scale={1}
+                                    onComplete={() => removeEffect(effect.id)}
+                                />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* HUD Layer (Z-50) */}
+            <div className="absolute top-4 left-4 flex gap-3 items-center z-50">
                 <div className="w-14 h-14 bg-gray-800 rounded-full border-2 border-orange-500/50 shadow-lg shadow-orange-500/20 overflow-hidden relative">
                     <div className="absolute inset-0 flex items-center justify-center text-2xl">🧙‍♂️</div>
                 </div>
-
-                {/* Status Bars */}
                 <div className="flex flex-col gap-1 drop-shadow-md">
-                    {/* HP Bar */}
                     <div className="w-40 h-3 bg-gray-800/80 rounded-full overflow-hidden border border-gray-600/50 relative">
                         <div
                             className="h-full bg-gradient-to-r from-red-600 via-red-500 to-red-400 transition-all duration-300 shadow-[0_0_10px_rgba(239,68,68,0.5)]"
                             style={{ width: `${(hp / maxHp) * 100}%` }}
                         />
                     </div>
-
-                    {/* CP Indicator */}
                     <div className="flex items-center gap-2">
                         <span className="text-[10px] text-gray-400 font-bold uppercase">Combat Power</span>
                         <span className="text-xs text-orange-400 font-mono font-bold">⚔️ 1,450</span>
@@ -38,8 +80,7 @@ export const BattleStage = () => {
                 </div>
             </div>
 
-            {/* Film Roll Indicator (Top Right) */}
-            <div className="absolute top-4 right-4 flex flex-col items-end gap-1 z-20">
+            <div className="absolute top-4 right-4 flex flex-col items-end gap-1 z-50">
                 <span className="text-[10px] font-mono text-yellow-500/80 tracking-tighter">FILM ROLL</span>
                 <div className="flex gap-1.5">
                     {Array.from({ length: maxFilm }).map((_, i) => (
@@ -50,11 +91,6 @@ export const BattleStage = () => {
                     ))}
                 </div>
                 <span className="text-[10px] font-mono text-yellow-500/80">{storeFilm}/{maxFilm}</span>
-            </div>
-
-            {/* Central View (Content) */}
-            <div className="relative z-10 p-4 text-center">
-                <h1 className="text-white/20 text-4xl font-black uppercase tracking-widest select-none pointer-events-none">Battle Stage</h1>
             </div>
         </div>
     );

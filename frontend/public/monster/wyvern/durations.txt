@@ -1,0 +1,6 @@
+wyvern_attack1.webp: 2160.0
+wyvern_attack2.webp: 2160.0
+wyvern_die1.webp: 1020.0
+wyvern_move.webp: 720.0
+wyvern_png.webp: 300.0
+wyvern_stand.webp: 720.0

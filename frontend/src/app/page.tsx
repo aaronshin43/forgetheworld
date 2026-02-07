@@ -8,6 +8,7 @@ import { useGameStore } from '@/store/gameStore';
 import { CameraView } from '@/components/CameraView';
 import { AnalysisOverlay } from '@/views/AnalysisOverlay';
 import { ResultOverlay } from '@/views/ResultOverlay';
+import { DebugPanel } from '@/components/DebugPanel';
 
 export default function Home() {
   useGameLoop();
@@ -22,6 +23,9 @@ export default function Home() {
         {/* Overlays */}
         {isAnalyzing && <AnalysisOverlay />}
         {scanResult && <ResultOverlay />}
+
+        {/* Debug Panel - Global Overlay */}
+        <DebugPanel />
       </main>
     </div>
   );

@@ -1,0 +1,5 @@
+coffeemachine_attack1.webp: 1800.0
+coffeemachine_die1.webp: 1440.0
+coffeemachine_hit1.webp: 600.0
+coffeemachine_move.webp: 1080.0
+coffeemachine_stand.webp: 1080.0

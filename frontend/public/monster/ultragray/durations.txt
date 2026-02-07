@@ -1,0 +1,4 @@
+ultragray_attack1.webp: 1650.0
+ultragray_die1.webp: 1140.0
+ultragray_hit1.webp: 600.0
+ultragray_move.webp: 480.0

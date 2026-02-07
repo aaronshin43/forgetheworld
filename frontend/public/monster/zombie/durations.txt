@@ -1,0 +1,6 @@
+zombie_attack1.webp: 1500.0
+zombie_attack2.webp: 1620.0
+zombie_die1.webp: 1300.0
+zombie_hit1.webp: 600.0
+zombie_move.webp: 800.0
+zombie_stand.webp: 600.0

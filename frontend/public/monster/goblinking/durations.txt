@@ -1,0 +1,5 @@
+goblinking_attack1.webp: 2370.0
+goblinking_die1.webp: 1740.0
+goblinking_hit1.webp: 300.0
+goblinking_move.webp: 1020.0
+goblinking_stand.webp: 1200.0
