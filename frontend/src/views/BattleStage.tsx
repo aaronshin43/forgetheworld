@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 
 export const BattleStage = () => {
-    const { hp, maxHp } = useGameStore();
+    const { hp, maxHp, film: storeFilm, maxFilm } = useGameStore();
+
+    // Simple local subscription to film updates for animation/reactivity if needed, 
+    // currently we just use the store value which re-renderscomponent on change.
 
     return (
         <div className="h-1/2 bg-gray-900 relative overflow-hidden flex items-center justify-center">
@@ -33,6 +36,20 @@ export const BattleStage = () => {
                         <span className="text-xs text-orange-400 font-mono font-bold">⚔️ 1,450</span>
                     </div>
                 </div>
+            </div>
+
+            {/* Film Roll Indicator (Top Right) */}
+            <div className="absolute top-4 right-4 flex flex-col items-end gap-1 z-20">
+                <span className="text-[10px] font-mono text-yellow-500/80 tracking-tighter">FILM ROLL</span>
+                <div className="flex gap-1.5">
+                    {Array.from({ length: maxFilm }).map((_, i) => (
+                        <div
+                            key={i}
+                            className={`w-3 h-5 rounded-sm border border-yellow-500/50 transition-all duration-300 ${i < storeFilm ? 'bg-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.8)]' : 'bg-transparent opacity-30'}`}
+                        />
+                    ))}
+                </div>
+                <span className="text-[10px] font-mono text-yellow-500/80">{storeFilm}/{maxFilm}</span>
             </div>
 
             {/* Central View (Content) */}

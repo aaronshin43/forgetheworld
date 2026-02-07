@@ -2,35 +2,25 @@ import React from 'react';
 import { useGameStore } from '../store/gameStore';
 
 export const CommandCenter = () => {
-    const { film, maxFilm, inventory } = useGameStore();
+    const { inventory } = useGameStore();
 
     return (
         <div className="h-1/2 bg-gray-950 text-white p-6 flex flex-col justify-between border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.5)] z-20">
 
-            {/* Inventory Grid */}
+            {/* Inventory Grid (3x2) */}
             <div className="w-full">
                 <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Inventory</h3>
-                <div className="grid grid-cols-6 gap-2">
+                <div className="grid grid-cols-3 gap-2">
                     {inventory.map((item, index) => (
-                        <div key={index} className="aspect-square bg-white/5 border border-white/10 rounded-md flex items-center justify-center hover:bg-white/10 transition-colors cursor-pointer">
-                            {item ? <span className="text-xl">{item}</span> : <div className="w-2 h-2 rounded-full bg-white/5"></div>}
+                        <div key={index} className="aspect-square bg-white/5 border border-white/10 rounded-md flex items-center justify-center hover:bg-white/10 transition-colors cursor-pointer relative overflow-hidden group">
+                            {item ? (
+                                <span className="text-2xl drop-shadow-md">{item}</span>
+                            ) : (
+                                <div className="w-1.5 h-1.5 rounded-full bg-white/5 group-hover:bg-white/10" />
+                            )}
                         </div>
                     ))}
                 </div>
-            </div>
-
-            {/* Resource Indicator */}
-            <div className="flex justify-center items-center gap-2 mb-2">
-                <span className="text-xs font-mono text-yellow-500/80">FILM ROLL</span>
-                <div className="flex gap-1">
-                    {Array.from({ length: maxFilm }).map((_, i) => (
-                        <div
-                            key={i}
-                            className={`w-3 h-4 rounded-sm border border-yellow-500/50 ${i < film ? 'bg-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.6)]' : 'bg-transparent'}`}
-                        />
-                    ))}
-                </div>
-                <span className="text-xs font-mono text-yellow-500/80">{film}/{maxFilm}</span>
             </div>
 
             {/* Action Bar */}

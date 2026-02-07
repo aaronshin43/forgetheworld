@@ -14,13 +14,15 @@ export default function Home() {
   const { viewMode, isAnalyzing, scanResult } = useGameStore();
 
   return (
-    <main className="flex flex-col h-[100dvh] w-full bg-black overflow-hidden select-none touch-none overscroll-none relative">
-      <BattleStage />
-      {viewMode === 'battle' ? <CommandCenter /> : <CameraView />}
+    <div className="min-h-[100dvh] w-full bg-neutral-900 flex justify-center overflow-hidden">
+      <main className="flex flex-col h-[100dvh] w-full max-w-[480px] bg-black relative shadow-2xl overflow-hidden select-none touch-none overscroll-none border-x border-white/5">
+        <BattleStage />
+        {viewMode === 'battle' ? <CommandCenter /> : <CameraView />}
 
-      {/* Overlays */}
-      {isAnalyzing && <AnalysisOverlay />}
-      {scanResult && <ResultOverlay />}
-    </main>
+        {/* Overlays */}
+        {isAnalyzing && <AnalysisOverlay />}
+        {scanResult && <ResultOverlay />}
+      </main>
+    </div>
   );
 }
