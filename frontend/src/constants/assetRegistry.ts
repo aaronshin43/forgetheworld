@@ -78,3 +78,9 @@ export const MONSTER_LIST = [
     "wyvern",
     "zombie"
 ];
+
+export const BACKGROUND_LIST = [
+    "city",
+    "city2",
+    "subway"
+];

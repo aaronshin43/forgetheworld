@@ -32,6 +32,7 @@ interface GameState {
     activeEffects: ActiveEffect[];
     monsters: ActiveMonster[];
     characterAction: string;
+    currentBackground: string;
 
     setHp: (hp: number) => void;
     useFilm: () => boolean;
@@ -49,6 +50,7 @@ interface GameState {
     clearMonsters: () => void;
     triggerCharacterAttack: () => void;
     setCharacterAction: (action: string) => void;
+    setBackground: (background: string) => void;
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -66,6 +68,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     activeEffects: [],
     monsters: [],
     characterAction: 'stand1',
+    currentBackground: 'city', // Default background
 
     setHp: (hp) => set({ hp }),
     useFilm: () => {
@@ -116,11 +119,12 @@ export const useGameStore = create<GameState>((set, get) => ({
 
         // Reset to stand after animation
         setTimeout(() => {
-            // Only reset if we are still doing that attack (simple check)
             const current = get().characterAction;
             if (current === randomAttack) {
                 set({ characterAction: 'stand1' });
             }
         }, duration);
-    }
+    },
+
+    setBackground: (background) => set({ currentBackground: background })
 }));

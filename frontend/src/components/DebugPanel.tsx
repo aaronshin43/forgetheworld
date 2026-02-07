@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { SKILL_DURATIONS, SKILL_CONFIGS, MONSTER_LIST } from '../constants/assetRegistry';
+import { SKILL_DURATIONS, SKILL_CONFIGS, MONSTER_LIST, BACKGROUND_LIST } from '../constants/assetRegistry';
 import { useGameStore } from '../store/gameStore';
 
 export const DebugPanel = () => {
-    const { addEffect, triggerCharacterAttack, spawnMonster, clearMonsters } = useGameStore();
+    const { addEffect, triggerCharacterAttack, spawnMonster, clearMonsters, currentBackground, setBackground } = useGameStore();
 
     const [isOpen, setIsOpen] = useState(false);
     const [selectedSkill, setSelectedSkill] = useState(Object.keys(SKILL_DURATIONS)[0]);
@@ -36,6 +36,21 @@ export const DebugPanel = () => {
             </div>
 
             <div className="space-y-6">
+                <div>
+                    <label className="text-[10px] text-gray-400 block mb-1 font-bold tracking-wider">BACKGROUND</label>
+                    <select
+                        value={currentBackground}
+                        onChange={(e) => setBackground(e.target.value)}
+                        className="w-full bg-black/50 border border-gray-600 rounded text-xs p-1.5 text-white mb-2"
+                    >
+                        {BACKGROUND_LIST.map(bg => (
+                            <option key={bg} value={bg}>{bg}</option>
+                        ))}
+                    </select>
+                </div>
+
+                <hr className="border-gray-700" />
+
                 <div>
                     <label className="text-[10px] text-gray-400 block mb-1 font-bold tracking-wider">CHARACTER</label>
                     <button

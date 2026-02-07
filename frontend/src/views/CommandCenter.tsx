@@ -16,7 +16,11 @@ export const CommandCenter = () => {
                             {item ? (
                                 <span className="text-2xl drop-shadow-md">{item}</span>
                             ) : (
-                                <div className="w-1.5 h-1.5 rounded-full bg-white/5 group-hover:bg-white/10" />
+                                <img
+                                    src="/ui/anvil.webp"
+                                    alt="Empty Slot"
+                                    className="w-1/2 h-1/2 object-contain opacity-20 grayscale group-hover:grayscale-0 group-hover:opacity-40 transition-all duration-300"
+                                />
                             )}
                         </div>
                     ))}

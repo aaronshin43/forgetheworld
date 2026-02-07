@@ -5,17 +5,34 @@ import { SkillEffect } from '../components/SkillEffect';
 import { Monster } from '../components/Monster';
 
 export const BattleStage = () => {
-    const { hp, maxHp, film: storeFilm, maxFilm, activeEffects, monsters, removeEffect } = useGameStore();
+    const {
+        hp,
+        maxHp,
+        film: storeFilm,
+        maxFilm,
+        activeEffects,
+        monsters,
+        removeEffect,
+        currentBackground
+    } = useGameStore();
 
     return (
         <div className="h-1/2 bg-gray-900 relative flex items-center justify-center z-10">
 
             {/* Game World Clipping Container */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                {/* Background */}
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-gray-800 via-gray-900 to-black opacity-80 z-0" />
+                {/* Background Image */}
+                <div className="absolute inset-0 z-0">
+                    <img
+                        src={`/background/${currentBackground}.webp`}
+                        alt="Background"
+                        className="w-full h-full object-cover object-top opacity-80"
+                    />
+                    {/* Optional Overlay to darken it slightly for better entity visibility */}
+                    <div className="absolute inset-0 bg-black/30" />
+                </div>
 
-                {/* Game World Container - where action happens */}
+                {/* Game World Container */}
                 <div className="absolute inset-0 z-10">
 
                     {/* Monsters Layer */}
@@ -33,7 +50,7 @@ export const BattleStage = () => {
                         </div>
                     ))}
 
-                    {/* Character - Centered Left */}
+                    {/* Character */}
                     <div className="absolute bottom-[20%] left-[20%] z-30">
                         <Character />
                     </div>
@@ -62,35 +79,37 @@ export const BattleStage = () => {
             </div>
 
             {/* HUD Layer (Z-50) */}
-            <div className="absolute top-4 left-4 flex gap-3 items-center z-50">
-                <div className="w-14 h-14 bg-gray-800 rounded-full border-2 border-orange-500/50 shadow-lg shadow-orange-500/20 overflow-hidden relative">
+            <div className="absolute top-8 left-4 flex gap-3 items-start z-50">
+                <div className="w-14 h-14 bg-gray-800 rounded-full border-2 border-orange-500/50 shadow-lg shadow-orange-500/20 overflow-hidden relative mt-1">
                     <div className="absolute inset-0 flex items-center justify-center text-2xl">🧙‍♂️</div>
                 </div>
-                <div className="flex flex-col gap-1 drop-shadow-md">
+                <div className="flex flex-col gap-0.5 drop-shadow-md">
+                    {/* Combat Power (Moved Above) */}
+                    <div className="flex items-center gap-1.5 ml-1">
+                        <span className="text-sm">⚔️</span>
+                        <span className="text-sm text-orange-400 font-mono font-bold italic">1,450</span>
+                    </div>
+
+                    {/* HP Bar */}
                     <div className="w-40 h-3 bg-gray-800/80 rounded-full overflow-hidden border border-gray-600/50 relative">
                         <div
                             className="h-full bg-gradient-to-r from-red-600 via-red-500 to-red-400 transition-all duration-300 shadow-[0_0_10px_rgba(239,68,68,0.5)]"
                             style={{ width: `${(hp / maxHp) * 100}%` }}
                         />
                     </div>
-                    <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-gray-400 font-bold uppercase">Combat Power</span>
-                        <span className="text-xs text-orange-400 font-mono font-bold">⚔️ 1,450</span>
-                    </div>
                 </div>
             </div>
 
-            <div className="absolute top-4 right-4 flex flex-col items-end gap-1 z-50">
-                <span className="text-[10px] font-mono text-yellow-500/80 tracking-tighter">FILM ROLL</span>
-                <div className="flex gap-1.5">
-                    {Array.from({ length: maxFilm }).map((_, i) => (
-                        <div
-                            key={i}
-                            className={`w-3 h-5 rounded-sm border border-yellow-500/50 transition-all duration-300 ${i < storeFilm ? 'bg-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.8)]' : 'bg-transparent opacity-30'}`}
-                        />
-                    ))}
-                </div>
-                <span className="text-[10px] font-mono text-yellow-500/80">{storeFilm}/{maxFilm}</span>
+            {/* Film Roll HUD (Lightning Icons) */}
+            <div className="absolute top-8 right-6 flex items-center gap-2 z-50">
+                {Array.from({ length: maxFilm }).map((_, i) => (
+                    <span
+                        key={i}
+                        className={`text-lg drop-shadow-lg transition-all duration-300 ${i < storeFilm ? 'text-yellow-400 scale-110 shadow-yellow-500/50' : 'text-gray-600 opacity-40 scale-90'}`}
+                    >
+                        ⚡
+                    </span>
+                ))}
             </div>
         </div>
     );
