@@ -16,7 +16,6 @@ export const CHARACTER_DURATIONS: Record<string, number> = {
     "swingO1": 800,
     "swingO2": 800,
     "swingO3": 800,
-    "swingOF": 700,
     "swingP1": 800,
     "swingP2": 800,
     "swingPF": 700,
@@ -112,7 +111,7 @@ export const ATTACK_ANIMATIONS = [
     "shoot1", "shoot2", "shootF",
     "stabO1", "stabO2", "stabOF",
     "stabT1", "stabT2", "stabTF",
-    "swingO1", "swingO2", "swingO3", "swingOF",
+    "swingO1", "swingO2", "swingO3",
     "swingP1", "swingP2", "swingPF",
     "swingT1", "swingT2", "swingT3", "swingTF"
 ];
@@ -133,41 +132,41 @@ export const BACKGROUND_LIST = [
     "subway"
 ];
 
-export const MONSTER_BASE_STATS: Record<string, { hp: number; atk: number; def: number; spd: number; moveSpeed: number }> = {
-    "coffeemachine": { hp: 150, atk: 15, def: 5, spd: 0.8, moveSpeed: 8 },
-    "goblin": { hp: 80, atk: 12, def: 2, spd: 1.2, moveSpeed: 15 },
-    "goblinking": { hp: 300, atk: 25, def: 10, spd: 0.7, moveSpeed: 6 },
-    "rockspirit": { hp: 200, atk: 10, def: 20, spd: 0.5, moveSpeed: 5 },
-    "ultragray": { hp: 120, atk: 18, def: 5, spd: 1.0, moveSpeed: 10 },
-    "wyvern": { hp: 100, atk: 20, def: 8, spd: 1.1, moveSpeed: 18 },
-    "zombie": { hp: 180, atk: 14, def: 3, spd: 0.6, moveSpeed: 7 }
+export const MONSTER_BASE_STATS: Record<string, { hp: number; atk: number; def: number; spd: number; moveSpeed: number; scale: number }> = {
+    "coffeemachine": { hp: 150, atk: 15, def: 5, spd: 0.8, moveSpeed: 12, scale: 0.8 },
+    "goblin": { hp: 80, atk: 12, def: 2, spd: 1.2, moveSpeed: 15, scale: 1.0 },
+    "goblinking": { hp: 300, atk: 25, def: 10, spd: 0.7, moveSpeed: 11, scale: 1.0 },
+    "rockspirit": { hp: 200, atk: 10, def: 20, spd: 0.5, moveSpeed: 18, scale: 1.0 },
+    "ultragray": { hp: 120, atk: 18, def: 5, spd: 1.0, moveSpeed: 16, scale: 1.0 },
+    "wyvern": { hp: 100, atk: 20, def: 8, spd: 1.1, moveSpeed: 17, scale: 0.8 },
+    "zombie": { hp: 180, atk: 14, def: 3, spd: 0.6, moveSpeed: 13, scale: 1.0 }
 };
 
 // Formations: y is % from top, xOffset is adder to baseline (75%)
 export const MONSTER_FORMATIONS: Record<number, Array<{ y: number, xOffset: number }>> = {
     1: [
-        { y: 50, xOffset: 0 }
+        { y: 95, xOffset: 0 }
     ],
     2: [
-        { y: 45, xOffset: 0 },
-        { y: 55, xOffset: 5 }
+        { y: 88, xOffset: 0 },
+        { y: 95, xOffset: 15 }
     ],
     3: [
-        { y: 40, xOffset: 5 },
-        { y: 50, xOffset: 0 },
-        { y: 60, xOffset: 5 }
+        { y: 89, xOffset: 13 },
+        { y: 93, xOffset: 0 },
+        { y: 97, xOffset: 15 }
     ],
     4: [
-        { y: 35, xOffset: 0 },
-        { y: 45, xOffset: 8 },
-        { y: 55, xOffset: 0 },
-        { y: 65, xOffset: 8 }
+        { y: 85, xOffset: 3 },
+        { y: 89, xOffset: 13 },
+        { y: 93, xOffset: 0 },
+        { y: 97, xOffset: 15 }
     ],
     5: [
-        { y: 30, xOffset: 5 },
-        { y: 40, xOffset: 0 },
-        { y: 50, xOffset: 10 },
-        { y: 60, xOffset: 0 },
-        { y: 70, xOffset: 5 }
+        { y: 88, xOffset: 3 },
+        { y: 82, xOffset: 16 },
+        { y: 90, xOffset: 20 },
+        { y: 94, xOffset: 0 },
+        { y: 98, xOffset: 15 }
     ]
 };
