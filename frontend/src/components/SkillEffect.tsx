@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { SKILL_DURATIONS, SKILL_CATEGORIES } from '../constants/assetRegistry';
+import { useSkillSound } from '../hooks/useSkillSound';
 
 interface SkillEffectProps {
     name: string;
@@ -21,24 +22,36 @@ export const SkillEffect = ({ name, x, y, scale, onComplete }: SkillEffectProps)
     const imagePath = getSkillPath(name);
     const isUltimate = SKILL_CATEGORIES.ultimate.includes(name);
     const hasSeparateBackground = name === 'souleclipse';
+    const { playSound } = useSkillSound();
 
     // Use a ref to store the latest onComplete callback
-    // This prevents the useEffect from re-running when the parent component re-renders
-    // and creates a new onComplete function reference.
     const onCompleteRef = useRef(onComplete);
     onCompleteRef.current = onComplete;
 
     const [uniqueId] = useState(Date.now());
 
     useEffect(() => {
-        const timer = setTimeout(() => {
+        // 1. Play Use Sound immediately
+        playSound(name, 'use');
+
+        // 2. Schedule Hit Sound at 75% duration (25% remaining)
+        const hitTime = duration * 0.75;
+        const hitTimer = setTimeout(() => {
+            playSound(name, 'hit');
+        }, hitTime);
+
+        // 3. Schedule Completion
+        const endTimer = setTimeout(() => {
             if (onCompleteRef.current) {
                 onCompleteRef.current();
             }
         }, duration);
 
-        return () => clearTimeout(timer);
-    }, [duration]); // Only re-run if duration changes (which it shouldn't for the same skill)
+        return () => {
+            clearTimeout(hitTimer);
+            clearTimeout(endTimer);
+        };
+    }, [duration, name, playSound]);
 
     return (
         <div
