@@ -34,6 +34,13 @@ export const useGameLoop = () => {
             updateFilmRecharge(time);
 
             // 2. Game Logic based on State
+            // Freeze on game over
+            if (stageState === 'gameover') {
+                previousTimeRef.current = time;
+                requestRef.current = requestAnimationFrame(animate);
+                return;
+            }
+
             if (stageState === 'spawning') {
                 const { appMode, spawnWave } = useGameStore.getState();
 

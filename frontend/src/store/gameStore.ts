@@ -123,6 +123,8 @@ interface GameState {
     score: number;
     killCount: number;
     feverTimeReady: boolean;
+    gameStartTime: number;
+    survivalTime: number;
     stageState: 'spawning' | 'walking' | 'fighting' | 'cleared' | 'gameover';
     timeScale: number;
 
@@ -150,6 +152,7 @@ interface GameState {
     setHeroStats: (stats: Partial<EntityStats>) => void;
     damageHero: (amount: number) => void;
     healHero: (amount: number) => void;
+    triggerGameOver: () => void;
     addExp: (amount: number) => void;
 
     useFilm: () => boolean;
@@ -262,7 +265,7 @@ export const useGameStore = create<GameState>((set, get) => ({
 
     // Hero Initial State
     heroStats: {
-        hp: 1000,
+        hp: 10,
         maxHp: 1000,
         atk: 300,
         def: 50,
@@ -285,6 +288,8 @@ export const useGameStore = create<GameState>((set, get) => ({
     score: 0,
     killCount: 0,
     feverTimeReady: false,
+    gameStartTime: Date.now(),
+    survivalTime: 0,
     stageState: 'spawning',
     timeScale: 1.0,
 
@@ -312,14 +317,26 @@ export const useGameStore = create<GameState>((set, get) => ({
     })),
     damageHero: (amount) => set((state) => {
         const newHp = Math.max(0, state.heroStats.hp - amount);
-        return {
-            heroStats: { ...state.heroStats, hp: newHp },
-            // Optional: check game over here or in loop
-        };
+        const updatedStats = { ...state.heroStats, hp: newHp };
+
+        // Trigger game over if HP reaches 0
+        if (newHp === 0 && state.stageState !== 'gameover') {
+            get().triggerGameOver();
+        }
+
+        return { heroStats: updatedStats };
     }),
     healHero: (amount) => set((state) => ({
         heroStats: { ...state.heroStats, hp: Math.min(state.heroStats.maxHp, state.heroStats.hp + amount) }
     })),
+    triggerGameOver: () => set((state) => {
+        const survivalTime = Math.floor((Date.now() - state.gameStartTime) / 1000); // in seconds
+        return {
+            stageState: 'gameover',
+            survivalTime,
+            characterAction: 'prone'
+        };
+    }),
     addExp: (amount) => set((state) => {
         let { heroExp, heroMaxExp, heroLevel } = state;
         heroExp += amount;
@@ -461,7 +478,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     startCrafting: () => set({ interactionMode: 'crafting', viewMode: 'camera', scanMode: 'craft' }),
     startSkillMode: () => set({ interactionMode: 'battle', viewMode: 'camera', scanMode: 'skill', tempMaterial: null }),
     // Enhancement Actions
-    startEnhancement: () => set({ interactionMode: 'enhancing', viewMode: 'camera', tempMaterial: null }),
+    startEnhancement: () => set({ interactionMode: 'enhancing', viewMode: 'camera', scanMode: 'enhance', tempMaterial: null }),
 
     scanMaterial: (data) => set((state) => {
         const grade = calculateGrade(data.rarity, state.sessionStartTime);
