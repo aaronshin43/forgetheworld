@@ -35,7 +35,7 @@ def get_image_generation_prompt(item_description):
     # We will enforce the background color in the prompt description.
     
     bg_color = "dark blue-grey background (hex #2a2e3d)"
-    style = "High quality pixel art style icon, fantasy RPG item"
-    negative = "no text, no watermark, no blur, no realistic photo"
+    style = "High quality pixel art style icon, fantasy RPG item, 256x256 size"
+    negative = "no text, no blur"
     
     return f"{style} of {item_description}. {bg_color}. centered, distinct outline. {negative}."
