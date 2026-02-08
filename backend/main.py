@@ -20,21 +20,35 @@ import re
 from fastapi import UploadFile, File, Form
 from fastapi import UploadFile, File, Form, Body
 from pydantic import BaseModel
-from ai_service import analyze_image_with_gemini, generate_flavor_text_with_featherless, generate_item_image, generate_item_image_v2
+from ai_service import analyze_image_with_gemini, generate_flavor_text_with_featherless, generate_item_image, generate_item_image_v2, generate_evolution_concept
 
 class ImageRequest(BaseModel):
     prompt: str
 
+class EvolutionRequest(BaseModel):
+    base_item: dict
+    absorbed_materials: list
+
 @app.post("/scan")
 async def scan_item(
     file: UploadFile = File(...), 
-    mode: str = Form(...)
+    mode: str = Form(...),
+    skip_image_generation: bool = Form(False)
 ):
     contents = await file.read()
     
     # 1. Vision Analysis (Gemini)
     gemini_result = await analyze_image_with_gemini(contents, mode)
     
+    if skip_image_generation:
+        return {
+            "analysis": gemini_result,
+            "flavor": {
+                "name": gemini_result.get("item", "Unknown Material"),
+                "description": "A material used for enhancing items."
+            }
+        }
+
     # 2. Flavor Text (Featherless)
     flavor_text = await generate_flavor_text_with_featherless(gemini_result)
     if isinstance(flavor_text, str):
@@ -57,3 +71,19 @@ async def scan_item(
 async def generate_image(request: ImageRequest):
     image_url = await generate_item_image_v2(request.prompt)
     return {"image": image_url}
+
+@app.post("/evolve")
+async def evolve_item(request: EvolutionRequest):
+    # 1. Concept Generation (Gemini)
+    concept = await generate_evolution_concept(request.base_item, request.absorbed_materials)
+    
+    # 2. Image Generation (Gemini/Imagen)
+    image_url = None
+    if concept and "visual_prompt" in concept:
+        image_url = await generate_item_image_v2(concept["visual_prompt"])
+        
+    return {
+        "name": concept.get("name", "Unknown Evolution"),
+        "description": concept.get("description", "A mysterious form."),
+        "image": image_url
+    }

@@ -39,3 +39,23 @@ def get_image_generation_prompt(item_description):
     negative = "no text, no blur"
     
     return f"{style} of {item_description}. {bg_color}. centered, distinct outline. {negative}."
+
+EVOLUTION_PROMPT = """
+You are a Fantasy Evolution Alchemist.
+You have a Base Item and a list of Absorbed Materials.
+Create a new, evolved concept for the item.
+
+Base Item: {base_item_name} ({base_description})
+Absorbed Materials: {materials_list}
+
+Task:
+1. Combine the base item's essence with the materials.
+2. Create a new Name and Description.
+3. Keep the original type (Sword logic remains sword-like, etc).
+4. Return JSON:
+{{
+    "name": "New Evolved Name",
+    "description": "A short, epic description of the evolved form...",
+    "visual_prompt": "A detailed image generation prompt for Stable Diffusion describing the new appearance... centered, pixel art style, dark blue-grey background."
+}}
+"""

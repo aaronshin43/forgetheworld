@@ -65,14 +65,38 @@ export interface InventoryItem {
     stats?: InventoryItemStats;
     grade?: string; // S, A, B, C, D
     rarity?: number; // 1-10
+    enhancementLevel?: number;
+    absorbedMaterials?: { name: string; grade: string }[];
+}
+
+interface MaterialData {
+    name: string;
+    grade: string;
+    rarity: number;
+    stats: Record<string, number>;
+    description: string;
 }
 
 interface GameState {
     // Session State
     sessionStartTime: number;
+    interactionMode: 'battle' | 'crafting' | 'enhancing';
+    tempMaterial: MaterialData | null;
 
     // Hero State
     heroStats: EntityStats;
+    // ...
+
+    // Actions
+    startCrafting: () => void;
+    startEnhancement: () => void;
+    scanMaterial: (materialData: { name: string, rarity: number, affectedStats: string[], description: string }) => void;
+    enhanceItem: (targetItemId: string) => void;
+    triggerEvolution: (itemId: string) => Promise<void>;
+    cancelEnhancement: () => void;
+
+    // ... existing actions
+
     heroLevel: number;
     heroExp: number;
     heroMaxExp: number;
@@ -191,20 +215,15 @@ const generateItemStats = (baseStats: EntityStats, grade: string, affectedStats:
         const variance = 0.8 + Math.random() * 0.4;
         const finalVal = baseVal * multiplier * variance;
 
-        let val = 0;
-        if (key === 'spd' || key === 'critRate' || key === 'critDmg') {
-            val = Number(finalVal.toFixed(2));
-        } else {
-            val = Math.floor(finalVal);
-        }
+        const val = Number(finalVal.toFixed(2));
 
         if (key === 'maxHp') {
-            newStats.maxHp += val;
-            newStats.hp += val;
+            newStats.maxHp = Number((newStats.maxHp + val).toFixed(2));
+            newStats.hp = Number((newStats.hp + val).toFixed(2));
         } else {
             // Safe casting
             if (key in newStats) {
-                (newStats as any)[key] += val;
+                (newStats as any)[key] = Number(((newStats as any)[key] + val).toFixed(2));
             }
         }
 
@@ -218,6 +237,8 @@ const generateItemStats = (baseStats: EntityStats, grade: string, affectedStats:
 export const useGameStore = create<GameState>((set, get) => ({
     // Session Init
     sessionStartTime: Date.now(),
+    interactionMode: 'battle',
+    tempMaterial: null,
 
     // Hero Initial State
     heroStats: {
@@ -380,6 +401,131 @@ export const useGameStore = create<GameState>((set, get) => ({
             heroStats: newStats
         };
     }),
+    startCrafting: () => set({ interactionMode: 'crafting', viewMode: 'camera', scanMode: 'craft' }),
+    // Enhancement Actions
+    startEnhancement: () => set({ interactionMode: 'enhancing', viewMode: 'camera', tempMaterial: null }),
+
+    scanMaterial: (data) => set((state) => {
+        const grade = calculateGrade(data.rarity, state.sessionStartTime);
+        const { itemStats } = generateItemStats(state.heroStats, grade, data.affectedStats);
+
+        return {
+            tempMaterial: {
+                name: data.name,
+                grade,
+                rarity: data.rarity,
+                stats: itemStats,
+                description: data.description
+            },
+            // ResultOverlay needs `scanResult` to be set
+            scanResult: {
+                analysis: { ...data, stats: itemStats, rarity_score: data.rarity, affected_stats: data.affectedStats },
+                flavor: { name: data.name, description: data.description }
+            } as any
+        };
+    }),
+
+    enhanceItem: (targetItemId) => {
+        const state = get();
+        const { tempMaterial, inventory } = state;
+        if (!tempMaterial) return;
+
+        let shouldEvolve = false;
+
+        const newInventory = inventory.map(item => {
+            if (item && item.id === targetItemId) {
+                const newStats = { ...(item.stats || {}) };
+                Object.entries(tempMaterial.stats).forEach(([key, val]) => {
+                    const k = key as keyof InventoryItemStats;
+                    newStats[k] = Number(((newStats[k] || 0) + (val as number)).toFixed(2));
+                });
+
+                const newAbsorbed = [...(item.absorbedMaterials || []), { name: tempMaterial.name, grade: tempMaterial.grade }];
+                const newLevel = (item.enhancementLevel || 0) + 1;
+
+                console.log(`[Enhanced] ${item.name} +${newLevel} (Absorbed ${tempMaterial.name})`);
+
+                if (newLevel > 0 && newLevel % 5 === 0) {
+                    shouldEvolve = true;
+                }
+
+                return {
+                    ...item,
+                    stats: newStats,
+                    enhancementLevel: newLevel,
+                    absorbedMaterials: newAbsorbed
+                };
+            }
+            return item;
+        });
+
+        set({
+            inventory: newInventory,
+            tempMaterial: null,
+            interactionMode: 'battle',
+            viewMode: 'battle',
+            scanResult: null
+        });
+
+        if (shouldEvolve) {
+            get().triggerEvolution(targetItemId);
+        }
+    },
+
+    triggerEvolution: async (itemId) => {
+        const { inventory } = get();
+        const item = inventory.find(i => i && i.id === itemId);
+        if (!item) return;
+
+        set({ isAnalyzing: true, viewMode: 'battle', interactionMode: 'enhancing' });
+
+        try {
+            const response = await fetch("http://localhost:8000/evolve", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    base_item: { name: item.name, description: item.description },
+                    absorbed_materials: item.absorbedMaterials || []
+                })
+            });
+            const data = await response.json();
+
+            set((state) => ({
+                inventory: state.inventory.map(i => {
+                    if (i && i.id === itemId) {
+                        return {
+                            ...i,
+                            name: data.name,
+                            description: data.description,
+                            image: data.image,
+                            grade: i.grade === 'Common' ? 'Rare' : i.grade === 'Rare' ? 'Unique' : i.grade === 'Unique' ? 'Epic' : 'Legendary',
+                            rarity: Math.min((i.rarity || 1) + 2, 10),
+                            status: 'ready'
+                        };
+                    }
+                    return i;
+                }),
+                isAnalyzing: false,
+                interactionMode: 'battle',
+                scanResult: {
+                    analysis: {
+                        item: data.name,
+                        rarity_score: (item.rarity || 1) + 2,
+                        affected_stats: Object.keys(item.stats || {}),
+                        stats: item.stats
+                    },
+                    flavor: { name: data.name, description: data.description }
+                } as any
+            }));
+
+        } catch (e) {
+            console.error("Evolution Failed", e);
+            set({ isAnalyzing: false });
+        }
+    },
+
+    cancelEnhancement: () => set({ interactionMode: 'battle', viewMode: 'battle', tempMaterial: null, scanResult: null }),
+
     devEquipRandomItem: () => set((state) => {
         const inventory = [...state.inventory];
         const emptyIndex = inventory.findIndex(item => item === null);

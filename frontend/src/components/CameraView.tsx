@@ -9,7 +9,7 @@ const videoConstraints = {
 
 export const CameraView = () => {
     const webcamRef = useRef<Webcam>(null);
-    const { film, setIsAnalyzing, setScanResult, setTimeScale, useFilm, setInventoryItem, craftItem, inventory, scanMode } = useGameStore();
+    const { film, setIsAnalyzing, setScanResult, setTimeScale, useFilm, setInventoryItem, craftItem, inventory, scanMode, interactionMode, scanMaterial } = useGameStore();
 
     const capture = useCallback(async () => {
         const imageSrc = webcamRef.current?.getScreenshot();
@@ -20,7 +20,6 @@ export const CameraView = () => {
 
             // Start Analysis
             setIsAnalyzing(true);
-            // setTimeScale(0.0); // REMOVED: Keep time running for graceful freeze
 
             try {
                 // 1. Prepare Image
@@ -32,10 +31,13 @@ export const CameraView = () => {
                 formData.append("file", file);
                 formData.append("mode", scanMode || "craft");
 
+                if (interactionMode === 'enhancing') {
+                    formData.append("skip_image_generation", "true");
+                }
+
                 // 2. Scan Item (Vision + Flavor Text)
                 // Return to battle immediately so overlay shows there
                 useGameStore.getState().setViewMode('battle');
-                // useGameStore.getState().setTimeScale(1.0); // REMOVED
 
                 const response = await fetch("http://localhost:8000/scan", {
                     method: "POST",
@@ -60,6 +62,19 @@ export const CameraView = () => {
                     });
 
                     // Do NOT show ResultOverlay
+                    return;
+                }
+
+                // ENHANCE LOGIC
+                if (interactionMode === 'enhancing') {
+                    const flavor = data.flavor || { name: data.analysis?.item, description: '' };
+                    scanMaterial({
+                        name: flavor.name || data.analysis?.item || 'Unknown Material',
+                        rarity: data.analysis?.rarity_score || 1,
+                        affectedStats: data.analysis?.affected_stats || ['atk', 'def', 'hp'],
+                        description: flavor.description
+                    });
+                    setIsAnalyzing(false);
                     return;
                 }
 
