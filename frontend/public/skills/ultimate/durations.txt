@@ -4,7 +4,6 @@ groundzero.webp: 5460.0
 shadower.webp: 5100.0
 supercannonexplosion.webp: 6540.0
 ren.webp: 3480.0
-cataclysm.webp: 4590.0
 spiritcalibur.webp: 7020.0
 souleclipse.webp: 8340.0
-combodefault.webp: 4400.0
+

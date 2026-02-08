@@ -1,15 +1,51 @@
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useState } from 'react';
 import Webcam from 'react-webcam';
 import { useGameStore } from '../store/gameStore';
 import { SKILL_CONFIGS } from '../constants/assetRegistry';
 
 const videoConstraints = {
+    width: { ideal: 1920 },
+    height: { ideal: 1080 },
     facingMode: { ideal: "environment" }
 };
 
 export const CameraView = () => {
     const webcamRef = useRef<Webcam>(null);
     const { film, setIsAnalyzing, setScanResult, setTimeScale, useFilm, setInventoryItem, craftItem, inventory, scanMode, interactionMode, scanMaterial, triggerSkill } = useGameStore();
+    const [cameraError, setCameraError] = useState<string | null>(null);
+
+    const handleUserMediaError = useCallback((error: string | DOMException) => {
+        console.error('Camera error:', error);
+        let errorMessage = 'Camera access denied';
+
+        if (typeof error === 'object' && error.name) {
+            switch (error.name) {
+                case 'NotAllowedError':
+                case 'PermissionDeniedError':
+                    errorMessage = 'Please allow camera access in your browser settings';
+                    break;
+                case 'NotFoundError':
+                case 'DevicesNotFoundError':
+                    errorMessage = 'No camera found on your device';
+                    break;
+                case 'NotReadableError':
+                case 'TrackStartError':
+                    errorMessage = 'Camera is being used by another app. Please close other apps and try again.';
+                    break;
+                case 'OverconstrainedError':
+                case 'ConstraintNotSatisfiedError':
+                    errorMessage = 'Camera does not support required settings';
+                    break;
+                case 'NotSupportedError':
+                    errorMessage = 'HTTPS required for camera access. Please use https:// instead of http://';
+                    break;
+                default:
+                    errorMessage = `Camera error: ${error.name}`;
+            }
+        }
+
+        setCameraError(errorMessage);
+    }, []);
 
     const capture = useCallback(async () => {
         const imageSrc = webcamRef.current?.getScreenshot();
@@ -149,13 +185,48 @@ export const CameraView = () => {
 
     return (
         <div className="relative w-full h-full bg-black overflow-hidden">
-            <Webcam
-                audio={false}
-                ref={webcamRef}
-                screenshotFormat="image/jpeg"
-                videoConstraints={videoConstraints}
-                className="object-cover w-full h-full"
-            />
+            {cameraError ? (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 text-white p-8 z-20">
+                    <div className="text-red-500 text-6xl mb-4">⚠️</div>
+                    <h2 className="text-2xl font-bold mb-4">Camera Access Error</h2>
+                    <p className="text-center mb-6 max-w-md">{cameraError}</p>
+                    <div className="text-sm text-gray-400 max-w-md text-center mb-6">
+                        <p className="mb-2">For mobile devices:</p>
+                        <ul className="text-left list-disc pl-5">
+                            <li>Ensure you're using HTTPS (https://)</li>
+                            <li>Check browser camera permissions</li>
+                            <li>Close other apps using the camera</li>
+                            <li>Try refreshing the page</li>
+                        </ul>
+                    </div>
+                    <button
+                        onClick={() => {
+                            setCameraError(null);
+                            window.location.reload();
+                        }}
+                        className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg"
+                    >
+                        Retry
+                    </button>
+                    <button
+                        onClick={() => {
+                            useGameStore.getState().setViewMode('battle');
+                        }}
+                        className="mt-4 px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg"
+                    >
+                        Back to Game
+                    </button>
+                </div>
+            ) : (
+                <Webcam
+                    audio={false}
+                    ref={webcamRef}
+                    screenshotFormat="image/jpeg"
+                    videoConstraints={videoConstraints}
+                    className="object-cover w-full h-full"
+                    onUserMediaError={handleUserMediaError}
+                />
+            )}
 
             {/* Button Overlay */}
             <div className="absolute bottom-8 left-0 right-0 flex justify-center items-center pb-8 z-30 gap-8 pointer-events-auto">
@@ -175,9 +246,9 @@ export const CameraView = () => {
                 {/* Capture Button */}
                 <button
                     onClick={capture}
-                    disabled={film <= 0}
+                    disabled={film <= 0 || !!cameraError}
                     className={`w-20 h-20 rounded-full border-4 border-white backdrop-blur-md transition-all shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:scale-105 active:scale-95
-            ${film > 0 ? 'bg-white/20 active:bg-white/40' : 'bg-red-500/20 border-red-500/50 cursor-not-allowed'}
+            ${film > 0 && !cameraError ? 'bg-white/20 active:bg-white/40' : 'bg-red-500/20 border-red-500/50 cursor-not-allowed'}
           `}
                 />
 

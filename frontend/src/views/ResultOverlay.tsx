@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
 import { EnhancementSelectionModal } from '../components/EnhancementSelectionModal';
+import { ItemDetailModal } from '../components/ItemDetailModal';
 
 /** API의 flavor가 문자열(마크다운 JSON)로 올 수 있으므로 항상 { name, description } 객체로 정규화 */
 function normalizeFlavor(flavor: unknown): { name: string; description: string } {
@@ -21,12 +22,115 @@ function normalizeFlavor(flavor: unknown): { name: string; description: string }
 }
 
 export const ResultOverlay = () => {
-    const { scanResult, setScanResult, setViewMode, setTimeScale, setIsAnalyzing, inventory, interactionMode, enhanceItem, triggerSkill, scanMode } = useGameStore();
+    const { scanResult, setScanResult, setViewMode, setTimeScale, setIsAnalyzing, inventory, interactionMode, enhanceItem, triggerSkill, scanMode, stageState, survivalTime, killCount, heroStats, score, setAppMode, resetGame } = useGameStore();
     const [showEnhanceSelect, setShowEnhanceSelect] = useState(false);
+    const [selectedItem, setSelectedItem] = useState<any | null>(null);
+
+    // Game Over Screen
+    if (stageState === 'gameover') {
+        const minutes = Math.floor(survivalTime / 60);
+        const seconds = survivalTime % 60;
+        const finalScore = survivalTime + killCount;
+
+        return (
+            <div className="absolute inset-0 z-50 flex flex-col bg-gradient-to-b from-gray-900 to-black font-sans">
+                {/* Top Section - Game Over Stats */}
+                <div className="flex-1 flex flex-col items-center justify-center p-6">
+                    <h1 className="text-6xl font-bold text-red-500 mb-8 animate-pulse">GAME OVER</h1>
+
+                    <div className="bg-gray-800/80 rounded-lg p-8 max-w-md w-full space-y-4">
+                        {/* Survival Time */}
+                        <div className="flex justify-between items-center border-b border-gray-700 pb-3">
+                            <span className="text-gray-400 text-lg">Survival Time</span>
+                            <span className="text-white text-2xl font-bold">{minutes}:{seconds.toString().padStart(2, '0')}</span>
+                        </div>
+
+                        {/* Kill Count */}
+                        <div className="flex justify-between items-center border-b border-gray-700 pb-3">
+                            <span className="text-gray-400 text-lg">Monsters Defeated</span>
+                            <span className="text-white text-2xl font-bold">{killCount}</span>
+                        </div>
+
+                        {/* Final Stats */}
+                        <div className="pt-3">
+                            <p className="text-gray-400 text-sm mb-2">Final Stats</p>
+                            <div className="grid grid-cols-2 gap-2 text-sm">
+                                <div className="text-gray-300">HP: <span className="text-white">{heroStats.maxHp}</span></div>
+                                <div className="text-gray-300">ATK: <span className="text-white">{heroStats.atk}</span></div>
+                                <div className="text-gray-300">DEF: <span className="text-white">{heroStats.def}</span></div>
+                                <div className="text-gray-300">SPD: <span className="text-white">{heroStats.spd}</span></div>
+                                <div className="text-gray-300">Crit Rate: <span className="text-white">{(heroStats.critRate * 100).toFixed(1)}%</span></div>
+                                <div className="text-gray-300">Crit Dmg: <span className="text-white">{heroStats.critDmg.toFixed(2)}x</span></div>
+                            </div>
+                        </div>
+
+                        {/* Final Score */}
+                        <div className="flex justify-between items-center pt-3 border-t border-gray-700">
+                            <span className="text-yellow-400 text-xl font-bold">Final Score</span>
+                            <span className="text-yellow-300 text-3xl font-bold">{finalScore}</span>
+                        </div>
+                    </div>
+
+                    {/* Return Button */}
+                    <button
+                        onClick={() => {
+                            resetGame();
+                            setAppMode('intro');
+                        }}
+                        className="mt-8 px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold rounded-lg transition-colors"
+                    >
+                        Return to Menu
+                    </button>
+                </div>
+
+                {/* Bottom Section - Inventory Display */}
+                <div className="h-1/3 bg-gray-900/90 p-4 border-t border-gray-700">
+                    <div className="grid grid-cols-3 gap-3 max-w-md mx-auto">
+                        {inventory.map((item, index) => (
+                            <div
+                                key={index}
+                                onClick={() => item && setSelectedItem(item)}
+                                className={`relative aspect-square bg-gray-800 rounded-lg overflow-hidden border-2 border-gray-700 ${item ? 'cursor-pointer hover:border-blue-500 transition-colors' : ''
+                                    }`}
+                            >
+                                {item ? (
+                                    <>
+                                        {item.image ? (
+                                            <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center">
+                                                <span className="text-xs text-gray-400 text-center px-1">{item.name}</span>
+                                            </div>
+                                        )}
+                                    </>
+                                ) : (
+                                    <img
+                                        src="/ui/anvil.webp"
+                                        alt="Empty"
+                                        className="w-1/2 h-1/2 object-contain opacity-20 absolute inset-0 m-auto"
+                                    />
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Item Detail Modal */}
+                {selectedItem && (
+                    <ItemDetailModal
+                        item={selectedItem}
+                        onClose={() => setSelectedItem(null)}
+                    />
+                )}
+            </div>
+        );
+    }
 
     if (!scanResult) return null;
 
-    const isSkill = scanMode === 'skill' || scanResult.analysis.type === 'skill';
+    // Check scanMode directly - don't rely on analysis.type which may be incorrect
+    const isSkill = scanMode === 'skill';
+    const isEnhance = interactionMode === 'enhancing';
 
     const handleSelectEnhance = (itemId: string) => {
         enhanceItem(itemId);
@@ -187,8 +291,8 @@ export const ResultOverlay = () => {
                     <button
                         onClick={interactionMode === 'enhancing' ? () => setShowEnhanceSelect(true) : isSkill ? () => triggerSkill(flavor.name) : handleClose}
                         className={`w-full py-3 ${interactionMode === 'enhancing' ? 'bg-indigo-600 hover:bg-indigo-500' :
-                                isSkill ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)]' :
-                                    'bg-yellow-600 hover:bg-yellow-500'
+                            isSkill ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)]' :
+                                'bg-yellow-600 hover:bg-yellow-500'
                             } text-black font-bold rounded-lg transition-colors`}
                     >
                         {interactionMode === 'enhancing' ? 'SELECT ITEM TO ENHANCE' : isSkill ? 'CAST SKILL' : 'CLAIM ITEM'}
