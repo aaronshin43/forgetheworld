@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { ATTACK_ANIMATIONS, CHARACTER_DURATIONS, SKILL_CATEGORIES, SKILL_CONFIGS, MONSTER_FORMATIONS, MONSTER_LIST, MONSTER_BASE_STATS } from '../constants/assetRegistry';
+import { CHARACTER_DURATIONS, SKILL_CATEGORIES, SKILL_CONFIGS, MONSTER_FORMATIONS, MONSTER_LIST, MONSTER_BASE_STATS } from '../constants/assetRegistry';
 
 export interface EntityStats {
     hp: number;
@@ -503,13 +503,12 @@ export const useGameStore = create<GameState>((set, get) => ({
 
     setCharacterAction: (action) => set({ characterAction: action }),
     triggerCharacterAttack: () => {
-        // 1. Character Animation (Sprite)
-        const randomAttack = ATTACK_ANIMATIONS[Math.floor(Math.random() * ATTACK_ANIMATIONS.length)];
-        const duration = CHARACTER_DURATIONS[randomAttack] || 1000;
-        set({ characterAction: randomAttack });
+        // 1. Character Animation (Sprite) – basic 스킬은 swingP1 모션만 사용
+        const characterMotion = 'swingP1';
+        const duration = CHARACTER_DURATIONS[characterMotion] || 1000;
+        set({ characterAction: characterMotion });
 
         // 2. Skill Effect (Visual)
-        // Pick random basic skill
         const basicSkills = SKILL_CATEGORIES.basic;
         if (basicSkills && basicSkills.length > 0) {
             const randomSkillName = basicSkills[Math.floor(Math.random() * basicSkills.length)];
@@ -524,7 +523,7 @@ export const useGameStore = create<GameState>((set, get) => ({
 
         setTimeout(() => {
             const current = get().characterAction;
-            if (current === randomAttack) {
+            if (current === characterMotion) {
                 set({ characterAction: 'stand1' });
             }
         }, duration);
