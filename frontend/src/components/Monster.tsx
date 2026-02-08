@@ -8,14 +8,14 @@ interface MonsterProps {
     scale?: number;
     animXOffset?: number;
     animYOffset?: number;
+    uuid?: string; // Globally Unique ID for cache busting
 }
 
-export const Monster = ({ name, action = 'stand', scale = 1.0, animXOffset = 0, animYOffset = 0 }: MonsterProps) => {
+export const Monster = ({ name, action = 'stand', scale = 1.0, animXOffset = 0, animYOffset = 0, uuid }: MonsterProps) => {
     // Default to 'stand' action if not provided.
     // Assumes asset path pattern: /monster/{name}/{name}_{action}.webp
-    // ...
-
-    const src = `/monster/${name}/${name}_${action}.webp`;
+    // Appending tmestamp/uuid to force restart of animated webp
+    const src = `/monster/${name}/${name}_${action}.webp?id=${uuid || Date.now()}`;
 
     return (
         <div

@@ -13,6 +13,17 @@ export interface EntityStats {
     scale: number;
 }
 
+export const calculateCombatPower = (stats: EntityStats): number => {
+    return Math.floor(
+        (stats.atk * 1.5) +
+        (stats.maxHp * 0.2) +
+        (stats.def * 0.8) +
+        (stats.spd * 50) +
+        (stats.critRate * 1000) +
+        (stats.critDmg * 100)
+    );
+};
+
 export interface ActiveEffect {
     id: number;
     name: string;
@@ -32,6 +43,7 @@ export interface ActiveMonster {
     lastAttackTime: number;
     standCycles: number;
     stateStartTime: number;
+    actionId: number; // For forcing unique animation per action event
 }
 
 export interface InventoryItemStats {
@@ -76,6 +88,7 @@ interface GameState {
     appMode: 'intro' | 'game' | 'dev';
     isLoading: boolean;
     loadingProgress: number;
+    isMenuOpen: boolean;
 
     // Visuals State
     activeEffects: ActiveEffect[];
@@ -122,9 +135,41 @@ interface GameState {
     setAppMode: (mode: 'intro' | 'game' | 'dev') => void;
     setIsLoading: (isLoading: boolean) => void;
     setLoadingProgress: (progress: number) => void;
+    setIsMenuOpen: (isMenuOpen: boolean) => void;
+    resetGame: () => void;
+    devEquipRandomItem: () => void;
+    craftItem: (index: number, item: InventoryItem) => void;
 }
 
+const applyRandomStats = (baseStats: EntityStats) => {
+    const statsKeys = ['atk', 'def', 'maxHp', 'spd', 'critRate', 'critDmg'] as const;
+    const selected = [...statsKeys].sort(() => 0.5 - Math.random()).slice(0, 3);
+    const newStats = { ...baseStats };
+    const changes: Record<string, number> = {};
+
+    selected.forEach(key => {
+        let val = 0;
+        if (key === 'atk') val = 50;
+        if (key === 'def') val = 20;
+        if (key === 'maxHp') val = 100;
+        if (key === 'spd') val = 0.2;
+        if (key === 'critRate') val = 0.05;
+        if (key === 'critDmg') val = 0.2;
+
+        if (key === 'maxHp') {
+            newStats.maxHp += val;
+            newStats.hp += val;
+        } else {
+            (newStats as any)[key] += val;
+        }
+        changes[key] = val;
+    });
+
+    return { newStats, changes };
+};
+
 export const useGameStore = create<GameState>((set, get) => ({
+    // ... (rest of initial state)
     // Hero Initial State
     heroStats: {
         hp: 1000,
@@ -159,6 +204,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     appMode: 'intro',
     isLoading: true,
     loadingProgress: 0,
+    isMenuOpen: false,
 
     activeEffects: [],
     monsters: [],
@@ -230,8 +276,70 @@ export const useGameStore = create<GameState>((set, get) => ({
     setAppMode: (appMode) => set({ appMode }),
     setIsLoading: (isLoading) => set({ isLoading }),
     setLoadingProgress: (loadingProgress) => set({ loadingProgress }),
+    setIsMenuOpen: (isMenuOpen) => set({ isMenuOpen }),
+    resetGame: () => set((state) => ({
+        heroStats: {
+            hp: 1000,
+            maxHp: 1000,
+            atk: 300,
+            def: 50,
+            spd: 1.0,
+            critRate: 0.1,
+            critDmg: 1.5,
+            moveSpeed: 0,
+            scale: 1.0
+        },
+        heroLevel: 1,
+        heroExp: 0,
+        heroMaxExp: 100,
+        wave: 1,
+        score: 0,
+        stageState: 'spawning',
+        timeScale: 1.0,
+        monsters: [],
+        activeEffects: [],
+        monsterIdCounter: 0,
+        characterAction: 'stand1',
+        isAnalyzing: false,
+        scanResult: null,
+        scanMode: null,
+        isMenuOpen: false,
+        inventory: Array(6).fill(null)
+    })),
+    craftItem: (index, item) => set((state) => {
+        const { newStats, changes } = applyRandomStats(state.heroStats);
 
-    // Monster Actions
+        console.log(`[Crafted Item] ${item.name} Stats:`, changes);
+        console.log('New Hero Stats:', newStats);
+
+        const newInventory = [...state.inventory];
+        newInventory[index] = item;
+
+        return {
+            inventory: newInventory,
+            heroStats: newStats
+        };
+    }),
+    devEquipRandomItem: () => set((state) => {
+        const inventory = [...state.inventory];
+        const emptyIndex = inventory.findIndex(item => item === null);
+        if (emptyIndex === -1) return {};
+
+        const newItem: InventoryItem = {
+            id: `dev-${Date.now()}`,
+            name: 'Dev Sword',
+            image: '/ui/sword.webp',
+            status: 'ready'
+        };
+        inventory[emptyIndex] = newItem;
+
+        const { newStats } = applyRandomStats(state.heroStats);
+
+        return {
+            inventory,
+            heroStats: newStats
+        };
+    }),
     spawnMonster: (name, stats, x, y, targetX) => {
         set((state) => {
             const newId = state.monsterIdCounter + 1;
@@ -247,7 +355,8 @@ export const useGameStore = create<GameState>((set, get) => ({
                     currentAction: 'move',
                     lastAttackTime: 0,
                     standCycles: 0,
-                    stateStartTime: Date.now()
+                    stateStartTime: Date.now(),
+                    actionId: 0
                 }]
             };
         });
@@ -297,12 +406,18 @@ export const useGameStore = create<GameState>((set, get) => ({
     setMonsterAction: (id, action) => set((state) => ({
         monsters: state.monsters.map(m => {
             if (m.id === id) {
+                // Prevent restarting death animation if already dying
+                if (action === 'die1' && m.currentAction === 'die1') {
+                    return m;
+                }
+
                 // Only update if action is different to avoid resetting start time on redundant calls?
                 // The loop logic will handle redundancy. If we call this, we imply a change or restart.
                 return {
                     ...m,
                     currentAction: action,
-                    stateStartTime: Date.now()  // Reset time on action change
+                    stateStartTime: Date.now(),  // Reset time on action change
+                    actionId: (m.actionId || 0) + 1 // Guaranteed unique increment
                 };
             }
             return m;

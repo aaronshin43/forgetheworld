@@ -9,7 +9,7 @@ const videoConstraints = {
 
 export const CameraView = () => {
     const webcamRef = useRef<Webcam>(null);
-    const { film, setIsAnalyzing, setScanResult, setTimeScale, useFilm, setInventoryItem, inventory, scanMode } = useGameStore();
+    const { film, setIsAnalyzing, setScanResult, setTimeScale, useFilm, setInventoryItem, craftItem, inventory, scanMode } = useGameStore();
 
     const capture = useCallback(async () => {
         const imageSrc = webcamRef.current?.getScreenshot();
@@ -77,8 +77,8 @@ export const CameraView = () => {
                     ? { atk: Number(data.analysis.stats.atk) || 0, def: Number(data.analysis.stats.def) || 0, hp: Number(data.analysis.stats.hp) || 0 }
                     : undefined;
 
-                // Set Loading State (include description/stats for item detail modal later)
-                setInventoryItem(targetIndex, {
+                // Set Loading State & Apply Stats Immediately
+                craftItem(targetIndex, {
                     id: newItemId,
                     name: flavor.name || data.analysis?.item || '—',
                     image: null,
