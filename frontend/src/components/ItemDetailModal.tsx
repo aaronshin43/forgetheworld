@@ -94,7 +94,7 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({ item, onClose 
                         onClick={onClose}
                         className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-900 font-bold text-sm uppercase tracking-wider transition-colors shadow-lg"
                     >
-                        Confirm
+                        Close
                     </button>
                 </div>
             </motion.div>

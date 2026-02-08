@@ -91,11 +91,15 @@ export const ResultOverlay = () => {
                         </div>
 
                         <div className="flex flex-wrap justify-center gap-2">
-                            {(scanResult.analysis.affected_stats || ['atk', 'def', 'maxHp']).map((stat: string) => (
-                                <span key={stat} className="px-3 py-1 bg-gray-700 border border-gray-600 rounded text-xs text-gray-300 uppercase font-bold">
-                                    {stat}
-                                </span>
-                            ))}
+                            {(scanResult.analysis.affected_stats || ['atk', 'def', 'maxHp']).map((stat: string) => {
+                                const val = item?.stats?.[stat as keyof typeof item.stats] ?? 0;
+                                return (
+                                    <span key={stat} className="px-3 py-1 bg-gray-700 border border-gray-600 rounded text-xs text-gray-300 uppercase font-bold flex items-center gap-1">
+                                        <span>{stat}</span>
+                                        <span className="text-yellow-400">+{val}</span>
+                                    </span>
+                                );
+                            })}
                         </div>
                     </div>
 

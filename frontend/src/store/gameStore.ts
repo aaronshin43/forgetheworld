@@ -47,9 +47,13 @@ export interface ActiveMonster {
 }
 
 export interface InventoryItemStats {
-    atk: number;
-    def: number;
-    hp: number;
+    atk?: number;
+    def?: number;
+    hp?: number;
+    maxHp?: number;
+    spd?: number;
+    critRate?: number;
+    critDmg?: number;
 }
 
 export interface InventoryItem {
