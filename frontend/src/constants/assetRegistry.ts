@@ -133,13 +133,96 @@ export const BACKGROUND_LIST = [
 ];
 
 export const MONSTER_BASE_STATS: Record<string, { hp: number; atk: number; def: number; spd: number; moveSpeed: number; scale: number }> = {
-    "coffeemachine": { hp: 150, atk: 15, def: 5, spd: 0.8, moveSpeed: 12, scale: 0.8 },
-    "goblin": { hp: 80, atk: 12, def: 2, spd: 1.2, moveSpeed: 15, scale: 1.0 },
-    "goblinking": { hp: 300, atk: 25, def: 10, spd: 0.7, moveSpeed: 11, scale: 1.0 },
-    "rockspirit": { hp: 200, atk: 10, def: 20, spd: 0.5, moveSpeed: 18, scale: 1.0 },
-    "ultragray": { hp: 120, atk: 18, def: 5, spd: 1.0, moveSpeed: 16, scale: 1.0 },
-    "wyvern": { hp: 100, atk: 20, def: 8, spd: 1.1, moveSpeed: 17, scale: 0.8 },
-    "zombie": { hp: 180, atk: 14, def: 3, spd: 0.6, moveSpeed: 13, scale: 1.0 }
+    "coffeemachine": { hp: 150, atk: 15, def: 5, spd: 2, moveSpeed: 12, scale: 0.8 },
+    "goblin": { hp: 80, atk: 12, def: 2, spd: 1, moveSpeed: 15, scale: 1.0 },
+    "goblinking": { hp: 300, atk: 25, def: 10, spd: 2, moveSpeed: 11, scale: 1.0 },
+    "rockspirit": { hp: 200, atk: 10, def: 20, spd: 2, moveSpeed: 18, scale: 1.0 },
+    "ultragray": { hp: 120, atk: 18, def: 5, spd: 1, moveSpeed: 16, scale: 1.0 },
+    "wyvern": { hp: 100, atk: 20, def: 8, spd: 2, moveSpeed: 17, scale: 0.8 },
+    "zombie": { hp: 180, atk: 14, def: 3, spd: 2, moveSpeed: 13, scale: 1.0 }
+};
+
+export const MONSTER_DURATIONS: Record<string, Record<string, number>> = {
+    "coffeemachine": {
+        "attack1": 1800,
+        "die1": 1440,
+        "hit1": 600,
+        "move": 1080,
+        "stand": 1080
+    },
+    "goblin": {
+        "attack1": 1580,
+        "die1": 820,
+        "hit1": 600,
+        "move": 600,
+        "stand": 780
+    },
+    "goblinking": {
+        "attack1": 2370,
+        "die1": 1740,
+        "hit1": 300,
+        "move": 1020,
+        "stand": 1200
+    },
+    "rockspirit": {
+        "attack1": 2160,
+        "attack2": 2190,
+        "attack3": 3780,
+        "die1": 1800,
+        "hit1": 600,
+        "move": 480,
+        "stand": 1200
+    },
+    "ultragray": {
+        "attack1": 1650,
+        "die1": 1140,
+        "hit1": 600,
+        "move": 480,
+        "stand": 2350
+    },
+    "wyvern": {
+        "attack1": 2160,
+        "attack2": 2160,
+        "die1": 1020,
+        "move": 720,
+        "stand": 720
+    },
+    "zombie": {
+        "attack1": 1500,
+        "attack2": 1620,
+        "die1": 1300,
+        "hit1": 600,
+        "move": 800,
+        "stand": 600
+    }
+};
+
+// Animation Offsets (in pixels, relative to center anchor, positive is right/down, negative is left/up)
+export const MONSTER_ANIMATION_OFFSETS: Record<string, Record<string, { x: number; y: number }>> = {
+    "goblinking": {
+        "die1": { x: 35, y: 0 }
+    },
+    "rockspirit": {
+        "attack1": { x: -265, y: 10 },
+        "attack2": { x: -100, y: 0 },
+        "attack3": { x: -100, y: 0 }
+    },
+    "coffeemachine": {
+        "attack1": { x: -50, y: 15 },
+        "die1": { x: -10, y: 0 }
+    },
+    "ultragray": {
+        "attack1": { x: 15, y: 0 }
+    },
+    "goblin": {
+        "attack1": { x: -15, y: 0 }
+    },
+    "wyvern": {
+        "attack1": { x: -25, y: 15 }
+    },
+    "zombie": {
+        "attack1": { x: -15, y: 0 }
+    }
 };
 
 // Formations: y is % from top, xOffset is adder to baseline (75%)

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { ATTACK_ANIMATIONS, CHARACTER_DURATIONS, SKILL_CATEGORIES, SKILL_CONFIGS } from '../constants/assetRegistry';
+import { ATTACK_ANIMATIONS, CHARACTER_DURATIONS, SKILL_CATEGORIES, SKILL_CONFIGS, MONSTER_FORMATIONS, MONSTER_LIST, MONSTER_BASE_STATS } from '../constants/assetRegistry';
 
 export interface EntityStats {
     hp: number;
@@ -30,6 +30,8 @@ export interface ActiveMonster {
     stats: EntityStats;
     currentAction: string;
     lastAttackTime: number;
+    standCycles: number;
+    stateStartTime: number;
 }
 
 export interface InventoryItem {
@@ -64,10 +66,13 @@ interface GameState {
     scanResult: any | null;
     inventory: (InventoryItem | null)[];
     appMode: 'intro' | 'game' | 'dev';
+    isLoading: boolean;
+    loadingProgress: number;
 
     // Visuals State
     activeEffects: ActiveEffect[];
     monsters: ActiveMonster[];
+    monsterIdCounter: number; // For generating unique IDs
     characterAction: string;
     currentBackground: string;
 
@@ -92,6 +97,7 @@ interface GameState {
 
     // Entity Actions
     spawnMonster: (name: string, stats: EntityStats, x: number, y: number, targetX: number) => void;
+    spawnWave: (count: number, monsterName?: string) => void;
     updateMonsterPosition: (id: number, x: number) => void;
     damageMonster: (id: number, amount: number) => void;
     setMonsterAction: (id: number, action: string) => void;
@@ -106,6 +112,8 @@ interface GameState {
     setInventoryItem: (index: number, item: InventoryItem | null) => void;
     setBackground: (background: string) => void;
     setAppMode: (mode: 'intro' | 'game' | 'dev') => void;
+    setIsLoading: (isLoading: boolean) => void;
+    setLoadingProgress: (progress: number) => void;
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -140,12 +148,15 @@ export const useGameStore = create<GameState>((set, get) => ({
     isAnalyzing: false,
     scanResult: null,
     inventory: Array(6).fill(null),
+    appMode: 'intro',
+    isLoading: true,
+    loadingProgress: 0,
 
     activeEffects: [],
     monsters: [],
+    monsterIdCounter: 0,
     characterAction: 'stand1',
     currentBackground: 'city',
-    appMode: 'intro',
 
     // Hero Actions
     setHeroStats: (stats) => set((state) => ({
@@ -209,22 +220,59 @@ export const useGameStore = create<GameState>((set, get) => ({
     },
     setBackground: (background) => set({ currentBackground: background }),
     setAppMode: (appMode) => set({ appMode }),
+    setIsLoading: (isLoading) => set({ isLoading }),
+    setLoadingProgress: (loadingProgress) => set({ loadingProgress }),
 
     // Monster Actions
     spawnMonster: (name, stats, x, y, targetX) => {
-        const id = Date.now() + Math.random();
-        set((state) => ({
-            monsters: [...state.monsters, {
-                id,
-                name,
-                x,
-                y,
-                targetX,
-                stats: { ...stats },
-                currentAction: 'move',
-                lastAttackTime: 0
-            }]
-        }));
+        set((state) => {
+            const newId = state.monsterIdCounter + 1;
+            return {
+                monsterIdCounter: newId,
+                monsters: [...state.monsters, {
+                    id: newId,
+                    name,
+                    x,
+                    y,
+                    targetX,
+                    stats: { ...stats },
+                    currentAction: 'move',
+                    lastAttackTime: 0,
+                    standCycles: 0,
+                    stateStartTime: Date.now()
+                }]
+            };
+        });
+    },
+    spawnWave: (count, monsterName) => {
+        const { wave, spawnMonster } = get();
+        // If monsterName is provided, stick to it. Otherwise random.
+        const name = monsterName || MONSTER_LIST[Math.floor(Math.random() * MONSTER_LIST.length)];
+
+        // Formation
+        const spawnCount = count || 1;
+        const formation = (MONSTER_FORMATIONS as any)?.[spawnCount] || (MONSTER_FORMATIONS as any)?.[1]; // type casting safe here as constants are reliable
+
+        for (let i = 0; i < spawnCount; i++) {
+            const base = MONSTER_BASE_STATS[name] || { hp: 100, atk: 10, def: 5, spd: 1.0, moveSpeed: 10, scale: 1.0 };
+            const stats = {
+                hp: Math.floor(base.hp * (1 + wave * 0.2)),
+                maxHp: Math.floor(base.hp * (1 + wave * 0.2)),
+                atk: Math.floor(base.atk * (1 + wave * 0.1)),
+                def: Math.floor(base.def * (1 + wave * 0.1)),
+                spd: base.spd,
+                critRate: 0.05,
+                critDmg: 1.5,
+                moveSpeed: base.moveSpeed,
+                scale: base.scale
+            };
+
+            const pos = formation?.[i] || { y: 50, xOffset: 0 };
+            const targetX = 70 + pos.xOffset;
+            const startX = 100 + pos.xOffset;
+
+            spawnMonster(name, stats, startX, pos.y, targetX);
+        }
     },
     updateMonsterPosition: (id, x) => set((state) => ({
         monsters: state.monsters.map(m => m.id === id ? { ...m, x } : m)
@@ -236,11 +284,21 @@ export const useGameStore = create<GameState>((set, get) => ({
             }
             return m;
         });
-        // We filter dead monsters later in the loop or let them linger for death animation
         return { monsters: newMonsters };
     }),
     setMonsterAction: (id, action) => set((state) => ({
-        monsters: state.monsters.map(m => m.id === id ? { ...m, currentAction: action } : m)
+        monsters: state.monsters.map(m => {
+            if (m.id === id) {
+                // Only update if action is different to avoid resetting start time on redundant calls?
+                // The loop logic will handle redundancy. If we call this, we imply a change or restart.
+                return {
+                    ...m,
+                    currentAction: action,
+                    stateStartTime: Date.now()  // Reset time on action change
+                };
+            }
+            return m;
+        })
     })),
     clearMonsters: () => set({ monsters: [] }),
 
@@ -267,10 +325,6 @@ export const useGameStore = create<GameState>((set, get) => ({
             const randomSkillName = basicSkills[Math.floor(Math.random() * basicSkills.length)];
             const config = SKILL_CONFIGS[randomSkillName] || { x: 50, y: 50, scale: 1.0 };
 
-            // Add effect slightly offset to look like a hit? Or just center?
-            // For now, use config default.
-            // We need to call addEffect. Since we are inside the store, we can use get().addEffect or just separate set logic?
-            // get().addEffect is cleaner if it exists. Yes it does.
             get().addEffect(randomSkillName, {
                 x: config.x,
                 y: config.y,

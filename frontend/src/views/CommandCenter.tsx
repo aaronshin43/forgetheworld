@@ -86,7 +86,6 @@ export const CommandCenter = () => {
                             type="button"
                             onClick={() => {
                                 useGameStore.getState().setViewMode('camera');
-                                useGameStore.getState().setTimeScale(0.1);
                                 useGameStore.getState().setScanMode('craft');
                             }}
                             className={BTN_CLASS}
@@ -98,7 +97,6 @@ export const CommandCenter = () => {
                             type="button"
                             onClick={() => {
                                 useGameStore.getState().setViewMode('camera');
-                                useGameStore.getState().setTimeScale(0.1);
                                 useGameStore.getState().setScanMode('skill');
                             }}
                             className={BTN_CLASS}
@@ -110,7 +108,6 @@ export const CommandCenter = () => {
                             type="button"
                             onClick={() => {
                                 useGameStore.getState().setViewMode('camera');
-                                useGameStore.getState().setTimeScale(0.1);
                                 useGameStore.getState().setScanMode('enhance');
                             }}
                             className={BTN_CLASS}

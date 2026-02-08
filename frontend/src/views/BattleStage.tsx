@@ -4,6 +4,7 @@ import { Character } from '../components/Character';
 import { SkillEffect } from '../components/SkillEffect';
 import { Monster } from '../components/Monster';
 import { useGameLoop } from '../hooks/useGameLoop';
+import { MONSTER_ANIMATION_OFFSETS } from '../constants/assetRegistry';
 
 export const BattleStage = () => {
     // Run the Game Loop
@@ -53,7 +54,13 @@ export const BattleStage = () => {
                                 transform: 'translate(-50%, -100%)' // Anchor at feet
                             }}
                         >
-                            <Monster name={monster.name} action={monster.currentAction} scale={monster.stats.scale || 1.0} />
+                            <Monster
+                                name={monster.name}
+                                action={monster.currentAction}
+                                scale={monster.stats.scale || 1.0}
+                                animXOffset={MONSTER_ANIMATION_OFFSETS[monster.name]?.[monster.currentAction]?.x || 0}
+                                animYOffset={MONSTER_ANIMATION_OFFSETS[monster.name]?.[monster.currentAction]?.y || 0}
+                            />
                         </div>
                     ))}
 

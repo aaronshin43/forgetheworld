@@ -20,7 +20,7 @@ export const CameraView = () => {
 
             // Start Analysis
             setIsAnalyzing(true);
-            setTimeScale(0.0); // Stop time
+            // setTimeScale(0.0); // REMOVED: Keep time running for graceful freeze
 
             try {
                 // 1. Prepare Image
@@ -35,7 +35,7 @@ export const CameraView = () => {
                 // 2. Scan Item (Vision + Flavor Text)
                 // Return to battle immediately so overlay shows there
                 useGameStore.getState().setViewMode('battle');
-                useGameStore.getState().setTimeScale(1.0);
+                // useGameStore.getState().setTimeScale(1.0); // REMOVED
 
                 const response = await fetch("http://localhost:8000/scan", {
                     method: "POST",
@@ -88,7 +88,7 @@ export const CameraView = () => {
             } catch (err) {
                 console.error("Scan failed", err);
                 setIsAnalyzing(false);
-                setTimeScale(0.1);
+                // setTimeScale(0.1); // REMOVED
             }
         }
     }, [webcamRef, film, setIsAnalyzing, setScanResult, setTimeScale, useFilm, inventory]);
@@ -140,7 +140,7 @@ export const CameraView = () => {
                 <button
                     onClick={() => {
                         useGameStore.getState().setViewMode('battle');
-                        useGameStore.getState().setTimeScale(1.0);
+                        // useGameStore.getState().setTimeScale(1.0); // REMOVED
                     }}
                     className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/30 flex items-center justify-center text-white/70 active:bg-white/20 transition-all hover:scale-105"
                 >
