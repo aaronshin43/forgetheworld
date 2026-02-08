@@ -72,8 +72,8 @@ export const useGameLoop = () => {
             }
             else if (stageState === 'fighting') {
                 const currentMonsters = useGameStore.getState().monsters; // Live State at start of frame
-                const { appMode, viewMode, isAnalyzing, scanResult } = useGameStore.getState();
-                const isFrozen = viewMode === 'camera' || isAnalyzing || !!scanResult;
+                const { appMode, viewMode, isAnalyzing, scanResult, isMenuOpen } = useGameStore.getState();
+                const isFrozen = viewMode === 'camera' || isAnalyzing || !!scanResult || isMenuOpen;
                 const now = Date.now();
 
                 // 1. Monster Logic (Animation Cycles & Freeze)

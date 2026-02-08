@@ -69,6 +69,7 @@ interface GameState {
     appMode: 'intro' | 'game' | 'dev';
     isLoading: boolean;
     loadingProgress: number;
+    isMenuOpen: boolean;
 
     // Visuals State
     activeEffects: ActiveEffect[];
@@ -115,6 +116,8 @@ interface GameState {
     setAppMode: (mode: 'intro' | 'game' | 'dev') => void;
     setIsLoading: (isLoading: boolean) => void;
     setLoadingProgress: (progress: number) => void;
+    setIsMenuOpen: (isMenuOpen: boolean) => void;
+    resetGame: () => void;
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -152,6 +155,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     appMode: 'intro',
     isLoading: true,
     loadingProgress: 0,
+    isMenuOpen: false,
 
     activeEffects: [],
     monsters: [],
@@ -223,8 +227,35 @@ export const useGameStore = create<GameState>((set, get) => ({
     setAppMode: (appMode) => set({ appMode }),
     setIsLoading: (isLoading) => set({ isLoading }),
     setLoadingProgress: (loadingProgress) => set({ loadingProgress }),
-
-    // Monster Actions
+    setIsMenuOpen: (isMenuOpen) => set({ isMenuOpen }),
+    resetGame: () => set((state) => ({
+        heroStats: {
+            hp: 1000,
+            maxHp: 1000,
+            atk: 300,
+            def: 50,
+            spd: 1.0,
+            critRate: 0.1,
+            critDmg: 1.5,
+            moveSpeed: 0,
+            scale: 1.0
+        },
+        heroLevel: 1,
+        heroExp: 0,
+        heroMaxExp: 100,
+        wave: 1,
+        score: 0,
+        stageState: 'spawning',
+        timeScale: 1.0,
+        monsters: [],
+        activeEffects: [],
+        monsterIdCounter: 0,
+        characterAction: 'stand1',
+        isAnalyzing: false,
+        scanResult: null,
+        scanMode: null,
+        isMenuOpen: false
+    })),
     spawnMonster: (name, stats, x, y, targetX) => {
         set((state) => {
             const newId = state.monsterIdCounter + 1;
