@@ -2,14 +2,31 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
 
+/** API의 flavor가 문자열(마크다운 JSON)로 올 수 있으므로 항상 { name, description } 객체로 정규화 */
+function normalizeFlavor(flavor: unknown): { name: string; description: string } {
+    if (flavor && typeof flavor === 'object' && 'name' in flavor && 'description' in flavor) {
+        return { name: String((flavor as { name: string }).name), description: String((flavor as { description: string }).description) };
+    }
+    if (typeof flavor === 'string') {
+        try {
+            const raw = flavor.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+            const parsed = JSON.parse(raw) as { name?: string; description?: string };
+            return { name: parsed?.name ?? '—', description: parsed?.description ?? '' };
+        } catch {
+            return { name: '—', description: '' };
+        }
+    }
+    return { name: '—', description: '' };
+}
+
 export const ResultOverlay = () => {
     const { scanResult, setScanResult, setViewMode, setTimeScale, setIsAnalyzing, inventory } = useGameStore();
 
     if (!scanResult) return null;
 
-    const matchingItem = inventory.find(item => item && (item.name === scanResult.flavor.name || item.name === scanResult.analysis.item) && item.image);
-
-    const displayImage = matchingItem?.image;
+    const flavor = normalizeFlavor(scanResult.flavor);
+    // 이미지: JSON flavor.name과 일치하는 인벤토리 아이템만 사용 (인식 로직 제거)
+    const displayImage = inventory.find(item => item && item.name === flavor.name && item.image)?.image;
 
     const handleClose = () => {
         setScanResult(null);
@@ -40,17 +57,15 @@ export const ResultOverlay = () => {
                         />
                     ) : (
                         <div className="relative z-10 flex flex-col items-center">
-                            <span className="text-6xl mb-4 animate-pulse">
-                                {scanResult.analysis.type === 'weapon' ? '⚔️' : scanResult.analysis.type === 'armor' ? '🛡️' : '🧪'}
-                            </span>
+                            <span className="text-6xl mb-4 animate-pulse">🧪</span>
                             <span className="text-xs text-yellow-500/70 uppercase tracking-widest animate-pulse">Forging...</span>
                         </div>
                     )}
                 </div>
 
                 <div className="p-6">
-                    <h2 className="text-2xl font-bold text-yellow-400 mb-1">{scanResult.flavor.name}</h2>
-                    <p className="text-gray-400 text-xs italic mb-4">"{scanResult.flavor.description}"</p>
+                    <h2 className="text-2xl font-bold text-yellow-400 mb-1">{flavor.name}</h2>
+                    <p className="text-gray-400 text-xs italic mb-4">"{flavor.description}"</p>
 
                     <div className="grid grid-cols-3 gap-2 mb-6">
                         <div className="bg-gray-700/50 p-2 rounded">

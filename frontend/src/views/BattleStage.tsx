@@ -87,7 +87,7 @@ export const BattleStage = () => {
             {/* HUD Layer (Z-50) */}
             <div className="absolute top-8 left-4 flex gap-3 items-start z-50">
                 <div className="w-14 h-14 bg-gray-800 rounded-full border-2 border-orange-500/50 shadow-lg shadow-orange-500/20 overflow-hidden relative mt-1">
-                    <div className="absolute inset-0 flex items-center justify-center text-2xl">🧙‍♂️</div>
+                    <img src="/ui/head.webp" alt="Character" className="absolute inset-0 w-full h-full object-cover object-center" />
                 </div>
                 <div className="flex flex-col gap-0.5 drop-shadow-md">
                     {/* Combat Power (Moved Above) */}
@@ -103,19 +103,20 @@ export const BattleStage = () => {
                             style={{ width: `${(hp / maxHp) * 100}%` }}
                         />
                     </div>
-                </div>
-            </div>
 
-            {/* Film Roll HUD (Lightning Icons) */}
-            <div className="absolute bottom-4 right-8 flex items-center gap-2 z-50">
-                {Array.from({ length: maxFilm }).map((_, i) => (
-                    <span
-                        key={i}
-                        className={`text-lg drop-shadow-lg transition-all duration-300 ${i < storeFilm ? 'text-yellow-400 scale-110 shadow-yellow-500/50' : 'text-gray-600 opacity-40 scale-90'}`}
-                    >
-                        ⚡
-                    </span>
-                ))}
+                    {/* Film (goldenhammar 아이콘) – HP바 밑 */}
+                    <div className="flex items-center gap-1 mt-1 ml-0.5">
+                        {Array.from({ length: maxFilm }).map((_, i) => (
+                            <img
+                                key={i}
+                                src="/ui/goldenhammar.webp"
+                                alt=""
+                                aria-hidden
+                                className={`w-5 h-5 object-contain drop-shadow-lg transition-all duration-300 ${i < storeFilm ? 'opacity-100 scale-110' : 'opacity-40 scale-90 grayscale'}`}
+                            />
+                        ))}
+                    </div>
+                </div>
             </div>
         </div>
     );
