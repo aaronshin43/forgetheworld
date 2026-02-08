@@ -519,7 +519,7 @@ export const useGameStore = create<GameState>((set, get) => ({
 
                 console.log(`[Enhanced] ${item.name} +${newLevel} (Absorbed ${tempMaterial.name})`);
 
-                if (newLevel > 0 && newLevel % 5 === 0) {
+                if (newLevel > 0 && newLevel % 3 === 0) {
                     shouldEvolve = true;
                 }
 
