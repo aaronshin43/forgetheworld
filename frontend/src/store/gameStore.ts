@@ -265,11 +265,11 @@ export const useGameStore = create<GameState>((set, get) => ({
 
     // Hero Initial State
     heroStats: {
-        hp: 10,
-        maxHp: 1000,
-        atk: 300,
-        def: 50,
-        spd: 1.0, // Attacks per second
+        hp: 100,
+        maxHp: 100,
+        atk: 30,
+        def: 5,
+        spd: 0.7, // Attacks per second
         critRate: 0.1, // 10%
         critDmg: 1.5, // 150%
         moveSpeed: 0, // Hero doesn't move
@@ -422,10 +422,10 @@ export const useGameStore = create<GameState>((set, get) => ({
     })),
     resetGame: () => set((state) => ({
         heroStats: {
-            hp: 1000,
-            maxHp: 1000,
-            atk: 300,
-            def: 50,
+            hp: 100,
+            maxHp: 100,
+            atk: 30,
+            def: 5,
             spd: 1.0,
             critRate: 0.1,
             critDmg: 1.5,
