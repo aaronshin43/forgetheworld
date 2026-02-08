@@ -29,6 +29,30 @@ class EvolutionRequest(BaseModel):
     base_item: dict
     absorbed_materials: list
 
+class LeaderboardEntry(BaseModel):
+    player_name: str
+    combat_power: int
+    survival_time: int
+    kill_count: int
+    weapons: list
+
+# In-memory leaderboard storage (for hackathon - would use DB in production)
+leaderboard_db = []
+
+@app.post("/leaderboard/submit")
+async def submit_score(entry: LeaderboardEntry):
+    leaderboard_db.append(entry.dict())
+    # Sort by combat power descending
+    leaderboard_db.sort(key=lambda x: x['combat_power'], reverse=True)
+    # Keep only top 10
+    while len(leaderboard_db) > 10:
+        leaderboard_db.pop()
+    return {"status": "success", "rank": leaderboard_db.index(entry.dict()) + 1 if entry.dict() in leaderboard_db else None}
+
+@app.get("/leaderboard")
+async def get_leaderboard():
+    return {"leaderboard": leaderboard_db[:10]}
+
 @app.post("/scan")
 async def scan_item(
     file: UploadFile = File(...), 

@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useGameStore } from '../store/gameStore';
+import { Leaderboard } from '../components/Leaderboard';
 
 export const IntroScreen = () => {
     const { setAppMode } = useGameStore();
+    const [showLeaderboard, setShowLeaderboard] = useState(false);
 
     return (
         <div className="h-full w-full min-h-0 overflow-hidden relative flex flex-col items-center justify-center">
@@ -55,18 +57,28 @@ export const IntroScreen = () => {
                     />
                 </div>
 
-                <button
-                    type="button"
-                    onClick={() => setAppMode('game')}
-                    className="block animate-pulse-scale transition-transform hover:scale-105 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 rounded-lg overflow-hidden"
-                    aria-label="Start Game"
-                >
-                    <img
-                        src="/ui/start_btn.webp"
-                        alt="Start Game"
-                        className="h-auto w-full max-w-[280px] object-contain pointer-events-none"
-                    />
-                </button>
+                <div className="flex flex-col gap-4 items-center">
+                    <button
+                        type="button"
+                        onClick={() => setAppMode('game')}
+                        className="block animate-pulse-scale transition-transform hover:scale-105 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 rounded-lg overflow-hidden"
+                        aria-label="Start Game"
+                    >
+                        <img
+                            src="/ui/start_btn.webp"
+                            alt="Start Game"
+                            className="h-auto w-full max-w-[280px] object-contain pointer-events-none"
+                        />
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={() => setShowLeaderboard(true)}
+                        className="mt-4 px-6 py-2 bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-black text-sm font-bold rounded-lg transition-all hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(251,191,36,0.4)] border border-yellow-400"
+                    >
+                        LEADERBOARD
+                    </button>
+                </div>
 
                 {/* <button
                     onClick={() => setAppMode('dev')}
@@ -75,6 +87,8 @@ export const IntroScreen = () => {
                     DEV MODE
                 </button> */}
             </div>
+
+            <Leaderboard isOpen={showLeaderboard} onClose={() => setShowLeaderboard(false)} />
         </div>
     );
 };

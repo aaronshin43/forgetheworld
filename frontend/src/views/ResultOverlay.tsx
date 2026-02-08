@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useGameStore } from '../store/gameStore';
+import { useGameStore, calculateCombatPower } from '../store/gameStore';
 import { EnhancementSelectionModal } from '../components/EnhancementSelectionModal';
 import { ItemDetailModal } from '../components/ItemDetailModal';
+import { Leaderboard } from '../components/Leaderboard';
 
 /** API의 flavor가 문자열(마크다운 JSON)로 올 수 있으므로 항상 { name, description } 객체로 정규화 */
 function normalizeFlavor(flavor: unknown): { name: string; description: string } {
@@ -25,12 +26,65 @@ export const ResultOverlay = () => {
     const { scanResult, setScanResult, setViewMode, setTimeScale, setIsAnalyzing, inventory, interactionMode, enhanceItem, triggerSkill, scanMode, stageState, survivalTime, killCount, heroStats, score, setAppMode, resetGame } = useGameStore();
     const [showEnhanceSelect, setShowEnhanceSelect] = useState(false);
     const [selectedItem, setSelectedItem] = useState<any | null>(null);
+    const [scoreSubmitted, setScoreSubmitted] = useState(false);
+    const [showLeaderboard, setShowLeaderboard] = useState(false);
+    const [playerName, setPlayerName] = useState('');
+    const [isEditingName, setIsEditingName] = useState(false);
+
+    // Submit score to leaderboard
+    const submitScore = async (customName?: string) => {
+        if (scoreSubmitted) return;
+
+        const name = customName || playerName.trim() || `Player${Math.floor(Math.random() * 9999)}`;
+        const combatPower = calculateCombatPower(heroStats);
+        const weapons = inventory
+            .filter(item => item !== null)
+            .map(item => ({
+                name: item!.name,
+                grade: item!.grade || 'Common'
+            }));
+
+        try {
+            const apiBase = process.env.NEXT_PUBLIC_API_BASE ?? "";
+            await fetch(`${apiBase}/leaderboard/submit`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    player_name: name,
+                    combat_power: combatPower,
+                    survival_time: survivalTime,
+                    kill_count: killCount,
+                    weapons: weapons
+                })
+            });
+            setScoreSubmitted(true);
+            setIsEditingName(false);
+        } catch (error) {
+            console.error('Failed to submit score:', error);
+        }
+    };
+
+    const handleNameSubmit = () => {
+        if (playerName.trim()) {
+            submitScore(playerName.trim());
+        } else {
+            submitScore();
+        }
+    };
+
+    // Don't auto-submit anymore - let user enter name first
+    useEffect(() => {
+        if (stageState === 'gameover' && !scoreSubmitted) {
+            setIsEditingName(true);
+        }
+    }, [stageState]);
 
     // Game Over Screen
     if (stageState === 'gameover') {
         const minutes = Math.floor(survivalTime / 60);
         const seconds = survivalTime % 60;
         const finalScore = survivalTime + killCount;
+        const combatPower = calculateCombatPower(heroStats);
 
         return (
             <div className="absolute inset-0 z-50 flex flex-col bg-gradient-to-b from-gray-900 to-black font-sans">
@@ -39,6 +93,35 @@ export const ResultOverlay = () => {
                     <h1 className="text-6xl font-bold text-red-500 mb-8 animate-pulse">GAME OVER</h1>
 
                     <div className="bg-gray-800/80 rounded-lg p-8 max-w-md w-full space-y-4">
+                        {/* Player Name Input */}
+                        {isEditingName && !scoreSubmitted && (
+                            <div className="mb-4 p-4 bg-gray-900/80 rounded-lg border border-yellow-600/30">
+                                <label className="block text-yellow-400 text-sm font-bold mb-2">Enter Your Name</label>
+                                <input
+                                    type="text"
+                                    value={playerName}
+                                    onChange={(e) => setPlayerName(e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && handleNameSubmit()}
+                                    placeholder="Player Name"
+                                    maxLength={20}
+                                    className="w-full px-4 py-2 bg-gray-800 text-white rounded border border-gray-600 focus:border-yellow-400 focus:outline-none"
+                                    autoFocus
+                                />
+                                <button
+                                    onClick={handleNameSubmit}
+                                    className="w-full mt-3 px-4 py-2 bg-yellow-600 hover:bg-yellow-500 text-black font-bold rounded transition-colors"
+                                >
+                                    Submit Score
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Combat Power */}
+                        <div className="flex justify-between items-center border-b border-yellow-600/30 pb-3">
+                            <span className="text-yellow-400 text-lg font-bold">⚔️ Combat Power</span>
+                            <span className="text-yellow-300 text-3xl font-black">{combatPower.toLocaleString()}</span>
+                        </div>
+
                         {/* Survival Time */}
                         <div className="flex justify-between items-center border-b border-gray-700 pb-3">
                             <span className="text-gray-400 text-lg">Survival Time</span>
@@ -71,16 +154,35 @@ export const ResultOverlay = () => {
                         </div>
                     </div>
 
-                    {/* Return Button */}
-                    <button
-                        onClick={() => {
-                            resetGame();
-                            setAppMode('intro');
-                        }}
-                        className="mt-8 px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold rounded-lg transition-colors"
-                    >
-                        Return to Menu
-                    </button>
+                    {/* Score Submission Status */}
+                    {scoreSubmitted && (
+                        <div className="text-center text-green-400 text-sm animate-pulse">
+                            ✓ Score submitted to leaderboard!
+                        </div>
+                    )}
+
+                    {/* Buttons */}
+                    <div className="flex gap-4 mt-8">
+                        <button
+                            onClick={() => setShowLeaderboard(true)}
+                            disabled={!scoreSubmitted}
+                            className={`flex-1 px-6 py-3 bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-black text-lg font-bold rounded-lg transition-all shadow-[0_0_15px_rgba(251,191,36,0.4)] ${!scoreSubmitted ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                            View Rankings
+                        </button>
+                        <button
+                            onClick={() => {
+                                resetGame();
+                                setAppMode('intro');
+                                setScoreSubmitted(false);
+                                setPlayerName('');
+                                setIsEditingName(false);
+                            }}
+                            className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold rounded-lg transition-colors"
+                        >
+                            Return to Menu
+                        </button>
+                    </div>
                 </div>
 
                 {/* Bottom Section - Inventory Display */}
@@ -122,6 +224,9 @@ export const ResultOverlay = () => {
                         onClose={() => setSelectedItem(null)}
                     />
                 )}
+
+                {/* Leaderboard Modal */}
+                <Leaderboard isOpen={showLeaderboard} onClose={() => setShowLeaderboard(false)} />
             </div>
         );
     }
