@@ -133,13 +133,13 @@ export const BACKGROUND_LIST = [
 ];
 
 export const MONSTER_BASE_STATS: Record<string, { hp: number; atk: number; def: number; spd: number; moveSpeed: number; scale: number }> = {
-    "coffeemachine": { hp: 150, atk: 15, def: 5, spd: 0.8, moveSpeed: 12, scale: 0.8 },
-    "goblin": { hp: 80, atk: 12, def: 2, spd: 1.2, moveSpeed: 15, scale: 1.0 },
-    "goblinking": { hp: 300, atk: 25, def: 10, spd: 0.7, moveSpeed: 11, scale: 1.0 },
-    "rockspirit": { hp: 200, atk: 10, def: 20, spd: 0.5, moveSpeed: 18, scale: 1.0 },
-    "ultragray": { hp: 120, atk: 18, def: 5, spd: 1.0, moveSpeed: 16, scale: 1.0 },
-    "wyvern": { hp: 100, atk: 20, def: 8, spd: 1.1, moveSpeed: 17, scale: 0.8 },
-    "zombie": { hp: 180, atk: 14, def: 3, spd: 0.6, moveSpeed: 13, scale: 1.0 }
+    "coffeemachine": { hp: 150, atk: 15, def: 5, spd: 2, moveSpeed: 12, scale: 0.8 },
+    "goblin": { hp: 80, atk: 12, def: 2, spd: 1, moveSpeed: 15, scale: 1.0 },
+    "goblinking": { hp: 300, atk: 25, def: 10, spd: 2, moveSpeed: 11, scale: 1.0 },
+    "rockspirit": { hp: 200, atk: 10, def: 20, spd: 2, moveSpeed: 18, scale: 1.0 },
+    "ultragray": { hp: 120, atk: 18, def: 5, spd: 1, moveSpeed: 16, scale: 1.0 },
+    "wyvern": { hp: 100, atk: 20, def: 8, spd: 2, moveSpeed: 17, scale: 0.8 },
+    "zombie": { hp: 180, atk: 14, def: 3, spd: 2, moveSpeed: 13, scale: 1.0 }
 };
 
 export const MONSTER_DURATIONS: Record<string, Record<string, number>> = {
@@ -197,22 +197,31 @@ export const MONSTER_DURATIONS: Record<string, Record<string, number>> = {
     }
 };
 
-// Animation Offsets (in pixels, relative to center anchor)
-export const MONSTER_ANIMATION_OFFSETS: Record<string, Record<string, { x: number }>> = {
+// Animation Offsets (in pixels, relative to center anchor, positive is right/down, negative is left/up)
+export const MONSTER_ANIMATION_OFFSETS: Record<string, Record<string, { x: number; y: number }>> = {
     "goblinking": {
-        "die1": { x: 35 } // Example offset, user can tune
+        "die1": { x: 35, y: 0 }
     },
     "rockspirit": {
-        "attack1": { x: -250 },
-        "attack2": { x: -100 },
-        "attack3": { x: -100 }
+        "attack1": { x: -265, y: 10 },
+        "attack2": { x: -100, y: 0 },
+        "attack3": { x: -100, y: 0 }
     },
     "coffeemachine": {
-        "attack1": { x: -60 },
-        "die1": { x: -10 }
+        "attack1": { x: -50, y: 15 },
+        "die1": { x: -10, y: 0 }
     },
     "ultragray": {
-        "attack1": { x: -10 }
+        "attack1": { x: 15, y: 0 }
+    },
+    "goblin": {
+        "attack1": { x: -15, y: 0 }
+    },
+    "wyvern": {
+        "attack1": { x: -25, y: 15 }
+    },
+    "zombie": {
+        "attack1": { x: -15, y: 0 }
     }
 };
 
