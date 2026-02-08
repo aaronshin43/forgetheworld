@@ -749,9 +749,9 @@ export const useGameStore = create<GameState>((set, get) => ({
         // Central position for "Screen Nuke" skills typical of this genre
         const config = SKILL_CONFIGS[skillName] || { x: 50, y: 50, scale: 1.0 };
         get().addEffect(skillName, {
-            x: 50, // Center X
-            y: 50, // Center Y
-            scale: config.scale * 1.5 // Slightly larger for full screen effect impact
+            x: config.x,
+            y: config.y,
+            scale: config.scale
         });
 
         // 3. Delayed Damage
