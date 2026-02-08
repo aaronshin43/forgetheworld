@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useGameStore } from '../store/gameStore';
+import type { InventoryItem } from '../store/gameStore';
+import { ItemDetailModal } from '../components/ItemDetailModal';
 
 /** Reference: inventory.webp = Full frame (Title + Slots + Buttons), itembox = 6 slots, craft/skill/enhance = Bottom 3 buttons */
 const BTN_CLASS =
@@ -7,6 +9,7 @@ const BTN_CLASS =
 
 export const CommandCenter = () => {
     const { inventory } = useGameStore();
+    const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
 
     return (
         <div className="h-full flex flex-col justify-center items-center border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.5)] z-20 overflow-hidden min-w-0 relative bg-zinc-900">
@@ -37,7 +40,11 @@ export const CommandCenter = () => {
                         {inventory.map((item, index) => (
                             <div
                                 key={index}
-                                className="group relative w-full h-full min-w-0 min-h-0 aspect-square max-w-full max-h-full flex items-center justify-center cursor-pointer overflow-hidden rounded-[0.25rem]"
+                                role={item ? 'button' : undefined}
+                                tabIndex={item ? 0 : undefined}
+                                onClick={() => item && setSelectedItem(item)}
+                                onKeyDown={(e) => item && (e.key === 'Enter' || e.key === ' ') && setSelectedItem(item)}
+                                className={`group relative w-full h-full min-w-0 min-h-0 aspect-square max-w-full max-h-full flex items-center justify-center overflow-hidden rounded-[0.25rem] ${item ? 'cursor-pointer hover:ring-2 hover:ring-amber-400/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400' : ''}`}
                             >
                                 {/* Layer 1: Item (Image/Name) or Empty Slot (Anvil) - rendered behind the box */}
                                 <div className="absolute inset-0 z-0 flex items-center justify-center p-[8%] overflow-hidden">
@@ -118,6 +125,13 @@ export const CommandCenter = () => {
                     </div>
                 </div>
             </div>
+
+            {selectedItem && (
+                <ItemDetailModal
+                    item={selectedItem}
+                    onClose={() => setSelectedItem(null)}
+                />
+            )}
         </div>
     );
 };

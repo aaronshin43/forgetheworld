@@ -70,13 +70,21 @@ export const CameraView = () => {
                 if (targetIndex === -1) targetIndex = 0; // Overwrite first if full
 
                 const newItemId = Date.now().toString();
+                const flavor = data.flavor && typeof data.flavor === 'object'
+                    ? { name: data.flavor.name ?? data.analysis?.item, description: data.flavor.description ?? '' }
+                    : { name: data.analysis?.item ?? '—', description: '' };
+                const stats = data.analysis?.stats
+                    ? { atk: Number(data.analysis.stats.atk) || 0, def: Number(data.analysis.stats.def) || 0, hp: Number(data.analysis.stats.hp) || 0 }
+                    : undefined;
 
-                // Set Loading State
+                // Set Loading State (include description/stats for item detail modal later)
                 setInventoryItem(targetIndex, {
                     id: newItemId,
-                    name: data.flavor.name || data.analysis.item,
+                    name: flavor.name || data.analysis?.item || '—',
                     image: null,
-                    status: 'loading'
+                    status: 'loading',
+                    description: flavor.description || undefined,
+                    stats
                 });
 
                 setScanResult(data);

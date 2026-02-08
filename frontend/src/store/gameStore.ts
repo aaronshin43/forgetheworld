@@ -34,11 +34,19 @@ export interface ActiveMonster {
     stateStartTime: number;
 }
 
+export interface InventoryItemStats {
+    atk: number;
+    def: number;
+    hp: number;
+}
+
 export interface InventoryItem {
     id: string;
     name: string;
     image: string | null; // Base64 or URL
     status: 'loading' | 'ready';
+    description?: string;
+    stats?: InventoryItemStats;
 }
 
 interface GameState {

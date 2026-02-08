@@ -21,13 +21,25 @@ export default function Home() {
 
     return (
       <>
-        {/* Battle Stage (Always visible, shrinks in camera mode) */}
-        <div className={`w-full overflow-hidden transition-all duration-300 ${viewMode === 'camera' ? 'h-[40%]' : 'h-1/2'}`}>
+        {/* Battle Stage – 작은 화면에서는 비율 축소, 인벤토리 꽉 차도록 */}
+        <div
+          className={`w-full overflow-hidden transition-all duration-300 shrink-0 ${
+            viewMode === 'camera'
+              ? 'h-[40%]'
+              : 'h-1/2 max-h-[700px]:h-[40%] max-h-[600px]:h-[35%]'
+          }`}
+        >
           <BattleStage />
         </div>
 
-        {/* Bottom Panel (Command Center or Camera) */}
-        <div className={`w-full transition-all duration-300 ${viewMode === 'camera' ? 'h-[60%]' : 'h-1/2'}`}>
+        {/* Bottom Panel (인벤토리/카메라) – 작은 화면에서 비율 확대해 잘리지 않게 */}
+        <div
+          className={`w-full transition-all duration-300 min-h-0 ${
+            viewMode === 'camera'
+              ? 'h-[60%]'
+              : 'h-1/2 max-h-[700px]:h-[60%] max-h-[600px]:h-[65%]'
+          }`}
+        >
           {viewMode === 'camera' ? <CameraView /> : <CommandCenter />}
         </div>
       </>
