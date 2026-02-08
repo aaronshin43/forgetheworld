@@ -57,7 +57,13 @@ export const ResultOverlay = () => {
                         />
                     ) : (
                         <div className="relative z-10 flex flex-col items-center">
-                            <span className="text-6xl mb-4 animate-pulse">🧪</span>
+                            <motion.img
+                                src="/character/forge.webp"
+                                alt=""
+                                className="w-24 h-24 object-contain mb-4 drop-shadow-[0_0_12px_rgba(251,191,36,0.4)]"
+                                animate={{ opacity: [0.7, 1, 0.7] }}
+                                transition={{ repeat: Infinity, duration: 1.5 }}
+                            />
                             <span className="text-xs text-yellow-500/70 uppercase tracking-widest animate-pulse">Forging...</span>
                         </div>
                     )}
