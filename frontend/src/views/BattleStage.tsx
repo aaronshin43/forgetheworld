@@ -97,19 +97,20 @@ export const BattleStage = () => {
                             style={{ width: `${(hp / maxHp) * 100}%` }}
                         />
                     </div>
-                </div>
-            </div>
 
-            {/* Film Roll HUD (Lightning Icons) */}
-            <div className="absolute bottom-4 right-8 flex items-center gap-2 z-50">
-                {Array.from({ length: maxFilm }).map((_, i) => (
-                    <span
-                        key={i}
-                        className={`text-lg drop-shadow-lg transition-all duration-300 ${i < storeFilm ? 'text-yellow-400 scale-110 shadow-yellow-500/50' : 'text-gray-600 opacity-40 scale-90'}`}
-                    >
-                        ⚡
-                    </span>
-                ))}
+                    {/* Film (goldenhammar 아이콘) – HP바 밑 */}
+                    <div className="flex items-center gap-1 mt-1 ml-0.5">
+                        {Array.from({ length: maxFilm }).map((_, i) => (
+                            <img
+                                key={i}
+                                src="/ui/goldenhammar.webp"
+                                alt=""
+                                aria-hidden
+                                className={`w-5 h-5 object-contain drop-shadow-lg transition-all duration-300 ${i < storeFilm ? 'opacity-100 scale-110' : 'opacity-40 scale-90 grayscale'}`}
+                            />
+                        ))}
+                    </div>
+                </div>
             </div>
         </div>
     );
