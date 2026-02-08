@@ -62,7 +62,7 @@ export const IntroScreen = () => {
                     aria-label="Start Game"
                 >
                     <img
-                        src="/background/start_btn.webp"
+                        src="/ui/start_btn.webp"
                         alt="Start Game"
                         className="h-auto w-full max-w-[280px] object-contain pointer-events-none"
                     />
