@@ -1,0 +1,5 @@
+blast.webp: 960.0
+blast2.webp: 1080.0
+divinecharge.webp: 870.0
+divinecharge2.webp: 1170.0
+divineswing.webp: 900.0
