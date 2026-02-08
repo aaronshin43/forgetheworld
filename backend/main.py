@@ -15,6 +15,8 @@ app.add_middleware(
 def read_root():
     return {"Hello": "Forge the World"}
 
+import json
+import re
 from fastapi import UploadFile, File, Form
 from fastapi import UploadFile, File, Form, Body
 from pydantic import BaseModel
@@ -36,10 +38,15 @@ async def scan_item(
     # 2. Flavor Text (Featherless)
     flavor_text = await generate_flavor_text_with_featherless(gemini_result)
     if isinstance(flavor_text, str):
+        raw = flavor_text.strip()
+        # LLM이 ```json ... ``` 형태로 반환하는 경우 코드 블록 제거 후 파싱
+        if raw.startswith("```"):
+            raw = re.sub(r"^```(?:json)?\s*", "", raw)
+            raw = re.sub(r"\s*```$", "", raw)
         try:
-            flavor_text = json.loads(flavor_text)
-        except:
-            flavor_text = {"name": gemini_result['item'], "description": flavor_text}
+            flavor_text = json.loads(raw)
+        except Exception:
+            flavor_text = {"name": gemini_result["item"], "description": flavor_text}
 
     return {
         "analysis": gemini_result,
