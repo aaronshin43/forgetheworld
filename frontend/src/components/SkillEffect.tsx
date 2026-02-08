@@ -41,8 +41,8 @@ export const SkillEffect = ({ name, x, y, scale, onComplete }: SkillEffectProps)
         <div
             className="flex items-center justify-center p-0 m-0"
             style={{
-                width: '300px',
-                height: '300px'
+                width: '500px',
+                height: '500px'
             }}
         >
             <img
