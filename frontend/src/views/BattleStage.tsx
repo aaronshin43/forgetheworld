@@ -21,6 +21,7 @@ export const BattleStage = () => {
 
     // Derived values for UI
     const { hp, maxHp } = heroStats;
+    const hpRatio = maxHp > 0 ? hp / maxHp : 1;
 
     return (
         <div className="h-full bg-gray-900 relative flex items-center justify-center z-10">
@@ -85,25 +86,35 @@ export const BattleStage = () => {
             </div>
 
             {/* HUD Layer (Z-50) */}
-            <div className="absolute top-4 left-2 flex gap-3 items-start z-50">
+            <div className="absolute top-4 left-2 flex gap-0 items-start z-50">
                 <div className="relative w-[88px] h-[88px] flex-shrink-0 mt-1">
                     <div className="absolute inset-0 flex items-center justify-center translate-y-1">
                         <img src="/ui/head.webp" alt="Character" className="w-[70%] h-[70%] object-contain object-center" />
                     </div>
                     <img src="/ui/profile_box.webp" alt="" className="absolute inset-0 w-full h-full object-contain pointer-events-none" aria-hidden />
                 </div>
-                <div className="flex flex-col gap-0.5 drop-shadow-md">
-                    {/* Combat Power (Moved Above) */}
+                <div className="flex flex-col gap-0.5 drop-shadow-md translate-y-2 -ml-1">
+                    {/* Combat Power – 금속·엠보스 글씨체 */}
                     <div className="flex items-center gap-1.5 ml-1">
-                        <span className="text-sm">⚔️</span>
-                        <span className="text-sm text-orange-400 font-mono font-bold italic">1,450</span>
+                        <img src="/ui/sword.webp" alt="" className="w-5 h-5 object-contain flex-shrink-0" aria-hidden />
+                        <span className="text-sm font-metallic-emboss">1,450</span>
                     </div>
 
-                    {/* HP Bar */}
-                    <div className="w-40 h-3 bg-gray-800/80 rounded-full overflow-hidden border border-gray-600/50 relative">
-                        <div
-                            className="h-full bg-gradient-to-r from-red-600 via-red-500 to-red-400 transition-all duration-300 shadow-[0_0_10px_rgba(239,68,68,0.5)]"
-                            style={{ width: `${(hp / maxHp) * 100}%` }}
+                    {/* HP Bar: 빨간 바 뒤에, healthbar.webp 사진이 맨 위(앞)에 */}
+                    <div className="relative w-48 h-7 flex-shrink-0 isolate">
+                        {/* 트랙 + 채움 바 – 빨간색만 */}
+                        <div className="absolute bottom-[0.575rem] left-5 right-5 h-2.5 rounded-sm overflow-hidden bg-gray-900/90 z-0">
+                            <div
+                                className="h-full min-w-0 bg-red-500 transition-all duration-300"
+                                style={{ width: `${Math.max(hpRatio * 100, 0)}%` }}
+                            />
+                        </div>
+                        {/* healthbar.webp – 맨 앞(위) 레이어 */}
+                        <img
+                            src="/ui/healthbar.webp"
+                            alt=""
+                            className="absolute inset-0 w-full h-full object-fill object-top pointer-events-none z-10"
+                            aria-hidden
                         />
                     </div>
 
