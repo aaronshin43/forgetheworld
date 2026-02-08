@@ -3,7 +3,9 @@ import { SKILL_DURATIONS, SKILL_CONFIGS, MONSTER_LIST, BACKGROUND_LIST } from '.
 import { useGameStore } from '../store/gameStore';
 
 export const DebugPanel = () => {
-    const { addEffect, triggerCharacterAttack, spawnWave, clearMonsters, currentBackground, setBackground } = useGameStore();
+    const { addEffect, triggerCharacterAttack, spawnWave, clearMonsters, currentBackground, setBackground, devEquipRandomItem } = useGameStore();
+
+    // ... (rest of code)
 
     // ...
 
@@ -56,6 +58,18 @@ export const DebugPanel = () => {
                             <option key={bg} value={bg}>{bg}</option>
                         ))}
                     </select>
+                </div>
+
+                <hr className="border-gray-700" />
+
+                <div>
+                    <label className="text-[10px] text-gray-400 block mb-1 font-bold tracking-wider">ITEMS</label>
+                    <button
+                        onClick={devEquipRandomItem}
+                        className="w-full bg-purple-600/30 hover:bg-purple-600/50 text-xs py-2 rounded transition-colors border border-purple-500/30 text-purple-200"
+                    >
+                        Equip Random Item
+                    </button>
                 </div>
 
                 <hr className="border-gray-700" />

@@ -2,12 +2,25 @@ import React, { useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 
 export const GameMenu = () => {
-    const { appMode, setAppMode } = useGameStore();
+    const { appMode, setAppMode, setIsMenuOpen, resetGame } = useGameStore();
     const [isOpen, setIsOpen] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
 
+    const openMenu = () => {
+        setIsOpen(true);
+        setIsMenuOpen(true); // Triggers graceful freeze
+    };
+
+    const closeMenu = () => {
+        setIsOpen(false);
+        setIsMenuOpen(false); // Unfreezes
+        setShowConfirm(false);
+    };
+
     const handleQuitClick = () => {
         if (appMode === 'dev') {
+            closeMenu();
+            resetGame();
             setAppMode('intro');
         } else {
             setShowConfirm(true);
@@ -15,15 +28,16 @@ export const GameMenu = () => {
     };
 
     const confirmQuit = () => {
+        // Instant Quit - No graceful stop needed for quit itself, logic is reset
+        resetGame();
         setAppMode('intro');
-        setIsOpen(false);
-        setShowConfirm(false);
+        closeMenu(); // Reset menu state
     };
 
     if (!isOpen) {
         return (
             <button
-                onClick={() => setIsOpen(true)}
+                onClick={openMenu}
                 className="absolute top-4 right-4 z-[100] p-2 bg-black/40 text-white rounded-full hover:bg-black/60 transition-colors backdrop-blur-sm border border-white/10"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -40,7 +54,7 @@ export const GameMenu = () => {
 
                 {/* Close Button */}
                 <button
-                    onClick={() => { setIsOpen(false); setShowConfirm(false); }}
+                    onClick={closeMenu}
                     className="absolute top-3 right-3 text-gray-500 hover:text-white"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -53,7 +67,7 @@ export const GameMenu = () => {
                 {!showConfirm ? (
                     <>
                         <button
-                            onClick={() => setIsOpen(false)}
+                            onClick={closeMenu}
                             className="w-full py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg font-bold tracking-wide transition-colors"
                         >
                             RESUME
