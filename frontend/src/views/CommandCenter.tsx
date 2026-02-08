@@ -26,7 +26,7 @@ export const CommandCenter = () => {
                     <div className="flex-shrink-0 h-[2%] min-h-0" aria-hidden />
 
                     <div
-                        className="flex-1 min-h-0 w-full max-w-full grid place-content-center place-items-center -mt-0.5"
+                        className="flex-1 min-h-0 w-full max-w-full grid place-content-center place-items-center -mt-0.5 overflow-hidden min-w-0"
                         style={{
                             gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
                             gridTemplateRows: 'repeat(2, minmax(0, 1fr))',
@@ -37,21 +37,20 @@ export const CommandCenter = () => {
                     {inventory.map((item, index) => (
                         <div
                             key={index}
-                            className="group relative w-full h-full min-w-0 min-h-0 aspect-square max-w-full max-h-full flex items-center justify-center cursor-pointer overflow-hidden"
+                            className="group relative w-full h-full min-w-0 min-h-0 aspect-square max-w-full max-h-full flex items-center justify-center cursor-pointer overflow-hidden rounded-[0.25rem]"
                         >
                             {/* 1층: 아이템(생성된 이미지/이름) 또는 빈 슬롯 anvil – 박스 뒤에 보이게 */}
-                            <div className="absolute inset-0 z-0 flex items-center justify-center p-[8%]">
+                            <div className="absolute inset-0 z-0 flex items-center justify-center p-[8%] overflow-hidden">
                                 {item ? (
                                     <>
                                         {item.status === 'loading' ? (
-                                            <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-20">
-                                                <div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                                            <div className="absolute left-1/2 top-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center overflow-hidden">
+                                                <div className="w-6 h-6 flex-shrink-0 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
                                             </div>
-                                        ) : null}
-                                        {item.image ? (
+                                        ) : item.image ? (
                                             <img src={item.image} alt={item.name} className="w-full h-full object-contain pointer-events-none" />
                                         ) : (
-                                            <span className="text-xs font-bold text-amber-200 drop-shadow-md text-center px-1 truncate w-full">
+                                            <span className="text-xs font-bold text-amber-200 drop-shadow-md text-center px-1 truncate w-full min-w-0 block">
                                                 {item.name}
                                             </span>
                                         )}
