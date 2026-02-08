@@ -7,9 +7,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
+    # No volume mount: use built image so .next exists and next start works.
+    # For dev with live reload, run frontend locally (npm run dev) and backend in Docker.
     environment:
       - WATCHPACK_POLLING=true
 
