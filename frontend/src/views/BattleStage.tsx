@@ -101,7 +101,7 @@ export const BattleStage = () => {
             </div>
 
             {/* Film Roll HUD (Lightning Icons) */}
-            <div className="absolute top-8 right-6 flex items-center gap-2 z-50">
+            <div className="absolute bottom-4 right-8 flex items-center gap-2 z-50">
                 {Array.from({ length: maxFilm }).map((_, i) => (
                     <span
                         key={i}
