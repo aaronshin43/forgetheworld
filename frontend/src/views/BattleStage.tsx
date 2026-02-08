@@ -104,7 +104,7 @@ export const BattleStage = () => {
                         />
                     </div>
 
-                    {/* Film (goldenhammar 아이콘) – HP바 밑 */}
+                    {/* Film (goldenhammar icon) */}
                     <div className="flex items-center gap-1 mt-1 ml-0.5">
                         {Array.from({ length: maxFilm }).map((_, i) => (
                             <img
