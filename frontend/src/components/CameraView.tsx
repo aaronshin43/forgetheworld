@@ -73,18 +73,23 @@ export const CameraView = () => {
                 const flavor = data.flavor && typeof data.flavor === 'object'
                     ? { name: data.flavor.name ?? data.analysis?.item, description: data.flavor.description ?? '' }
                     : { name: data.analysis?.item ?? '—', description: '' };
-                const stats = data.analysis?.stats
-                    ? { atk: Number(data.analysis.stats.atk) || 0, def: Number(data.analysis.stats.def) || 0, hp: Number(data.analysis.stats.hp) || 0 }
-                    : undefined;
+
+                const rarity = data.analysis?.rarity_score || 1;
+                let affectedStats = data.analysis?.affected_stats;
+
+                // Fallback stats if backend fails
+                if (!affectedStats || !Array.isArray(affectedStats) || affectedStats.length < 3) {
+                    const allStats = ['atk', 'def', 'maxHp', 'spd', 'critRate'];
+                    affectedStats = allStats.sort(() => 0.5 - Math.random()).slice(0, 3);
+                }
 
                 // Set Loading State & Apply Stats Immediately
                 craftItem(targetIndex, {
                     id: newItemId,
                     name: flavor.name || data.analysis?.item || '—',
-                    image: null,
-                    status: 'loading',
                     description: flavor.description || undefined,
-                    stats
+                    rarity: rarity,
+                    affectedStats: affectedStats
                 });
 
                 setScanResult(data);

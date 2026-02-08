@@ -58,21 +58,35 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({ item, onClose 
                         </p>
                     )}
 
-                    {/* Stat boxes: ATK, DEF, HP */}
-                    <div className="grid grid-cols-3 gap-2 w-full max-w-[260px] mb-6">
-                        <div className="bg-zinc-700/60 rounded-lg p-2 text-center border border-zinc-600/50">
-                            <div className="text-[10px] uppercase text-zinc-400 tracking-wider">ATK</div>
-                            <div className="text-lg font-bold text-amber-400">{atk}</div>
+                    {/* Grade Display */}
+                    {item.grade && (
+                        <div className="flex flex-col items-center justify-center gap-1 mb-4">
+                            <span className={`text-xl font-black italic uppercase tracking-wider ${{
+                                Legendary: 'text-orange-400 drop-shadow-[0_0_8px_rgba(251,146,60,0.6)]',
+                                Epic: 'text-rose-500 drop-shadow-[0_0_8px_rgba(244,63,94,0.6)]',
+                                Unique: 'text-purple-400 drop-shadow-[0_0_8px_rgba(192,132,252,0.6)]',
+                                Rare: 'text-blue-400',
+                                Common: 'text-zinc-400',
+                            }[item.grade] || 'text-zinc-400'
+                                }`}>
+                                {item.grade}
+                            </span>
                         </div>
-                        <div className="bg-zinc-700/60 rounded-lg p-2 text-center border border-zinc-600/50">
-                            <div className="text-[10px] uppercase text-zinc-400 tracking-wider">DEF</div>
-                            <div className="text-lg font-bold text-amber-400">{def}</div>
+                    )}
+
+                    {/* Stat boxes: Dynamic */}
+                    {stats && Object.keys(stats).length > 0 ? (
+                        <div className="grid grid-cols-3 gap-2 w-full max-w-[260px] mb-6">
+                            {Object.entries(stats).map(([key, value]) => (
+                                <div key={key} className="bg-zinc-700/60 rounded-lg p-2 text-center border border-zinc-600/50">
+                                    <div className="text-[10px] uppercase text-zinc-400 tracking-wider">{key}</div>
+                                    <div className="text-lg font-bold text-amber-400">{value}</div>
+                                </div>
+                            ))}
                         </div>
-                        <div className="bg-zinc-700/60 rounded-lg p-2 text-center border border-zinc-600/50">
-                            <div className="text-[10px] uppercase text-zinc-400 tracking-wider">HP</div>
-                            <div className="text-lg font-bold text-amber-400">{hp}</div>
-                        </div>
-                    </div>
+                    ) : (
+                        <div className="mb-6 text-zinc-500 text-xs text-center">No Stats</div>
+                    )}
 
                     {/* Close / Confirm button */}
                     <button

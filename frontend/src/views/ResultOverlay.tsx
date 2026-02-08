@@ -37,6 +37,16 @@ export const ResultOverlay = () => {
         setTimeScale(1.0);
     };
 
+    const item = inventory.find(i => i && i.name === flavor.name);
+    const grade = item?.grade || 'Common';
+    const gradeColor = {
+        Legendary: 'text-orange-400 drop-shadow-[0_0_10px_rgba(251,146,60,0.8)]',
+        Epic: 'text-rose-500 drop-shadow-[0_0_10px_rgba(244,63,94,0.8)]',
+        Unique: 'text-purple-400 drop-shadow-[0_0_8px_rgba(192,132,252,0.8)]',
+        Rare: 'text-blue-400',
+        Common: 'text-gray-400',
+    }[grade] || 'text-gray-400';
+
     return (
         <div className="absolute inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-6 text-center">
             <motion.div
@@ -67,18 +77,19 @@ export const ResultOverlay = () => {
                     <h2 className="text-2xl font-bold text-yellow-400 mb-1">{flavor.name}</h2>
                     <p className="text-gray-400 text-xs italic mb-4">"{flavor.description}"</p>
 
-                    <div className="grid grid-cols-3 gap-2 mb-6">
-                        <div className="bg-gray-700/50 p-2 rounded">
-                            <div className="text-[10px] text-gray-500 uppercase">ATK</div>
-                            <div className="text-lg font-bold text-white">{scanResult.analysis.stats.atk}</div>
+                    <div className="mb-6">
+                        <div className="flex flex-col items-center justify-center gap-1 mb-3">
+                            <span className={`text-2xl font-black italic uppercase tracking-wider ${gradeColor}`}>
+                                {grade}
+                            </span>
                         </div>
-                        <div className="bg-gray-700/50 p-2 rounded">
-                            <div className="text-[10px] text-gray-500 uppercase">DEF</div>
-                            <div className="text-lg font-bold text-white">{scanResult.analysis.stats.def}</div>
-                        </div>
-                        <div className="bg-gray-700/50 p-2 rounded">
-                            <div className="text-[10px] text-gray-500 uppercase">HP</div>
-                            <div className="text-lg font-bold text-white">{scanResult.analysis.stats.hp}</div>
+
+                        <div className="flex flex-wrap justify-center gap-2">
+                            {(scanResult.analysis.affected_stats || ['atk', 'def', 'maxHp']).map((stat: string) => (
+                                <span key={stat} className="px-3 py-1 bg-gray-700 border border-gray-600 rounded text-xs text-gray-300 uppercase font-bold">
+                                    {stat}
+                                </span>
+                            ))}
                         </div>
                     </div>
 

@@ -59,9 +59,14 @@ export interface InventoryItem {
     status: 'loading' | 'ready';
     description?: string;
     stats?: InventoryItemStats;
+    grade?: string; // S, A, B, C, D
+    rarity?: number; // 1-10
 }
 
 interface GameState {
+    // Session State
+    sessionStartTime: number;
+
     // Hero State
     heroStats: EntityStats;
     heroLevel: number;
@@ -138,38 +143,78 @@ interface GameState {
     setIsMenuOpen: (isMenuOpen: boolean) => void;
     resetGame: () => void;
     devEquipRandomItem: () => void;
-    craftItem: (index: number, item: InventoryItem) => void;
+    craftItem: (index: number, itemData: { id: string, name: string, description?: string, rarity: number, affectedStats: string[] }) => void;
 }
 
-const applyRandomStats = (baseStats: EntityStats) => {
-    const statsKeys = ['atk', 'def', 'maxHp', 'spd', 'critRate', 'critDmg'] as const;
-    const selected = [...statsKeys].sort(() => 0.5 - Math.random()).slice(0, 3);
+const GRADE_THRESHOLDS = { Legendary: 14, Epic: 11, Unique: 8, Rare: 5, Common: 0 };
+
+const calculateGrade = (rarity: number, sessionStartTime: number): string => {
+    const minutesPlayed = (Date.now() - sessionStartTime) / 60000;
+    const timeBonus = Math.floor(minutesPlayed / 10); // +1 per 10 mins
+    const score = rarity + timeBonus;
+
+    if (score >= GRADE_THRESHOLDS.Legendary) return 'Legendary';
+    if (score >= GRADE_THRESHOLDS.Epic) return 'Epic';
+    if (score >= GRADE_THRESHOLDS.Unique) return 'Unique';
+    if (score >= GRADE_THRESHOLDS.Rare) return 'Rare';
+    return 'Common';
+};
+
+const generateItemStats = (baseStats: EntityStats, grade: string, affectedStats: string[]) => {
+    const multiplierMap: Record<string, number> = {
+        Legendary: 1.5,
+        Epic: 1.3,
+        Unique: 1.15,
+        Rare: 1.05,
+        Common: 0.9
+    };
+    const multiplier = multiplierMap[grade] || 1.0;
+
     const newStats = { ...baseStats };
     const changes: Record<string, number> = {};
+    const itemStats: any = {};
 
-    selected.forEach(key => {
+    affectedStats.slice(0, 3).forEach(key => {
+        let baseVal = 0;
+        if (key === 'atk') baseVal = 50;
+        if (key === 'def') baseVal = 20;
+        if (key === 'maxHp') baseVal = 100;
+        if (key === 'sp') baseVal = 0.1; // Typo fix: spd
+        if (key === 'spd') baseVal = 0.1;
+        if (key === 'critRate') baseVal = 0.05;
+        if (key === 'critDmg') baseVal = 0.1;
+
+        const variance = 0.8 + Math.random() * 0.4;
+        const finalVal = baseVal * multiplier * variance;
+
         let val = 0;
-        if (key === 'atk') val = 50;
-        if (key === 'def') val = 20;
-        if (key === 'maxHp') val = 100;
-        if (key === 'spd') val = 0.2;
-        if (key === 'critRate') val = 0.05;
-        if (key === 'critDmg') val = 0.2;
+        if (key === 'spd' || key === 'critRate' || key === 'critDmg') {
+            val = Number(finalVal.toFixed(2));
+        } else {
+            val = Math.floor(finalVal);
+        }
 
         if (key === 'maxHp') {
             newStats.maxHp += val;
             newStats.hp += val;
         } else {
-            (newStats as any)[key] += val;
+            // Safe casting
+            if (key in newStats) {
+                (newStats as any)[key] += val;
+            }
         }
+
         changes[key] = val;
+        itemStats[key] = val;
     });
 
-    return { newStats, changes };
+    return { newStats, changes, itemStats };
 };
 
 export const useGameStore = create<GameState>((set, get) => ({
-    // ... (rest of initial state)
+    // Session Init
+    sessionStartTime: Date.now(),
+
     // Hero Initial State
     heroStats: {
         hp: 1000,
@@ -306,14 +351,25 @@ export const useGameStore = create<GameState>((set, get) => ({
         isMenuOpen: false,
         inventory: Array(6).fill(null)
     })),
-    craftItem: (index, item) => set((state) => {
-        const { newStats, changes } = applyRandomStats(state.heroStats);
+    craftItem: (index, itemData) => set((state) => {
+        const grade = calculateGrade(itemData.rarity, state.sessionStartTime);
+        const { newStats, changes, itemStats } = generateItemStats(state.heroStats, grade, itemData.affectedStats);
 
-        console.log(`[Crafted Item] ${item.name} Stats:`, changes);
-        console.log('New Hero Stats:', newStats);
+        console.log(`[Crafted] ${itemData.name} (Grade ${grade})`, changes);
+
+        const newItem: InventoryItem = {
+            id: itemData.id,
+            name: itemData.name,
+            image: null, // Image comes later via async update
+            status: 'loading',
+            description: itemData.description,
+            stats: itemStats,
+            grade: grade,
+            rarity: itemData.rarity
+        };
 
         const newInventory = [...state.inventory];
-        newInventory[index] = item;
+        newInventory[index] = newItem;
 
         return {
             inventory: newInventory,
@@ -325,15 +381,22 @@ export const useGameStore = create<GameState>((set, get) => ({
         const emptyIndex = inventory.findIndex(item => item === null);
         if (emptyIndex === -1) return {};
 
+        const statsKeys = ['atk', 'def', 'maxHp', 'spd', 'critRate', 'critDmg'];
+        const selected = [...statsKeys].sort(() => 0.5 - Math.random()).slice(0, 3);
+
+        const { newStats, itemStats } = generateItemStats(state.heroStats, 'Legendary', selected);
+
         const newItem: InventoryItem = {
             id: `dev-${Date.now()}`,
-            name: 'Dev Sword',
+            name: 'Dev God Sword',
             image: '/ui/sword.webp',
-            status: 'ready'
+            status: 'ready',
+            description: 'Cheated item.',
+            stats: itemStats,
+            grade: 'Legendary',
+            rarity: 10
         };
         inventory[emptyIndex] = newItem;
-
-        const { newStats } = applyRandomStats(state.heroStats);
 
         return {
             inventory,
