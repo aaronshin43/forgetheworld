@@ -23,6 +23,7 @@ export const useGameLoop = () => {
     const requestRef = useRef<number | null>(null);
     const previousTimeRef = useRef<number | null>(null);
     const lastHeroAttackRef = useRef<number>(0);
+    const currentTargetIdRef = useRef<number | null>(null);
 
     const animate = (time: number) => {
         if (previousTimeRef.current !== null) {
@@ -79,7 +80,27 @@ export const useGameLoop = () => {
                 const heroCooldown = 1000 / heroStats.spd;
                 // Only auto-attack if NOT in dev mode AND NOT frozen
                 if (appMode !== 'dev' && !isFrozen && time - lastHeroAttackRef.current >= heroCooldown) {
-                    const target = currentMonsters[Math.floor(Math.random() * currentMonsters.length)];
+                    const validTargets = currentMonsters.filter(m => m.stats.hp > 0 && m.currentAction !== 'die1');
+
+                    let target = null;
+
+                    // 1. Check if we have a locked target that is still valid
+                    if (currentTargetIdRef.current !== null) {
+                        const lockedTarget = validTargets.find(m => m.id === currentTargetIdRef.current);
+                        if (lockedTarget) {
+                            target = lockedTarget;
+                        } else {
+                            currentTargetIdRef.current = null; // Target lost/dead
+                        }
+                    }
+
+                    // 2. If no target (or lost), pick the first valid one (sequential)
+                    if (!target && validTargets.length > 0) {
+                        // Sort by ID or X position? Array order is usually spawn order, which works for sequential.
+                        target = validTargets[0];
+                        currentTargetIdRef.current = target.id;
+                    }
+
                     if (target) {
                         triggerCharacterAttack();
                         const rawDmg = heroStats.atk * (100 / (100 + target.stats.def));
@@ -92,7 +113,7 @@ export const useGameLoop = () => {
 
                         damageMonster(target.id, Math.ceil(finalDmg));
 
-                        const currentMonsterState = useGameStore.getState().monsters.find(m => m.id === target.id);
+                        const currentMonsterState = useGameStore.getState().monsters.find(m => m.id === target!.id);
                         if (currentMonsterState && currentMonsterState.currentAction === 'stand') {
                             useGameStore.getState().setMonsterAction(target.id, 'hit1');
                             // No timeout needed; loop handles transition back to stand
