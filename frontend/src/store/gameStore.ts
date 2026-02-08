@@ -403,7 +403,6 @@ export const useGameStore = create<GameState>((set, get) => ({
         set({ inventory: newInventory });
     },
     setBackground: (background) => set({ currentBackground: background }),
-    setAppMode: (appMode) => set({ appMode }),
     setIsLoading: (isLoading) => set({ isLoading }),
     setLoadingProgress: (loadingProgress) => set({ loadingProgress }),
     setIsMenuOpen: (isMenuOpen) => set({ isMenuOpen }),
@@ -751,6 +750,27 @@ export const useGameStore = create<GameState>((set, get) => ({
     removeEffect: (id) => {
         set((state) => ({ activeEffects: state.activeEffects.filter(e => e.id !== id) }));
     },
+
+    setAppMode: (mode) => set((state) => {
+        if (mode === 'game') {
+            // Reset game state on new game start
+            return {
+                appMode: mode,
+                killCount: 0,
+                feverTimeReady: false,
+                wave: 1,
+                score: 0,
+                stageState: 'spawning',
+                gameStartTime: Date.now(),
+                survivalTime: 0,
+                heroStats: { ...state.heroStats, hp: state.heroStats.maxHp }, // Reset HP
+                monsters: [],
+                activeEffects: [],
+                damageNumbers: []
+            };
+        }
+        return { appMode: mode };
+    }),
 
     setCharacterAction: (action) => set({ characterAction: action }),
     triggerCharacterAttack: () => {
