@@ -49,7 +49,7 @@ export const IntroScreen = () => {
                     </div>
                     {/* 타이틀: 예전 구조처럼 이미지가 곧 블록 크기 (패딩/중첩 없음) */}
                     <img
-                        src="/ui/title_mobile.png"
+                        src="/ui/title_mobile.webp"
                         alt="FORGE the WORLD"
                         className="relative z-10 block w-full max-w-[560px] max-h-[65vh] object-contain object-center drop-shadow-[0_4px_12px_rgba(0,0,0,0.6)] animate-float"
                     />
