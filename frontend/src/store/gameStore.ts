@@ -32,6 +32,7 @@ export interface ActiveMonster {
     lastAttackTime: number;
     standCycles: number;
     stateStartTime: number;
+    actionId: number; // For forcing unique animation per action event
 }
 
 export interface InventoryItem {
@@ -239,7 +240,8 @@ export const useGameStore = create<GameState>((set, get) => ({
                     currentAction: 'move',
                     lastAttackTime: 0,
                     standCycles: 0,
-                    stateStartTime: Date.now()
+                    stateStartTime: Date.now(),
+                    actionId: 0
                 }]
             };
         });
@@ -289,12 +291,18 @@ export const useGameStore = create<GameState>((set, get) => ({
     setMonsterAction: (id, action) => set((state) => ({
         monsters: state.monsters.map(m => {
             if (m.id === id) {
+                // Prevent restarting death animation if already dying
+                if (action === 'die1' && m.currentAction === 'die1') {
+                    return m;
+                }
+
                 // Only update if action is different to avoid resetting start time on redundant calls?
                 // The loop logic will handle redundancy. If we call this, we imply a change or restart.
                 return {
                     ...m,
                     currentAction: action,
-                    stateStartTime: Date.now()  // Reset time on action change
+                    stateStartTime: Date.now(),  // Reset time on action change
+                    actionId: (m.actionId || 0) + 1 // Guaranteed unique increment
                 };
             }
             return m;

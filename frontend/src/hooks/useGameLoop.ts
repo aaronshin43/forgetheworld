@@ -71,70 +71,14 @@ export const useGameLoop = () => {
                 }
             }
             else if (stageState === 'fighting') {
-                const currentMonsters = useGameStore.getState().monsters; // Live State
-
+                const currentMonsters = useGameStore.getState().monsters; // Live State at start of frame
                 const { appMode, viewMode, isAnalyzing, scanResult } = useGameStore.getState();
                 const isFrozen = viewMode === 'camera' || isAnalyzing || !!scanResult;
-
-                // Hero Attack Logic
-                const heroCooldown = 1000 / heroStats.spd;
-                // Only auto-attack if NOT in dev mode AND NOT frozen
-                if (appMode !== 'dev' && !isFrozen && time - lastHeroAttackRef.current >= heroCooldown) {
-                    const validTargets = currentMonsters.filter(m => m.stats.hp > 0 && m.currentAction !== 'die1');
-
-                    let target = null;
-
-                    // 1. Check if we have a locked target that is still valid
-                    if (currentTargetIdRef.current !== null) {
-                        const lockedTarget = validTargets.find(m => m.id === currentTargetIdRef.current);
-                        if (lockedTarget) {
-                            target = lockedTarget;
-                        } else {
-                            currentTargetIdRef.current = null; // Target lost/dead
-                        }
-                    }
-
-                    // 2. If no target (or lost), pick the first valid one (sequential)
-                    if (!target && validTargets.length > 0) {
-                        // Sort by ID or X position? Array order is usually spawn order, which works for sequential.
-                        target = validTargets[0];
-                        currentTargetIdRef.current = target.id;
-                    }
-
-                    if (target) {
-                        triggerCharacterAttack();
-                        const rawDmg = heroStats.atk * (100 / (100 + target.stats.def));
-                        const variance = 0.95 + Math.random() * 0.1;
-                        let finalDmg = rawDmg * variance;
-
-                        if (Math.random() < heroStats.critRate) {
-                            finalDmg *= heroStats.critDmg;
-                        }
-
-                        damageMonster(target.id, Math.ceil(finalDmg));
-
-                        const currentMonsterState = useGameStore.getState().monsters.find(m => m.id === target!.id);
-                        if (currentMonsterState && currentMonsterState.currentAction === 'stand') {
-                            useGameStore.getState().setMonsterAction(target.id, 'hit1');
-                            // No timeout needed; loop handles transition back to stand
-                        }
-                    }
-                    lastHeroAttackRef.current = time;
-                }
-
-                // Monster Logic (Cycle Based)
-                // We iterate monsters and check if their current animation cycle is complete.
-
-                // Need to use setMonsterAction which now resets startTime. 
-                // But we also need to increment standCycles sometimes WITHOUT changing action or resetting time?
-                // Actually, if we loop 'stand', we effectively restart it. So resetting startTime is correct for looping.
-                // But we need a way to increment standCycles. The store doesn't have a specific action for that.
-                // We can add one, or just do it manually via a custom setState here? 
-                // Better to add a helper or just do: 
-                // useGameStore.setState(s => ({ monsters: s.monsters.map(...) }))
-
                 const now = Date.now();
 
+                // 1. Monster Logic (Animation Cycles & Freeze)
+                // We run this FIRST so that if Hero attacks later in this frame, 
+                // the 'hit1' reaction OVERRIDES any 'stand' cycle updates from here.
                 currentMonsters.forEach(monster => {
                     // GRACEFUL FREEZE LOGIC
                     if (isFrozen) {
@@ -187,11 +131,22 @@ export const useGameLoop = () => {
                         }
                         return; // Skip normal logic
                     }
+
+                    // NORMAL BATTLE LOGIC
                     const elapsed = now - (monster.stateStartTime || now);
                     const currentDuration = MONSTER_DURATIONS[monster.name]?.[monster.currentAction] || 1000;
 
                     if (elapsed >= currentDuration) {
                         // Animation finished! Decision time.
+
+                        // 0. CHECK DEATH FIRST
+                        // If animation finished and HP is <= 0, transition to Die sequence.
+                        // This allows the current action (attack/hit/stand) to finish completely before dying.
+                        if (monster.stats.hp <= 0 && monster.currentAction !== 'die1') {
+                            useGameStore.getState().setMonsterAction(monster.id, 'die1');
+                            return; // Stop processing other transitions
+                        }
+
                         if (monster.currentAction === 'stand') {
                             // Stand cycle finished.
                             const newCycles = (monster.standCycles || 0) + 1;
@@ -209,12 +164,7 @@ export const useGameLoop = () => {
                                     } : m)
                                 }));
 
-                                // Deal Damage Logic (Immediate or delayed? User asked for animation first?)
-                                // "Monster attack motion should play, THEN damage?" 
-                                // Usually damage is at impact point. For simplicity, let's deal damage at start or middle?
-                                // Let's deal it now for immediate feedback, or maybe schedule it. 
-                                // User said: "output attack motion after stand motion ends".
-                                // Let's simplify: Attack starts now. Damage happens now.
+                                // Deal Damage Logic
                                 const rawDmg = monster.stats.atk * (100 / (100 + heroStats.def));
                                 const variance = 0.95 + Math.random() * 0.1;
                                 let finalDmg = rawDmg * variance;
@@ -255,18 +205,59 @@ export const useGameLoop = () => {
                     }
                 });
 
-                // Handle Death Triggers (Transition alive -> die1)
-                // We check for monsters with HP <= 0 that are NOT yet in 'die1' action.
-                currentMonsters.forEach(m => {
-                    if (m.stats.hp <= 0 && m.currentAction !== 'die1') {
-                        useGameStore.getState().setMonsterAction(m.id, 'die1');
-                        // Loop will catch the end of 'die1' and remove them.
+                // 2. Hero Attack Logic
+                // This comes SECOND so it can interrupt 'stand' loops set by the monster logic.
+                const heroCooldown = 1000 / heroStats.spd;
+                // Only auto-attack if NOT in dev mode AND NOT frozen
+                if (appMode !== 'dev' && !isFrozen && time - lastHeroAttackRef.current >= heroCooldown) {
+                    const validTargets = currentMonsters.filter(m => m.stats.hp > 0 && m.currentAction !== 'die1');
+
+                    let target = null;
+
+                    // 1. Check if we have a locked target that is still valid
+                    if (currentTargetIdRef.current !== null) {
+                        const lockedTarget = validTargets.find(m => m.id === currentTargetIdRef.current);
+                        if (lockedTarget) {
+                            target = lockedTarget;
+                        } else {
+                            currentTargetIdRef.current = null; // Target lost/dead
+                        }
                     }
-                });
+
+                    // 2. If no target (or lost), pick the first valid one (sequential)
+                    if (!target && validTargets.length > 0) {
+                        // Sort by ID or X position? Array order is usually spawn order, which works for sequential.
+                        target = validTargets[0];
+                        currentTargetIdRef.current = target.id;
+                    }
+
+                    if (target) {
+                        triggerCharacterAttack();
+                        const rawDmg = heroStats.atk * (100 / (100 + target.stats.def));
+                        const variance = 0.95 + Math.random() * 0.1;
+                        let finalDmg = rawDmg * variance;
+
+                        if (Math.random() < heroStats.critRate) {
+                            finalDmg *= heroStats.critDmg;
+                        }
+
+                        damageMonster(target.id, Math.ceil(finalDmg));
+
+                        // Check LATEST state to ensure we interrupt nicely
+                        const currentMonsterState = useGameStore.getState().monsters.find(m => m.id === target!.id);
+                        if (currentMonsterState && currentMonsterState.currentAction === 'stand') {
+                            useGameStore.getState().setMonsterAction(target.id, 'hit1');
+                            // No timeout needed; loop handles transition back to stand
+                        }
+                    }
+                    lastHeroAttackRef.current = time;
+                }
+
+                // 3. Handle Death Triggers REMOVED - NOW HANDLED IN LOOP
 
                 // Check for Wave Clear
-                // If there are NO monsters left in the array, we are done.
-                if (currentMonsters.length === 0) {
+                const remainingMonsters = useGameStore.getState().monsters;
+                if (remainingMonsters.length === 0) {
                     setStageState('cleared');
                 }
             }

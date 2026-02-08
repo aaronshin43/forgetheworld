@@ -46,7 +46,7 @@ export const BattleStage = () => {
                     {/* Monsters Layer */}
                     {monsters.map(monster => (
                         <div
-                            key={monster.id}
+                            key={`${monster.id}-${monster.actionId || 0}`}
                             className="absolute z-20 transition-all duration-500 ease-out"
                             style={{
                                 left: `${monster.x}%`,
@@ -60,6 +60,7 @@ export const BattleStage = () => {
                                 scale={monster.stats.scale || 1.0}
                                 animXOffset={MONSTER_ANIMATION_OFFSETS[monster.name]?.[monster.currentAction]?.x || 0}
                                 animYOffset={MONSTER_ANIMATION_OFFSETS[monster.name]?.[monster.currentAction]?.y || 0}
+                                uuid={`${monster.id}_${monster.actionId}`}
                             />
                         </div>
                     ))}
