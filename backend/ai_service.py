@@ -51,7 +51,8 @@ async def analyze_image_with_gemini(image_bytes: bytes, mode: str):
             "material": "Unknown",
             "attribute": "Void",
             "type": "weapon" if mode == 'craft' else "skill",
-            "stats": {"atk": 10, "def": 0, "hp": 0}
+            "rarity_score": 1,
+            "affected_stats": ["atk", "def", "maxHp"]
         }
 
 async def generate_flavor_text_with_featherless(item_data: dict):
