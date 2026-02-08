@@ -25,6 +25,48 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* 인트로 타이틀 둥둥 뜨는 애니메이션 */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+.animate-float {
+  animation: float 2s ease-in-out infinite;
+}
+
+/* 스타트 버튼 커졌다 작아졌다 */
+@keyframes pulse-scale {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+.animate-pulse-scale {
+  animation: pulse-scale 1.5s ease-in-out infinite;
+}
+
+/* 타이틀 주변 빛줄기 회전 (프로펠러) */
+@keyframes streak-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-streak-rotate {
+  animation: streak-rotate 12s linear infinite;
+}
+
 /* 전투력 등: 금속·엠보스 스타일 (ENHANCE 느낌) */
 .font-metallic-emboss {
   font-weight: 700;

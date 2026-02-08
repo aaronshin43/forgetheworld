@@ -35,10 +35,10 @@ export default function Home() {
   };
 
   return (
-    // Letterbox Container
-    <main className="flex h-screen w-full items-center justify-center bg-zinc-900">
+    // Letterbox Container – 인트로/게임 모두 스크롤 없이 화면 비율에 맞게
+    <main className="flex h-screen w-full min-h-0 items-center justify-center bg-zinc-900 overflow-hidden">
       {/* Mobile Aspect Ratio Wrapper */}
-      <div className="relative w-full h-full max-w-[430px] max-h-[932px] bg-black shadow-2xl overflow-hidden flex flex-col border-x border-zinc-800">
+      <div className="relative w-full h-full min-h-0 max-w-[430px] max-h-[932px] bg-black shadow-2xl overflow-hidden flex flex-col border-x border-zinc-800">
 
         {renderContent()}
 
