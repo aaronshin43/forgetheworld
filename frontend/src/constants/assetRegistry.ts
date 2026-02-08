@@ -94,17 +94,17 @@ export const SKILL_CONFIGS: Record<string, SkillConfig> = {
     "divineswing": { x: 40, y: 75, scale: 1.0 },
 
     // Buff Defaults (Aura/Self)
-    "blueaura": { x: 50, y: 60, scale: 1.5 },
-    "darkaura": { x: 50, y: 60, scale: 1.5 },
-    "drainaura": { x: 50, y: 50, scale: 1.2 },
-    "guardianspirit": { x: 50, y: 40, scale: 1.2 },
-    "heavendoor": { x: 50, y: 50, scale: 1.5 },
-    "installshield": { x: 50, y: 50, scale: 1.0 },
-    "signusblessing": { x: 50, y: 40, scale: 1.5 },
-    "unionaura": { x: 50, y: 60, scale: 1.5 },
-    "valhalar": { x: 50, y: 50, scale: 1.2 },
-    "windbooster": { x: 50, y: 50, scale: 1.2 },
-    "yellowaura": { x: 50, y: 60, scale: 1.5 }
+    "blueaura": { x: 17, y: 80, scale: 0.5 },
+    "darkaura": { x: 17, y: 80, scale: 0.5 },
+    "drainaura": { x: 17, y: 80, scale: 0.5 },
+    "guardianspirit": { x: 18, y: 55, scale: 0.5 },
+    "heavendoor": { x: 55, y: 50, scale: 1.0 },
+    "installshield": { x: 18, y: 55, scale: 1.0 },
+    "signusblessing": { x: 17, y: 70, scale: 0.5 },
+    "unionaura": { x: 17, y: 80, scale: 0.5 },
+    "valhalar": { x: 50, y: 50, scale: 1.0 },
+    "windbooster": { x: 17, y: 80, scale: 0.5 },
+    "yellowaura": { x: 17, y: 70, scale: 0.5 }
 };
 
 export const ATTACK_ANIMATIONS = [
