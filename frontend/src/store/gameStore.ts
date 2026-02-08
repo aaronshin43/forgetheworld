@@ -1,6 +1,16 @@
 import { create } from 'zustand';
 import { CHARACTER_DURATIONS, SKILL_CATEGORIES, SKILL_CONFIGS, MONSTER_FORMATIONS, MONSTER_LIST, MONSTER_BASE_STATS, SKILL_DURATIONS } from '../constants/assetRegistry';
 
+export interface DamageNumber {
+    id: string;
+    monsterId: string;
+    amount: number;
+    isCrit: boolean;
+    x: number;
+    y: number;
+    timestamp: number;
+}
+
 export interface EntityStats {
     hp: number;
     maxHp: number;
@@ -128,6 +138,7 @@ interface GameState {
 
     // Visuals State
     activeEffects: ActiveEffect[];
+    damageNumbers: DamageNumber[];
     monsters: ActiveMonster[];
     monsterIdCounter: number; // For generating unique IDs
     characterAction: string;
@@ -162,6 +173,8 @@ interface GameState {
 
     addEffect: (name: string, config: { x: number; y: number; scale: number }) => void;
     removeEffect: (id: number) => void;
+    addDamageNumber: (monsterId: string, amount: number, isCrit: boolean, x: number, y: number) => void;
+    removeDamageNumber: (id: string) => void;
 
     triggerCharacterAttack: () => void;
     setCharacterAction: (action: string) => void;
@@ -281,6 +294,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     isMenuOpen: false,
 
     activeEffects: [],
+    damageNumbers: [],
     monsters: [],
     monsterIdCounter: 0,
     characterAction: 'stand1',
@@ -351,6 +365,20 @@ export const useGameStore = create<GameState>((set, get) => ({
     setIsLoading: (isLoading) => set({ isLoading }),
     setLoadingProgress: (loadingProgress) => set({ loadingProgress }),
     setIsMenuOpen: (isMenuOpen) => set({ isMenuOpen }),
+    addDamageNumber: (monsterId, amount, isCrit, x, y) => set((state) => ({
+        damageNumbers: [...state.damageNumbers, {
+            id: `dmg_${Date.now()}_${Math.random()}`,
+            monsterId,
+            amount,
+            isCrit,
+            x,
+            y,
+            timestamp: Date.now()
+        }]
+    })),
+    removeDamageNumber: (id) => set((state) => ({
+        damageNumbers: state.damageNumbers.filter(d => d.id !== id)
+    })),
     resetGame: () => set((state) => ({
         heroStats: {
             hp: 1000,
@@ -612,26 +640,45 @@ export const useGameStore = create<GameState>((set, get) => ({
     updateMonsterPosition: (id, x) => set((state) => ({
         monsters: state.monsters.map(m => m.id === id ? { ...m, x } : m)
     })),
-    damageMonster: (id, amount) => set((state) => {
-        const newMonsters = state.monsters.map(m => {
-            if (m.id === id) {
-                // If already dead/dying, don't interrupt death with hit
-                if (m.currentAction === 'die1') return m;
+    damageMonster: (id, amount) => {
+        const state = get();
+        const monster = state.monsters.find(m => m.id === id);
+        if (!monster || monster.currentAction === 'die1') return;
 
-                const newHp = Math.max(0, m.stats.hp - amount);
-                return {
-                    ...m,
-                    stats: { ...m.stats, hp: newHp },
-                    // FORCE HIT REACTION (Interrupts everything)
-                    currentAction: 'hit1',
-                    stateStartTime: Date.now(),
-                    actionId: (m.actionId || 0) + 1
-                };
-            }
-            return m;
+        // Calculate crit
+        const isCrit = Math.random() < state.heroStats.critRate;
+        const finalAmount = isCrit ? Math.ceil(amount * state.heroStats.critDmg) : Math.ceil(amount);
+
+        // Add damage number
+        state.addDamageNumber(
+            monster.id.toString(),
+            finalAmount,
+            isCrit,
+            monster.x,
+            monster.y
+        );
+
+        set((state) => {
+            const newMonsters = state.monsters.map(m => {
+                if (m.id === id) {
+                    // If already dead/dying, don't interrupt death with hit
+                    if (m.currentAction === 'die1') return m;
+
+                    const newHp = Math.max(0, m.stats.hp - finalAmount);
+                    return {
+                        ...m,
+                        stats: { ...m.stats, hp: newHp },
+                        // FORCE HIT REACTION (Interrupts everything)
+                        currentAction: 'hit1',
+                        stateStartTime: Date.now(),
+                        actionId: (m.actionId || 0) + 1
+                    };
+                }
+                return m;
+            });
+            return { monsters: newMonsters };
         });
-        return { monsters: newMonsters };
-    }),
+    },
     setMonsterAction: (id, action) => set((state) => ({
         monsters: state.monsters.map(m => {
             if (m.id === id) {

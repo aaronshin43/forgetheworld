@@ -27,9 +27,12 @@ body {
 
 /* 인트로 타이틀 둥둥 뜨는 애니메이션 */
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-12px);
   }
@@ -41,9 +44,12 @@ body {
 
 /* 스타트 버튼 커졌다 작아졌다 */
 @keyframes pulse-scale {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.03);
   }
@@ -58,6 +64,7 @@ body {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -78,4 +85,41 @@ body {
   -webkit-text-fill-color: transparent;
   text-shadow: none;
   filter: drop-shadow(0 1px 0 rgba(254, 243, 199, 0.4)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.font-metallic-emboss-red {
+  font-weight: 700;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  letter-spacing: 0.02em;
+  background: linear-gradient(180deg, #ffcccc 0%, #ff4444 35%, #cc0000 70%, #8b0000 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 1px 0 rgba(255, 204, 204, 0.4)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+
+
+/* Damage number float animation */
+@keyframes damageFloat {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(0.5);
+  }
+
+  30% {
+    opacity: 1;
+    transform: translateY(-15px) scale(1);
+  }
+
+  70% {
+    opacity: 1;
+    transform: translateY(-40px) scale(0.8);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-55px) scale(0.8);
+  }
 }

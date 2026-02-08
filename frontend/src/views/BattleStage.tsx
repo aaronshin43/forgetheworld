@@ -3,6 +3,7 @@ import { useGameStore, calculateCombatPower } from '../store/gameStore';
 import { Character } from '../components/Character';
 import { SkillEffect } from '../components/SkillEffect';
 import { Monster } from '../components/Monster';
+import { DamageNumber } from '../components/DamageNumber';
 import { useGameLoop } from '../hooks/useGameLoop';
 import { MONSTER_ANIMATION_OFFSETS } from '../constants/assetRegistry';
 
@@ -15,6 +16,7 @@ export const BattleStage = () => {
         film: storeFilm,
         maxFilm,
         activeEffects,
+        damageNumbers,
         monsters,
         removeEffect,
         currentBackground
@@ -41,6 +43,17 @@ export const BattleStage = () => {
             return () => clearTimeout(timer);
         }
     }, [currentCP]);
+
+    // Stand image heights for damage number positioning (in px)
+    const MONSTER_STAND_HEIGHTS: Record<string, number> = {
+        'goblinking': 180,
+        'rockspirit': 200,
+        'coffeemachine': 170,
+        'ultragray': 190,
+        'goblin': 160,
+        'wyvern': 200,
+        'zombie': 180
+    };
 
     return (
         <div className="h-full bg-gray-900 relative flex items-center justify-center z-10">
@@ -108,6 +121,24 @@ export const BattleStage = () => {
                             </div>
                         </div>
                     ))}
+                </div>
+
+                {/* Damage Numbers Layer (Z-40) */}
+                <div className="absolute inset-0 pointer-events-none z-40">
+                    {damageNumbers.map(dmg => {
+                        const monster = monsters.find(m => m.id.toString() === dmg.monsterId);
+                        if (!monster) return null;
+
+                        const standHeight = MONSTER_STAND_HEIGHTS[monster.name] || 180;
+
+                        return (
+                            <DamageNumber
+                                key={dmg.id}
+                                {...dmg}
+                                standHeight={standHeight}
+                            />
+                        );
+                    })}
                 </div>
             </div>
 
