@@ -129,9 +129,39 @@ interface GameState {
     setLoadingProgress: (progress: number) => void;
     setIsMenuOpen: (isMenuOpen: boolean) => void;
     resetGame: () => void;
+    devEquipRandomItem: () => void;
+    craftItem: (index: number, item: InventoryItem) => void;
 }
 
+const applyRandomStats = (baseStats: EntityStats) => {
+    const statsKeys = ['atk', 'def', 'maxHp', 'spd', 'critRate', 'critDmg'] as const;
+    const selected = [...statsKeys].sort(() => 0.5 - Math.random()).slice(0, 3);
+    const newStats = { ...baseStats };
+    const changes: Record<string, number> = {};
+
+    selected.forEach(key => {
+        let val = 0;
+        if (key === 'atk') val = 50;
+        if (key === 'def') val = 20;
+        if (key === 'maxHp') val = 100;
+        if (key === 'spd') val = 0.2;
+        if (key === 'critRate') val = 0.05;
+        if (key === 'critDmg') val = 0.2;
+
+        if (key === 'maxHp') {
+            newStats.maxHp += val;
+            newStats.hp += val;
+        } else {
+            (newStats as any)[key] += val;
+        }
+        changes[key] = val;
+    });
+
+    return { newStats, changes };
+};
+
 export const useGameStore = create<GameState>((set, get) => ({
+    // ... (rest of initial state)
     // Hero Initial State
     heroStats: {
         hp: 1000,
@@ -268,6 +298,40 @@ export const useGameStore = create<GameState>((set, get) => ({
         isMenuOpen: false,
         inventory: Array(6).fill(null)
     })),
+    craftItem: (index, item) => set((state) => {
+        const { newStats, changes } = applyRandomStats(state.heroStats);
+
+        console.log(`[Crafted Item] ${item.name} Stats:`, changes);
+        console.log('New Hero Stats:', newStats);
+
+        const newInventory = [...state.inventory];
+        newInventory[index] = item;
+
+        return {
+            inventory: newInventory,
+            heroStats: newStats
+        };
+    }),
+    devEquipRandomItem: () => set((state) => {
+        const inventory = [...state.inventory];
+        const emptyIndex = inventory.findIndex(item => item === null);
+        if (emptyIndex === -1) return {};
+
+        const newItem: InventoryItem = {
+            id: `dev-${Date.now()}`,
+            name: 'Dev Sword',
+            image: '/ui/sword.webp',
+            status: 'ready'
+        };
+        inventory[emptyIndex] = newItem;
+
+        const { newStats } = applyRandomStats(state.heroStats);
+
+        return {
+            inventory,
+            heroStats: newStats
+        };
+    }),
     spawnMonster: (name, stats, x, y, targetX) => {
         set((state) => {
             const newId = state.monsterIdCounter + 1;
