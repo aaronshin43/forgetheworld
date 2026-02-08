@@ -65,14 +65,37 @@ export interface InventoryItem {
     stats?: InventoryItemStats;
     grade?: string; // S, A, B, C, D
     rarity?: number; // 1-10
+    enhancementLevel?: number;
+    absorbedMaterials?: { name: string; grade: string }[];
+}
+
+interface MaterialData {
+    name: string;
+    grade: string;
+    rarity: number;
+    stats: Record<string, number>;
+    description: string;
 }
 
 interface GameState {
     // Session State
     sessionStartTime: number;
+    interactionMode: 'battle' | 'crafting' | 'enhancing';
+    tempMaterial: MaterialData | null;
 
     // Hero State
     heroStats: EntityStats;
+    // ...
+
+    // Actions
+    startCrafting: () => void;
+    startEnhancement: () => void;
+    scanMaterial: (materialData: { name: string, rarity: number, affectedStats: string[], description: string }) => void;
+    enhanceItem: (targetItemId: string) => void;
+    cancelEnhancement: () => void;
+
+    // ... existing actions
+
     heroLevel: number;
     heroExp: number;
     heroMaxExp: number;
@@ -218,6 +241,8 @@ const generateItemStats = (baseStats: EntityStats, grade: string, affectedStats:
 export const useGameStore = create<GameState>((set, get) => ({
     // Session Init
     sessionStartTime: Date.now(),
+    interactionMode: 'battle',
+    tempMaterial: null,
 
     // Hero Initial State
     heroStats: {
@@ -380,6 +405,68 @@ export const useGameStore = create<GameState>((set, get) => ({
             heroStats: newStats
         };
     }),
+    startCrafting: () => set({ interactionMode: 'crafting', viewMode: 'camera', scanMode: 'craft' }),
+    // Enhancement Actions
+    startEnhancement: () => set({ interactionMode: 'enhancing', viewMode: 'camera', tempMaterial: null }),
+
+    scanMaterial: (data) => set((state) => {
+        const grade = calculateGrade(data.rarity, state.sessionStartTime);
+        const { itemStats } = generateItemStats(state.heroStats, grade, data.affectedStats);
+
+        return {
+            tempMaterial: {
+                name: data.name,
+                grade,
+                rarity: data.rarity,
+                stats: itemStats,
+                description: data.description
+            },
+            // ResultOverlay needs `scanResult` to be set
+            scanResult: {
+                analysis: { ...data, stats: itemStats, rarity_score: data.rarity, affected_stats: data.affectedStats },
+                flavor: { name: data.name, description: data.description }
+            } as any
+        };
+    }),
+
+    enhanceItem: (targetItemId) => set((state) => {
+        const { tempMaterial, inventory } = state;
+        if (!tempMaterial) return {};
+
+        const newInventory = inventory.map(item => {
+            if (item && item.id === targetItemId) {
+                const newStats = { ...(item.stats || {}) };
+                Object.entries(tempMaterial.stats).forEach(([key, val]) => {
+                    const k = key as keyof InventoryItemStats;
+                    newStats[k] = (newStats[k] || 0) + (val as number);
+                });
+
+                const newAbsorbed = [...(item.absorbedMaterials || []), { name: tempMaterial.name, grade: tempMaterial.grade }];
+                const newLevel = (item.enhancementLevel || 0) + 1;
+
+                console.log(`[Enhanced] ${item.name} +${newLevel} (Absorbed ${tempMaterial.name})`);
+
+                return {
+                    ...item,
+                    stats: newStats,
+                    enhancementLevel: newLevel,
+                    absorbedMaterials: newAbsorbed
+                };
+            }
+            return item;
+        });
+
+        return {
+            inventory: newInventory,
+            tempMaterial: null,
+            interactionMode: 'battle',
+            viewMode: 'battle',
+            scanResult: null
+        };
+    }),
+
+    cancelEnhancement: () => set({ interactionMode: 'battle', viewMode: 'battle', tempMaterial: null, scanResult: null }),
+
     devEquipRandomItem: () => set((state) => {
         const inventory = [...state.inventory];
         const emptyIndex = inventory.findIndex(item => item === null);

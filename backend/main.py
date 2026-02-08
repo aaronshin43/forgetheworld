@@ -28,13 +28,23 @@ class ImageRequest(BaseModel):
 @app.post("/scan")
 async def scan_item(
     file: UploadFile = File(...), 
-    mode: str = Form(...)
+    mode: str = Form(...),
+    skip_image_generation: bool = Form(False)
 ):
     contents = await file.read()
     
     # 1. Vision Analysis (Gemini)
     gemini_result = await analyze_image_with_gemini(contents, mode)
     
+    if skip_image_generation:
+        return {
+            "analysis": gemini_result,
+            "flavor": {
+                "name": gemini_result.get("item", "Unknown Material"),
+                "description": "A material used for enhancing items."
+            }
+        }
+
     # 2. Flavor Text (Featherless)
     flavor_text = await generate_flavor_text_with_featherless(gemini_result)
     if isinstance(flavor_text, str):

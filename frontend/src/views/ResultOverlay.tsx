@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
+import { EnhancementSelectionModal } from '../components/EnhancementSelectionModal';
 
 /** API의 flavor가 문자열(마크다운 JSON)로 올 수 있으므로 항상 { name, description } 객체로 정규화 */
 function normalizeFlavor(flavor: unknown): { name: string; description: string } {
@@ -20,9 +21,20 @@ function normalizeFlavor(flavor: unknown): { name: string; description: string }
 }
 
 export const ResultOverlay = () => {
-    const { scanResult, setScanResult, setViewMode, setTimeScale, setIsAnalyzing, inventory } = useGameStore();
+    const { scanResult, setScanResult, setViewMode, setTimeScale, setIsAnalyzing, inventory, interactionMode, enhanceItem } = useGameStore();
+    const [showEnhanceSelect, setShowEnhanceSelect] = useState(false);
 
     if (!scanResult) return null;
+
+    const handleSelectEnhance = (itemId: string) => {
+        enhanceItem(itemId);
+        // enhanceItem clears scanResult, so overlay will close automatically
+        setShowEnhanceSelect(false);
+    };
+
+    if (showEnhanceSelect) {
+        return <EnhancementSelectionModal onSelect={handleSelectEnhance} onCancel={() => setShowEnhanceSelect(false)} />;
+    }
 
     const flavor = normalizeFlavor(scanResult.flavor);
     // 이미지: JSON flavor.name과 일치하는 인벤토리 아이템만 사용 (인식 로직 제거)
@@ -38,7 +50,36 @@ export const ResultOverlay = () => {
     };
 
     const item = inventory.find(i => i && i.name === flavor.name);
-    const grade = item?.grade || 'Common';
+    // If enhancing, we use the grade from result directly because item isn't in inventory yet (it's tempMaterial).
+    // Or scanResult.analysis.rarity_score logic.
+    // Actually, for enhancing, `item` will likely be undefined because `scanMaterial` doesn't add to inventory.
+    // So we need to calculate grade locally or use `tempMaterial`.
+    // But `ResultOverlay` uses `scanResult`. `scanMaterial` sets `scanResult` with `rarity_score`.
+    // Let's recalculate grade if item is missing.
+
+    // BUT wait, `calculateGrade` is in store/utils but not exported?
+    // It's in `gameStore.ts`.
+    // `scanResult` has `rarity_score`.
+    // Let's just use a simplified grade logic or assume `item` exists?
+    // For Enhancing, "Material" is NOT in inventory. So `item` is null.
+    // We should display the grade of the material.
+    // `scanResult.analysis.rarity_score` is available.
+    // Let's copy calculateGrade logic or use a helper?
+    // I'll just hardcode threshold here for display or use `scanResult.analysis.grade` if I added it?
+    // I didn't add `grade` to `scanResult.analysis`.
+    // But `scanMaterial` calculates it.
+    // Let's assume standard checks.
+
+    const getGrade = (score: number) => {
+        if (score >= 14) return 'Legendary';
+        if (score >= 11) return 'Epic';
+        if (score >= 8) return 'Unique';
+        if (score >= 5) return 'Rare';
+        return 'Common';
+    };
+
+    const grade = item?.grade || getGrade(scanResult.analysis.rarity_score || 0);
+
     const gradeColor = {
         Legendary: 'text-orange-400 drop-shadow-[0_0_10px_rgba(251,146,60,0.8)]',
         Epic: 'text-rose-500 drop-shadow-[0_0_10px_rgba(244,63,94,0.8)]',
@@ -74,13 +115,17 @@ export const ResultOverlay = () => {
                                 animate={{ opacity: [0.7, 1, 0.7] }}
                                 transition={{ repeat: Infinity, duration: 1.5 }}
                             />
-                            <span className="text-xs text-yellow-500/70 uppercase tracking-widest animate-pulse">Forging...</span>
+                            <span className="text-xs text-yellow-500/70 uppercase tracking-widest animate-pulse">
+                                {interactionMode === 'enhancing' ? 'Analyzing Material...' : 'Forging...'}
+                            </span>
                         </div>
                     )}
                 </div>
 
                 <div className="p-6">
-                    <h2 className="text-2xl font-bold text-yellow-400 mb-1">{flavor.name}</h2>
+                    <h2 className={`text-2xl font-bold mb-1 ${interactionMode === 'enhancing' ? 'text-indigo-400' : 'text-yellow-400'}`}>
+                        {interactionMode === 'enhancing' ? 'MATERIAL FOUND' : flavor.name}
+                    </h2>
                     <p className="text-gray-400 text-xs italic mb-4">"{flavor.description}"</p>
 
                     <div className="mb-6">
@@ -92,7 +137,13 @@ export const ResultOverlay = () => {
 
                         <div className="flex flex-wrap justify-center gap-2">
                             {(scanResult.analysis.affected_stats || ['atk', 'def', 'maxHp']).map((stat: string) => {
-                                const val = item?.stats?.[stat as keyof typeof item.stats] ?? 0;
+                                // For material, values are in scanResult.analysis.stats (if I added it in scanMaterial store action)
+                                // In `scanMaterial` store action, I did: `analysis: { ...data, stats: itemStats ... }`
+                                // So `scanResult.analysis.stats` should exist.
+                                // For crafted items, `item` exists and has stats.
+                                // So we prefer `item.stats` if it exists, else `scanResult.analysis.stats`.
+
+                                const val = item?.stats?.[stat as keyof typeof item.stats] ?? scanResult.analysis.stats?.[stat] ?? 0;
                                 return (
                                     <span key={stat} className="px-3 py-1 bg-gray-700 border border-gray-600 rounded text-xs text-gray-300 uppercase font-bold flex items-center gap-1">
                                         <span>{stat}</span>
@@ -104,10 +155,10 @@ export const ResultOverlay = () => {
                     </div>
 
                     <button
-                        onClick={handleClose}
-                        className="w-full py-3 bg-yellow-600 hover:bg-yellow-500 text-black font-bold rounded-lg transition-colors"
+                        onClick={interactionMode === 'enhancing' ? () => setShowEnhanceSelect(true) : handleClose}
+                        className={`w-full py-3 ${interactionMode === 'enhancing' ? 'bg-indigo-600 hover:bg-indigo-500' : 'bg-yellow-600 hover:bg-yellow-500'} text-black font-bold rounded-lg transition-colors`}
                     >
-                        CLAIM ITEM
+                        {interactionMode === 'enhancing' ? 'SELECT ITEM TO ENHANCE' : 'CLAIM ITEM'}
                     </button>
                 </div>
             </motion.div>

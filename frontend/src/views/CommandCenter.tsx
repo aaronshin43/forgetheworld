@@ -10,6 +10,7 @@ const BTN_CLASS =
 export const CommandCenter = () => {
     const { inventory } = useGameStore();
     const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
+    const hasItems = inventory.some(item => item !== null);
 
     return (
         <div className="h-full flex flex-col justify-center items-center border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.5)] z-20 overflow-hidden min-w-0 relative bg-zinc-900">
@@ -91,10 +92,7 @@ export const CommandCenter = () => {
                     >
                         <button
                             type="button"
-                            onClick={() => {
-                                useGameStore.getState().setViewMode('camera');
-                                useGameStore.getState().setScanMode('craft');
-                            }}
+                            onClick={useGameStore.getState().startCrafting}
                             className={BTN_CLASS}
                             aria-label="Craft"
                         >
@@ -113,12 +111,11 @@ export const CommandCenter = () => {
                         </button>
                         <button
                             type="button"
-                            onClick={() => {
-                                useGameStore.getState().setViewMode('camera');
-                                useGameStore.getState().setScanMode('enhance');
-                            }}
-                            className={BTN_CLASS}
+                            onClick={hasItems ? useGameStore.getState().startEnhancement : undefined}
+                            disabled={!hasItems}
+                            className={`${BTN_CLASS} ${!hasItems ? '!opacity-30 !grayscale !cursor-not-allowed hover:!scale-100 active:!scale-100' : ''}`}
                             aria-label="Enhance"
+                            title={!hasItems ? "Craft an item first!" : "Enhance Item"}
                         >
                             <img src="/ui/enhance_btn.webp" alt="Enhance" className="w-full h-full object-contain pointer-events-none" />
                         </button>

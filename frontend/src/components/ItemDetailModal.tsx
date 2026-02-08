@@ -47,8 +47,9 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({ item, onClose 
                     </div>
 
                     {/* Item name - golden, bold */}
-                    <h2 className="text-xl font-bold text-amber-400 mb-2 text-center tracking-wide">
+                    <h2 className="text-xl font-bold text-amber-400 mb-2 text-center tracking-wide flex items-center justify-center gap-2">
                         {name}
+                        {item.enhancementLevel ? <span className="text-yellow-200 text-lg">+{item.enhancementLevel}</span> : null}
                     </h2>
 
                     {/* Description / lore - italic, quoted */}
@@ -86,6 +87,27 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({ item, onClose 
                         </div>
                     ) : (
                         <div className="mb-6 text-zinc-500 text-xs text-center">No Stats</div>
+                    )}
+
+                    {/* Absorbed Materials */}
+                    {item.absorbedMaterials && item.absorbedMaterials.length > 0 && (
+                        <div className="w-full max-w-[260px] mb-6">
+                            <div className="text-[10px] uppercase text-zinc-500 tracking-wider mb-2 text-center border-t border-zinc-700/50 pt-2">Absorbed Materials</div>
+                            <div className="flex flex-wrap justify-center gap-1">
+                                {item.absorbedMaterials.map((mat, idx) => (
+                                    <span key={idx} className={`text-[10px] px-2 py-1 bg-zinc-800 border border-zinc-700 rounded-full ${{
+                                            Legendary: 'text-orange-400',
+                                            Epic: 'text-rose-500',
+                                            Unique: 'text-purple-400',
+                                            Rare: 'text-blue-400',
+                                            Common: 'text-gray-400',
+                                        }[mat.grade] || 'text-gray-400'
+                                        }`}>
+                                        {mat.name}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
                     )}
 
                     {/* Close / Confirm button */}

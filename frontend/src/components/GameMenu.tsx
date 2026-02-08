@@ -72,6 +72,7 @@ export const GameMenu = () => {
                         >
                             RESUME
                         </button>
+
                         <button
                             onClick={handleQuitClick}
                             className="w-full py-3 bg-red-600/20 hover:bg-red-600/40 text-red-200 border border-red-500/30 rounded-lg font-bold tracking-wide transition-colors"
