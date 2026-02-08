@@ -1,5 +1,5 @@
-import React from 'react';
-import { useGameStore } from '../store/gameStore';
+import React, { useEffect, useState, useRef } from 'react';
+import { useGameStore, calculateCombatPower } from '../store/gameStore';
 import { Character } from '../components/Character';
 import { SkillEffect } from '../components/SkillEffect';
 import { Monster } from '../components/Monster';
@@ -23,6 +23,24 @@ export const BattleStage = () => {
     // Derived values for UI
     const { hp, maxHp } = heroStats;
     const hpRatio = maxHp > 0 ? hp / maxHp : 1;
+
+    // Combat Power Animation Logic
+    const currentCP = calculateCombatPower(heroStats);
+    const [animateCP, setAnimateCP] = useState(false);
+    const prevCPRef = useRef(currentCP);
+
+    useEffect(() => {
+        if (currentCP !== prevCPRef.current) {
+            setAnimateCP(true);
+            prevCPRef.current = currentCP;
+
+            const timer = setTimeout(() => {
+                setAnimateCP(false);
+            }, 300); // 300ms pulse
+
+            return () => clearTimeout(timer);
+        }
+    }, [currentCP]);
 
     return (
         <div className="h-full bg-gray-900 relative flex items-center justify-center z-10">
@@ -102,10 +120,14 @@ export const BattleStage = () => {
                     <img src="/ui/profile_box.webp" alt="" className="absolute inset-0 w-full h-full object-contain pointer-events-none" aria-hidden />
                 </div>
                 <div className="flex flex-col gap-0.5 drop-shadow-md translate-y-2 -ml-1">
-                    {/* Combat Power – 금속·엠보스 글씨체 */}
+                    {/* Combat Power – Calculate & Animate */}
                     <div className="flex items-center gap-1.5 ml-1">
                         <img src="/ui/sword.webp" alt="" className="w-5 h-5 object-contain flex-shrink-0" aria-hidden />
-                        <span className="text-sm font-metallic-emboss">1,450</span>
+                        <span
+                            className={`text-sm font-metallic-emboss transition-all duration-300 ${animateCP ? 'scale-125 text-yellow-300 drop-shadow-[0_0_8px_rgba(253,224,71,0.8)]' : 'text-white'}`}
+                        >
+                            {currentCP.toLocaleString()}
+                        </span>
                     </div>
 
                     {/* HP Bar: 빨간 바 뒤에, healthbar.webp 사진이 맨 위(앞)에 */}

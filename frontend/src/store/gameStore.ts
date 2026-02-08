@@ -13,6 +13,17 @@ export interface EntityStats {
     scale: number;
 }
 
+export const calculateCombatPower = (stats: EntityStats): number => {
+    return Math.floor(
+        (stats.atk * 1.5) +
+        (stats.maxHp * 0.2) +
+        (stats.def * 0.8) +
+        (stats.spd * 50) +
+        (stats.critRate * 1000) +
+        (stats.critDmg * 100)
+    );
+};
+
 export interface ActiveEffect {
     id: number;
     name: string;
@@ -254,7 +265,8 @@ export const useGameStore = create<GameState>((set, get) => ({
         isAnalyzing: false,
         scanResult: null,
         scanMode: null,
-        isMenuOpen: false
+        isMenuOpen: false,
+        inventory: Array(6).fill(null)
     })),
     spawnMonster: (name, stats, x, y, targetX) => {
         set((state) => {
