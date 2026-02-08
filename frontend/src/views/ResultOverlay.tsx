@@ -98,7 +98,17 @@ export const ResultOverlay = () => {
                 <div className="bg-gray-900 p-8 flex items-center justify-center relative overflow-hidden h-64">
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-yellow-900/40 via-transparent to-transparent" />
 
-                    {displayImage ? (
+                    {interactionMode === 'enhancing' ? (
+                        <div className="flex flex-col items-center justify-center h-full">
+                            <motion.img
+                                src="/ui/anvil2.webp"
+                                alt="Material"
+                                className="w-48 h-48 object-contain drop-shadow-[0_0_15px_rgba(99,102,241,0.6)]"
+                                animate={{ scale: [1, 1.05, 1] }}
+                                transition={{ repeat: Infinity, duration: 2 }}
+                            />
+                        </div>
+                    ) : displayImage ? (
                         <motion.img
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
@@ -116,7 +126,7 @@ export const ResultOverlay = () => {
                                 transition={{ repeat: Infinity, duration: 1.5 }}
                             />
                             <span className="text-xs text-yellow-500/70 uppercase tracking-widest animate-pulse">
-                                {interactionMode === 'enhancing' ? 'Analyzing Material...' : 'Forging...'}
+                                Forging...
                             </span>
                         </div>
                     )}
@@ -124,7 +134,7 @@ export const ResultOverlay = () => {
 
                 <div className="p-6">
                     <h2 className={`text-2xl font-bold mb-1 ${interactionMode === 'enhancing' ? 'text-indigo-400' : 'text-yellow-400'}`}>
-                        {interactionMode === 'enhancing' ? 'MATERIAL FOUND' : flavor.name}
+                        {flavor.name}
                     </h2>
                     <p className="text-gray-400 text-xs italic mb-4">"{flavor.description}"</p>
 

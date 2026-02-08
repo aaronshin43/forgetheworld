@@ -7,7 +7,7 @@ from google import genai
 from google.genai import types
 import requests
 from dotenv import load_dotenv
-from prompts import GEMINI_SYSTEM_PROMPT, get_flavor_text_prompt, get_image_generation_prompt
+from prompts import GEMINI_SYSTEM_PROMPT, get_flavor_text_prompt, get_image_generation_prompt, EVOLUTION_PROMPT
 
 load_dotenv()
 
@@ -139,6 +139,7 @@ async def generate_item_image_v2(prompt: str):
             contents=full_prompt,
             config=types.GenerateContentConfig(
                 response_modalities=['Image'],
+                temperature=0.8,
                 image_config=types.ImageConfig(
                     aspect_ratio="1:1",
                 ),
@@ -176,4 +177,35 @@ def process_image_bytes(image_bytes):
     new_image.save(buffered, format="WEBP", quality=90)
     img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
     
+    
     return f"data:image/webp;base64,{img_str}"
+
+async def generate_evolution_concept(base_item: dict, materials: list):
+    try:        
+        # Format materials list string
+        materials_str = ", ".join([f"{m['name']} ({m['grade']})" for m in materials])
+        
+        prompt = EVOLUTION_PROMPT.format(
+            base_item_name=base_item.get('name', 'Unknown Item'), 
+            base_description=base_item.get('description', ''),
+            materials_list=materials_str
+        )
+
+        response = client.models.generate_content(
+            model="gemini-2.0-flash", 
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                temperature=0.8,
+            ),
+        )
+        print(f"Evolution Concept: {response.text}")
+        return json.loads(response.text)
+    except Exception as e:
+        print(f"Evolution Error: {e}")
+        # Fallback
+        return {
+            "name": f"Evolved {base_item.get('name', 'Item')}",
+            "description": "The item has evolved, absorbing new power.",
+            "visual_prompt": f"A powerful version of {base_item.get('name', 'Item')}, glowing with energy. Pixel art style."
+        }
