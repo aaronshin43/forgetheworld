@@ -15,7 +15,6 @@ stand2.webp: 1500.0
 swingO1.webp: 800.0
 swingO2.webp: 800.0
 swingO3.webp: 800.0
-swingOF.webp: 700.0
 swingP1.webp: 800.0
 swingP2.webp: 800.0
 swingPF.webp: 700.0

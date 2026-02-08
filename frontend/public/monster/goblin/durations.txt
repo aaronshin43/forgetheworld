@@ -2,3 +2,4 @@ goblin_die1.webp: 820.0
 goblin_hit1.webp: 600.0
 goblin_move.webp: 600.0
 goblin_stand.webp: 780.0
+goblin_attack1.webp: 1580.0

@@ -4,3 +4,4 @@ rockspirit_attack3.webp: 3780.0
 rockspirit_die1.webp: 1800.0
 rockspirit_hit1.webp: 600.0
 rockspirit_stand.webp: 1200.0
+rockspirit_move.webp: 480.0

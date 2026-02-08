@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { SKILL_DURATIONS } from '../constants/assetRegistry';
+import { SKILL_DURATIONS, SKILL_CATEGORIES } from '../constants/assetRegistry';
 
 interface SkillEffectProps {
     name: string;
@@ -9,8 +9,15 @@ interface SkillEffectProps {
     onComplete?: () => void;
 }
 
+const getSkillPath = (name: string) => {
+    if (SKILL_CATEGORIES.basic.includes(name)) return `/skills/basic/${name}.webp`;
+    if (SKILL_CATEGORIES.buff.includes(name)) return `/skills/buff/${name}.webp`;
+    return `/skills/ultimate/${name}.webp`; // Default to ultimate
+};
+
 export const SkillEffect = ({ name, x, y, scale, onComplete }: SkillEffectProps) => {
     const duration = SKILL_DURATIONS[name] || 3000;
+    const imagePath = getSkillPath(name);
 
     // Use a ref to store the latest onComplete callback
     // This prevents the useEffect from re-running when the parent component re-renders
@@ -34,12 +41,12 @@ export const SkillEffect = ({ name, x, y, scale, onComplete }: SkillEffectProps)
         <div
             className="flex items-center justify-center p-0 m-0"
             style={{
-                width: '300px',
-                height: '300px'
+                width: '500px',
+                height: '500px'
             }}
         >
             <img
-                src={`/skills/ultimate/${name}.webp?t=${uniqueId}`}
+                src={`${imagePath}?t=${uniqueId}`}
                 alt={name}
                 className="w-full h-full object-contain mix-blend-screen"
                 draggable={false}

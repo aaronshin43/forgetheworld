@@ -1,0 +1,12 @@
+blueaura.webp: 1920.0
+darkaura.webp: 1920.0
+drainaura.webp: 960.0
+guardianspirit.webp: 1200.0
+heavendoor.webp: 1800.0
+installshield.webp: 1440.0
+signusblessing.webp: 1980.0
+unionaura.webp: 1920.0
+valhalar.webp: 1380.0
+windbooster.webp: 900.0
+yellowaura.webp: 1920.0
+heavendoor.webp: 1800.0

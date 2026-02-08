@@ -24,17 +24,16 @@ export const Monster = ({ name, action = 'stand', scale = 1.0 }: MonsterProps) =
 
     return (
         <div
-            className="flex items-center justify-center pointer-events-none"
+            className="flex items-end justify-center pointer-events-none"
             style={{
-                width: '128px',
-                height: '128px',
-                transform: `scale(${scale})`
+                transform: `scale(${scale})`,
+                transformOrigin: 'bottom center' // Ensure scaling happens from feet
             }}
         >
             <img
                 src={src}
                 alt={`${name} ${action}`}
-                className="w-full h-full object-contain pixelated rendering-pixelated"
+                className="w-auto h-auto max-w-none object-contain pixelated rendering-pixelated"
                 style={{ imageRendering: 'pixelated' }}
                 draggable={false}
             />

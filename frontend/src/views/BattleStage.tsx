@@ -3,11 +3,14 @@ import { useGameStore } from '../store/gameStore';
 import { Character } from '../components/Character';
 import { SkillEffect } from '../components/SkillEffect';
 import { Monster } from '../components/Monster';
+import { useGameLoop } from '../hooks/useGameLoop';
 
 export const BattleStage = () => {
+    // Run the Game Loop
+    useGameLoop();
+
     const {
-        hp,
-        maxHp,
+        heroStats,
         film: storeFilm,
         maxFilm,
         activeEffects,
@@ -15,6 +18,9 @@ export const BattleStage = () => {
         removeEffect,
         currentBackground
     } = useGameStore();
+
+    // Derived values for UI
+    const { hp, maxHp } = heroStats;
 
     return (
         <div className="h-full bg-gray-900 relative flex items-center justify-center z-10">
@@ -43,15 +49,15 @@ export const BattleStage = () => {
                             style={{
                                 left: `${monster.x}%`,
                                 top: `${monster.y}%`,
-                                transform: 'translate(-50%, -50%)'
+                                transform: 'translate(-50%, -100%)' // Anchor at feet
                             }}
                         >
-                            <Monster name={monster.name} action="stand" />
+                            <Monster name={monster.name} action={monster.currentAction} scale={monster.stats.scale || 1.0} />
                         </div>
                     ))}
 
                     {/* Character */}
-                    <div className="absolute bottom-[20%] left-[20%] z-30">
+                    <div className="absolute bottom-[5%] left-[10%] z-30">
                         <Character />
                     </div>
 
@@ -101,7 +107,7 @@ export const BattleStage = () => {
                         />
                     </div>
 
-                    {/* Film (goldenhammar 아이콘) – HP바 밑 */}
+                    {/* Film (goldenhammar icon) */}
                     <div className="flex items-center gap-1 mt-1 ml-0.5">
                         {Array.from({ length: maxFilm }).map((_, i) => (
                             <img

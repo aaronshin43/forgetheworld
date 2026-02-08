@@ -39,7 +39,7 @@ async def scan_item(
     flavor_text = await generate_flavor_text_with_featherless(gemini_result)
     if isinstance(flavor_text, str):
         raw = flavor_text.strip()
-        # LLM이 ```json ... ``` 형태로 반환하는 경우 코드 블록 제거 후 파싱
+        # parse json
         if raw.startswith("```"):
             raw = re.sub(r"^```(?:json)?\s*", "", raw)
             raw = re.sub(r"\s*```$", "", raw)

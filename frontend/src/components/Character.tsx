@@ -5,11 +5,11 @@ export const Character = () => {
     const { characterAction } = useGameStore();
 
     return (
-        <div className="relative w-32 h-32 flex items-center justify-center">
+        <div className="flex items-end justify-center">
             <img
                 src={`/character/${characterAction}.webp`}
                 alt="Character"
-                className="w-full h-full object-contain pixelated rendering-pixelated"
+                className="w-auto h-auto max-w-none object-contain pixelated rendering-pixelated"
                 style={{ imageRendering: 'pixelated' }}
                 key={characterAction}
                 draggable={false}
