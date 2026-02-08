@@ -45,7 +45,7 @@ export const CommandCenter = () => {
                                 tabIndex={item ? 0 : undefined}
                                 onClick={() => item && setSelectedItem(item)}
                                 onKeyDown={(e) => item && (e.key === 'Enter' || e.key === ' ') && setSelectedItem(item)}
-                                className={`group relative w-full h-full min-w-0 min-h-0 aspect-square max-w-full max-h-full flex items-center justify-center overflow-hidden rounded-[0.25rem] ${item ? 'cursor-pointer hover:ring-2 hover:ring-amber-400/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400' : ''}`}
+                                className={`group relative w-full h-full min-w-0 min-h-0 aspect-square max-w-full max-h-full flex items-center justify-center overflow-hidden rounded-[0.25rem] ${item ? 'cursor-pointer hover:scale-105 active:scale-95 transition-transform duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400' : ''}`}
                             >
                                 {/* Layer 1: Item (Image/Name) or Empty Slot (Anvil) - rendered behind the box */}
                                 <div className="absolute inset-0 z-0 flex items-center justify-center p-[8%] overflow-hidden">
