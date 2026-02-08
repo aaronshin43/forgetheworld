@@ -615,7 +615,18 @@ export const useGameStore = create<GameState>((set, get) => ({
     damageMonster: (id, amount) => set((state) => {
         const newMonsters = state.monsters.map(m => {
             if (m.id === id) {
-                return { ...m, stats: { ...m.stats, hp: Math.max(0, m.stats.hp - amount) } };
+                // If already dead/dying, don't interrupt death with hit
+                if (m.currentAction === 'die1') return m;
+
+                const newHp = Math.max(0, m.stats.hp - amount);
+                return {
+                    ...m,
+                    stats: { ...m.stats, hp: newHp },
+                    // FORCE HIT REACTION (Interrupts everything)
+                    currentAction: 'hit1',
+                    stateStartTime: Date.now(),
+                    actionId: (m.actionId || 0) + 1
+                };
             }
             return m;
         });
@@ -711,6 +722,6 @@ export const useGameStore = create<GameState>((set, get) => ({
 
             // 4. Resume
             set({ isSkillActive: false });
-        }, skillDuration);
+        }, skillDuration * 0.9);
     },
 }));

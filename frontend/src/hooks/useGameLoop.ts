@@ -139,12 +139,24 @@ export const useGameLoop = () => {
                     if (elapsed >= currentDuration) {
                         // Animation finished! Decision time.
 
-                        // 0. CHECK DEATH FIRST
-                        // If animation finished and HP is <= 0, transition to Die sequence.
-                        // This allows the current action (attack/hit/stand) to finish completely before dying.
-                        if (monster.stats.hp <= 0 && monster.currentAction !== 'die1') {
-                            useGameStore.getState().setMonsterAction(monster.id, 'die1');
-                            return; // Stop processing other transitions
+                        // 0. HIT ANIMATION FINISHED
+                        if (monster.currentAction.startsWith('hit')) {
+                            if (monster.stats.hp <= 0) {
+                                // Dead -> Die
+                                useGameStore.getState().setMonsterAction(monster.id, 'die1');
+                            } else {
+                                // Alive -> Stand
+                                useGameStore.getState().setMonsterAction(monster.id, 'stand');
+                            }
+                            return;
+                        }
+
+                        // 1. DIE ANIMATION FINISHED
+                        if (monster.currentAction === 'die1') {
+                            useGameStore.setState(state => ({
+                                monsters: state.monsters.filter(m => m.id !== monster.id)
+                            }));
+                            return;
                         }
 
                         if (monster.currentAction === 'stand') {
