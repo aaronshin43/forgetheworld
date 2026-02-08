@@ -100,10 +100,7 @@ export const CommandCenter = () => {
                         </button>
                         <button
                             type="button"
-                            onClick={() => {
-                                useGameStore.getState().setViewMode('camera');
-                                useGameStore.getState().setScanMode('skill');
-                            }}
+                            onClick={useGameStore.getState().startSkillMode}
                             className={BTN_CLASS}
                             aria-label="Skill"
                         >

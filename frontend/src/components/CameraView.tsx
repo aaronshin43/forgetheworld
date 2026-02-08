@@ -9,7 +9,7 @@ const videoConstraints = {
 
 export const CameraView = () => {
     const webcamRef = useRef<Webcam>(null);
-    const { film, setIsAnalyzing, setScanResult, setTimeScale, useFilm, setInventoryItem, craftItem, inventory, scanMode, interactionMode, scanMaterial } = useGameStore();
+    const { film, setIsAnalyzing, setScanResult, setTimeScale, useFilm, setInventoryItem, craftItem, inventory, scanMode, interactionMode, scanMaterial, triggerSkill } = useGameStore();
 
     const capture = useCallback(async () => {
         const imageSrc = webcamRef.current?.getScreenshot();
@@ -39,7 +39,11 @@ export const CameraView = () => {
                 // Return to battle immediately so overlay shows there
                 useGameStore.getState().setViewMode('battle');
 
-                const response = await fetch("http://localhost:8000/scan", {
+                const endpoint = scanMode === 'skill'
+                    ? "http://localhost:8000/scan-skill"
+                    : "http://localhost:8000/scan";
+
+                const response = await fetch(endpoint, {
                     method: "POST",
                     body: formData,
                 });
@@ -49,19 +53,8 @@ export const CameraView = () => {
                 // SKILL MODE LOGIC
                 if (scanMode === 'skill') {
                     setIsAnalyzing(false);
-                    // Trigger Random Skill Effect
-                    const skillKeys = Object.keys(SKILL_CONFIGS);
-                    const randomSkill = skillKeys[Math.floor(Math.random() * skillKeys.length)];
-                    const config = SKILL_CONFIGS[randomSkill];
-
-                    // Add effect to center of screen (or randomized slightly?)
-                    useGameStore.getState().addEffect(randomSkill, {
-                        x: 50, // Center
-                        y: 50,
-                        scale: config.scale
-                    });
-
-                    // Do NOT show ResultOverlay
+                    const skillName = data.flavor?.name || data.analysis?.item || 'blast';
+                    triggerSkill(skillName);
                     return;
                 }
 

@@ -7,7 +7,14 @@ from google import genai
 from google.genai import types
 import requests
 from dotenv import load_dotenv
-from prompts import GEMINI_SYSTEM_PROMPT, get_flavor_text_prompt, get_image_generation_prompt, EVOLUTION_PROMPT
+from prompts import (
+    GEMINI_SYSTEM_PROMPT,
+    get_flavor_text_prompt,
+    get_image_generation_prompt,
+    EVOLUTION_PROMPT,
+    SKILL_ANALYSIS_PROMPT,
+    SKILL_DATABASE
+)
 
 load_dotenv()
 
@@ -208,4 +215,31 @@ async def generate_evolution_concept(base_item: dict, materials: list):
             "name": f"Evolved {base_item.get('name', 'Item')}",
             "description": "The item has evolved, absorbing new power.",
             "visual_prompt": f"A powerful version of {base_item.get('name', 'Item')}, glowing with energy. Pixel art style."
+        }
+
+async def analyze_skill_image(image_data: bytes):
+    try:
+        # Load image
+        image_part = types.Part.from_bytes(data=image_data, mime_type="image/jpeg")
+        
+        # Format Prompt
+        prompt = SKILL_ANALYSIS_PROMPT.format(skill_database=SKILL_DATABASE)
+
+        response = client.models.generate_content(
+            model="gemini-2.0-flash", 
+            contents=[prompt, image_part],
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                temperature=0.8,
+            ),
+        )
+        print(f"Skill Analysis: {response.text}")
+        return json.loads(response.text)
+    except Exception as e:
+        print(f"Skill Analysis Error: {e}")
+        # Failover
+        return {
+            "skill_name": "blast", 
+            "type": "deal", 
+            "reasoning": "Analysis failed, defaulting to basic blast."
         }

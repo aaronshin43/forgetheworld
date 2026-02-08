@@ -12,6 +12,7 @@ interface SkillEffectProps {
 const getSkillPath = (name: string) => {
     if (SKILL_CATEGORIES.basic.includes(name)) return `/skills/basic/${name}.webp`;
     if (SKILL_CATEGORIES.buff.includes(name)) return `/skills/buff/${name}.webp`;
+    if (SKILL_CATEGORIES.deal && SKILL_CATEGORIES.deal.includes(name)) return `/skills/deal/${name}.webp`;
     return `/skills/ultimate/${name}.webp`; // Default to ultimate
 };
 

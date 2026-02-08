@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { CHARACTER_DURATIONS, SKILL_CATEGORIES, SKILL_CONFIGS, MONSTER_FORMATIONS, MONSTER_LIST, MONSTER_BASE_STATS } from '../constants/assetRegistry';
+import { CHARACTER_DURATIONS, SKILL_CATEGORIES, SKILL_CONFIGS, MONSTER_FORMATIONS, MONSTER_LIST, MONSTER_BASE_STATS, SKILL_DURATIONS } from '../constants/assetRegistry';
 
 export interface EntityStats {
     hp: number;
@@ -90,9 +90,11 @@ interface GameState {
     // Actions
     startCrafting: () => void;
     startEnhancement: () => void;
+    startSkillMode: () => void;
     scanMaterial: (materialData: { name: string, rarity: number, affectedStats: string[], description: string }) => void;
     enhanceItem: (targetItemId: string) => void;
     triggerEvolution: (itemId: string) => Promise<void>;
+    triggerSkill: (skillName: string) => void;
     cancelEnhancement: () => void;
 
     // ... existing actions
@@ -116,6 +118,7 @@ interface GameState {
     viewMode: 'battle' | 'camera';
     scanMode: 'craft' | 'skill' | 'enhance' | null;
     isAnalyzing: boolean;
+    isSkillActive: boolean;
     scanResult: any | null;
     inventory: (InventoryItem | null)[];
     appMode: 'intro' | 'game' | 'dev';
@@ -269,6 +272,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     viewMode: 'battle',
     scanMode: null,
     isAnalyzing: false,
+    isSkillActive: false,
     scanResult: null,
     inventory: Array(6).fill(null),
     appMode: 'intro',
@@ -402,6 +406,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         };
     }),
     startCrafting: () => set({ interactionMode: 'crafting', viewMode: 'camera', scanMode: 'craft' }),
+    startSkillMode: () => set({ interactionMode: 'battle', viewMode: 'camera', scanMode: 'skill', tempMaterial: null }),
     // Enhancement Actions
     startEnhancement: () => set({ interactionMode: 'enhancing', viewMode: 'camera', tempMaterial: null }),
 
@@ -673,5 +678,39 @@ export const useGameStore = create<GameState>((set, get) => ({
                 set({ characterAction: 'stand1' });
             }
         }, duration);
+    },
+
+    triggerSkill: (skillName) => {
+        const { heroStats, activeEffects, addEffect, damageMonster, monsters } = get();
+        const skillDuration = (SKILL_DURATIONS as any)[skillName] || 3000;
+
+        // 1. Set Active (Freezes monsters via useGameLoop)
+        set({ isSkillActive: true, scanResult: null, interactionMode: 'battle', viewMode: 'battle' });
+
+        // 2. Add Visual Effect
+        // Central position for "Screen Nuke" skills typical of this genre
+        const config = SKILL_CONFIGS[skillName] || { x: 50, y: 50, scale: 1.0 };
+        get().addEffect(skillName, {
+            x: 50, // Center X
+            y: 50, // Center Y
+            scale: config.scale * 1.5 // Slightly larger for full screen effect impact
+        });
+
+        // 3. Delayed Damage
+        setTimeout(() => {
+            const currentMonsters = get().monsters;
+            const multiplier = 5.0; // High damage for skills
+            const rawDmg = heroStats.atk * multiplier;
+
+            // AOE Damage to ALL visible monsters
+            currentMonsters.forEach(m => {
+                let dmg = rawDmg * (100 / (100 + m.stats.def));
+                if (Math.random() < heroStats.critRate) dmg *= heroStats.critDmg;
+                get().damageMonster(m.id, Math.ceil(dmg));
+            });
+
+            // 4. Resume
+            set({ isSkillActive: false });
+        }, skillDuration);
     },
 }));

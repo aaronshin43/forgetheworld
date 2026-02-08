@@ -20,7 +20,7 @@ import re
 from fastapi import UploadFile, File, Form
 from fastapi import UploadFile, File, Form, Body
 from pydantic import BaseModel
-from ai_service import analyze_image_with_gemini, generate_flavor_text_with_featherless, generate_item_image, generate_item_image_v2, generate_evolution_concept
+from ai_service import analyze_image_with_gemini, generate_flavor_text_with_featherless, generate_item_image, generate_item_image_v2, generate_evolution_concept, analyze_skill_image
 
 class ImageRequest(BaseModel):
     prompt: str
@@ -86,4 +86,23 @@ async def evolve_item(request: EvolutionRequest):
         "name": concept.get("name", "Unknown Evolution"),
         "description": concept.get("description", "A mysterious form."),
         "image": image_url
+    }
+
+@app.post("/scan-skill")
+async def scan_skill(file: UploadFile = File(...)):
+    contents = await file.read()
+    skill_data = await analyze_skill_image(contents)
+    
+    return {
+        "analysis": {
+            "item": skill_data.get("skill_name"),
+            "type": "skill",
+            "skill_type": skill_data.get("type", "deal"),
+            "rarity_score": 5, 
+            "affected_stats": []
+        },
+        "flavor": {
+            "name": skill_data.get("skill_name"),
+            "description": skill_data.get("reasoning", "A powerful skill.")
+        }
     }

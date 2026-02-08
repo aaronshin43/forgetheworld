@@ -1,0 +1,6 @@
+guardianspirit;Nature, Spirit, Light, Shield;Healing, Protection, Green, Soft
+heavendoor;Gate, Light, Holy, Dimension;Resurrection, AOE, Divine, Gold
+installshield;Metal, Shield, Tech, Barrier;Defense, Invincible, Blue, Robotic
+signusblessing;Royal, Light, Sword, Queen;Stat Buff, Ultimate, Ascension, Holy
+valhalar;Warrior, Sword, Shout, Spirit;Attack Buff, Viking, Red, Berserk
+windbooster;Wind, Speed, Green, Arrow;Haste, Fast, Breeze, Agility

@@ -21,10 +21,12 @@ function normalizeFlavor(flavor: unknown): { name: string; description: string }
 }
 
 export const ResultOverlay = () => {
-    const { scanResult, setScanResult, setViewMode, setTimeScale, setIsAnalyzing, inventory, interactionMode, enhanceItem } = useGameStore();
+    const { scanResult, setScanResult, setViewMode, setTimeScale, setIsAnalyzing, inventory, interactionMode, enhanceItem, triggerSkill, scanMode } = useGameStore();
     const [showEnhanceSelect, setShowEnhanceSelect] = useState(false);
 
     if (!scanResult) return null;
+
+    const isSkill = scanMode === 'skill' || scanResult.analysis.type === 'skill';
 
     const handleSelectEnhance = (itemId: string) => {
         enhanceItem(itemId);
@@ -108,6 +110,16 @@ export const ResultOverlay = () => {
                                 transition={{ repeat: Infinity, duration: 2 }}
                             />
                         </div>
+                    ) : isSkill ? (
+                        <div className="flex flex-col items-center justify-center h-full">
+                            <motion.img
+                                src={`/skills/${scanResult.analysis.skill_type || 'deal'}/${flavor.name}.webp`}
+                                alt="Skill"
+                                className="w-48 h-48 object-contain drop-shadow-[0_0_20px_rgba(59,130,246,0.8)]"
+                                animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
+                                transition={{ repeat: Infinity, duration: 2 }}
+                            />
+                        </div>
                     ) : displayImage ? (
                         <motion.img
                             initial={{ opacity: 0, scale: 0.8 }}
@@ -133,42 +145,53 @@ export const ResultOverlay = () => {
                 </div>
 
                 <div className="p-6">
-                    <h2 className={`text-2xl font-bold mb-1 ${interactionMode === 'enhancing' ? 'text-indigo-400' : 'text-yellow-400'}`}>
+                    <h2 className={`text-2xl font-bold mb-1 ${interactionMode === 'enhancing' ? 'text-indigo-400' : isSkill ? 'text-blue-400' : 'text-yellow-400'}`}>
                         {flavor.name}
                     </h2>
                     <p className="text-gray-400 text-xs italic mb-4">"{flavor.description}"</p>
 
                     <div className="mb-6">
-                        <div className="flex flex-col items-center justify-center gap-1 mb-3">
-                            <span className={`text-2xl font-black italic uppercase tracking-wider ${gradeColor}`}>
-                                {grade}
-                            </span>
-                        </div>
+                        {!isSkill && (
+                            <div className="flex flex-col items-center justify-center gap-1 mb-3">
+                                <span className={`text-2xl font-black italic uppercase tracking-wider ${gradeColor}`}>
+                                    {grade}
+                                </span>
+                            </div>
+                        )}
 
                         <div className="flex flex-wrap justify-center gap-2">
-                            {(scanResult.analysis.affected_stats || ['atk', 'def', 'maxHp']).map((stat: string) => {
-                                // For material, values are in scanResult.analysis.stats (if I added it in scanMaterial store action)
-                                // In `scanMaterial` store action, I did: `analysis: { ...data, stats: itemStats ... }`
-                                // So `scanResult.analysis.stats` should exist.
-                                // For crafted items, `item` exists and has stats.
-                                // So we prefer `item.stats` if it exists, else `scanResult.analysis.stats`.
+                            {isSkill ? (
+                                <span className="px-3 py-1 bg-blue-900/50 border border-blue-500 rounded text-xs text-blue-200 uppercase font-bold flex items-center gap-1">
+                                    <span>TYPE: {scanResult.analysis.skill_type?.toUpperCase() || 'DEAL'}</span>
+                                </span>
+                            ) : (
+                                (scanResult.analysis.affected_stats || ['atk', 'def', 'maxHp']).map((stat: string) => {
+                                    // For material, values are in scanResult.analysis.stats (if I added it in scanMaterial store action)
+                                    // In `scanMaterial` store action, I did: `analysis: { ...data, stats: itemStats ... }`
+                                    // So `scanResult.analysis.stats` should exist.
+                                    // For crafted items, `item` exists and has stats.
+                                    // So we prefer `item.stats` if it exists, else `scanResult.analysis.stats`.
 
-                                const val = item?.stats?.[stat as keyof typeof item.stats] ?? scanResult.analysis.stats?.[stat] ?? 0;
-                                return (
-                                    <span key={stat} className="px-3 py-1 bg-gray-700 border border-gray-600 rounded text-xs text-gray-300 uppercase font-bold flex items-center gap-1">
-                                        <span>{stat}</span>
-                                        <span className="text-yellow-400">+{val}</span>
-                                    </span>
-                                );
-                            })}
+                                    const val = item?.stats?.[stat as keyof typeof item.stats] ?? scanResult.analysis.stats?.[stat] ?? 0;
+                                    return (
+                                        <span key={stat} className="px-3 py-1 bg-gray-700 border border-gray-600 rounded text-xs text-gray-300 uppercase font-bold flex items-center gap-1">
+                                            <span>{stat}</span>
+                                            <span className="text-yellow-400">+{val}</span>
+                                        </span>
+                                    );
+                                })
+                            )}
                         </div>
                     </div>
 
                     <button
-                        onClick={interactionMode === 'enhancing' ? () => setShowEnhanceSelect(true) : handleClose}
-                        className={`w-full py-3 ${interactionMode === 'enhancing' ? 'bg-indigo-600 hover:bg-indigo-500' : 'bg-yellow-600 hover:bg-yellow-500'} text-black font-bold rounded-lg transition-colors`}
+                        onClick={interactionMode === 'enhancing' ? () => setShowEnhanceSelect(true) : isSkill ? () => triggerSkill(flavor.name) : handleClose}
+                        className={`w-full py-3 ${interactionMode === 'enhancing' ? 'bg-indigo-600 hover:bg-indigo-500' :
+                                isSkill ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)]' :
+                                    'bg-yellow-600 hover:bg-yellow-500'
+                            } text-black font-bold rounded-lg transition-colors`}
                     >
-                        {interactionMode === 'enhancing' ? 'SELECT ITEM TO ENHANCE' : 'CLAIM ITEM'}
+                        {interactionMode === 'enhancing' ? 'SELECT ITEM TO ENHANCE' : isSkill ? 'CAST SKILL' : 'CLAIM ITEM'}
                     </button>
                 </div>
             </motion.div>
