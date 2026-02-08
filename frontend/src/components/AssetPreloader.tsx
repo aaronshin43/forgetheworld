@@ -55,6 +55,25 @@ export const AssetPreloader = () => {
         const bgAssets = ['city.webp', 'city2.webp', 'intro.webp', 'subway.webp'];
         bgAssets.forEach(asset => allAssets.push(`/background/${asset}`));
 
+        // 6. Skill Sounds (Optional - browsers might lazy load audio, but preloading helps)
+        // Check for 'use', 'use2', 'special', 'hit' for each skill
+        const soundSuffixes = ['use', 'use2', 'special', 'hit'];
+        Object.entries(SKILL_CATEGORIES).forEach(([category, skills]) => {
+            skills.forEach(skillName => {
+                soundSuffixes.forEach(suffix => {
+                    // Note: Not all combinations exist, but browser cache will handle 404s gracefully if we just try new Audio()
+                    // or we can just preload common ones. For now, let's skip explicit audio preloading to avoid 404 console spam
+                    // unless we know for sure they exist. 
+                    // Given the dynamic nature, we'll let Audio() handle loading on demand or preload silently.
+                    // If we strictly want to preload, we'd need a registry of existing files.
+                    // Let's at least preload 'use' which exists for most.
+                    if (suffix === 'use') {
+                        // allAssets.push(`/skill_sound/${category}/${skillName}_${suffix}.mp3`);
+                    }
+                });
+            });
+        });
+
         const total = allAssets.length;
         if (total === 0) {
             setLoadingProgress(100);

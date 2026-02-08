@@ -193,11 +193,11 @@ export const BattleStage = () => {
                                     style={{
                                         transform: `translate(-50%, -100%) rotate(${deg}deg)`,
                                         background: `
-                                          linear-gradient(to right, transparent 0%, rgba(59,130,246,0.12) 30%, rgba(96,165,250,0.35) 50%, rgba(59,130,246,0.12) 70%, transparent 100%),
-                                          linear-gradient(to top, transparent 0%, rgba(59,130,246,0.1) 15%, rgba(96,165,250,0.32) 50%, rgba(59,130,246,0.08) 85%, transparent 100%)
+                                          linear-gradient(to right, transparent 0%, rgba(239,68,68,0.12) 30%, rgba(248,113,113,0.35) 50%, rgba(239,68,68,0.12) 70%, transparent 100%),
+                                          linear-gradient(to top, transparent 0%, rgba(239,68,68,0.1) 15%, rgba(248,113,113,0.32) 50%, rgba(239,68,68,0.08) 85%, transparent 100%)
                                         `,
                                         filter: 'blur(6px)',
-                                        boxShadow: '0 0 24px rgba(59,130,246,0.22), 0 0 48px rgba(96,165,250,0.12)',
+                                        boxShadow: '0 0 24px rgba(239,68,68,0.22), 0 0 48px rgba(248,113,113,0.12)',
                                     }}
                                 />
                             ))}

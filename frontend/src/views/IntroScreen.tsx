@@ -68,12 +68,12 @@ export const IntroScreen = () => {
                     />
                 </button>
 
-                <button
+                {/* <button
                     onClick={() => setAppMode('dev')}
                     className="px-8 py-2 bg-gray-800/80 hover:bg-gray-700 text-gray-400 hover:text-white font-mono text-sm rounded border border-gray-600 backdrop-blur-sm transition-colors"
                 >
                     DEV MODE
-                </button>
+                </button> */}
             </div>
         </div>
     );

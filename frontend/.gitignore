@@ -42,3 +42,4 @@ next-env.d.ts
 
 # assets
 *.webp
+*.mp3
