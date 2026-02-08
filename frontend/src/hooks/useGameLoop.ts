@@ -34,6 +34,13 @@ export const useGameLoop = () => {
             updateFilmRecharge(time);
 
             // 2. Game Logic based on State
+            // Freeze on game over
+            if (stageState === 'gameover') {
+                previousTimeRef.current = time;
+                requestRef.current = requestAnimationFrame(animate);
+                return;
+            }
+
             if (stageState === 'spawning') {
                 const { appMode, spawnWave } = useGameStore.getState();
 
@@ -156,6 +163,8 @@ export const useGameLoop = () => {
                             useGameStore.setState(state => ({
                                 monsters: state.monsters.filter(m => m.id !== monster.id)
                             }));
+                            // Increment kill counter for fever time
+                            useGameStore.getState().incrementKillCount();
                             return;
                         }
 

@@ -121,6 +121,10 @@ interface GameState {
     // Game Loop State
     wave: number;
     score: number;
+    killCount: number;
+    feverTimeReady: boolean;
+    gameStartTime: number;
+    survivalTime: number;
     stageState: 'spawning' | 'walking' | 'fighting' | 'cleared' | 'gameover';
     timeScale: number;
 
@@ -148,6 +152,7 @@ interface GameState {
     setHeroStats: (stats: Partial<EntityStats>) => void;
     damageHero: (amount: number) => void;
     healHero: (amount: number) => void;
+    triggerGameOver: () => void;
     addExp: (amount: number) => void;
 
     useFilm: () => boolean;
@@ -157,6 +162,8 @@ interface GameState {
     setWave: (wave: number) => void;
     setStageState: (state: 'spawning' | 'walking' | 'fighting' | 'cleared' | 'gameover') => void;
     setTimeScale: (scale: number) => void;
+    incrementKillCount: () => void;
+    useFeverTime: () => void;
 
     setViewMode: (mode: 'battle' | 'camera') => void;
     setScanMode: (mode: 'craft' | 'skill' | 'enhance' | null) => void;
@@ -258,7 +265,7 @@ export const useGameStore = create<GameState>((set, get) => ({
 
     // Hero Initial State
     heroStats: {
-        hp: 1000,
+        hp: 10,
         maxHp: 1000,
         atk: 300,
         def: 50,
@@ -279,6 +286,10 @@ export const useGameStore = create<GameState>((set, get) => ({
     // Game Loop State
     wave: 1,
     score: 0,
+    killCount: 0,
+    feverTimeReady: false,
+    gameStartTime: Date.now(),
+    survivalTime: 0,
     stageState: 'spawning',
     timeScale: 1.0,
 
@@ -306,14 +317,26 @@ export const useGameStore = create<GameState>((set, get) => ({
     })),
     damageHero: (amount) => set((state) => {
         const newHp = Math.max(0, state.heroStats.hp - amount);
-        return {
-            heroStats: { ...state.heroStats, hp: newHp },
-            // Optional: check game over here or in loop
-        };
+        const updatedStats = { ...state.heroStats, hp: newHp };
+
+        // Trigger game over if HP reaches 0
+        if (newHp === 0 && state.stageState !== 'gameover') {
+            get().triggerGameOver();
+        }
+
+        return { heroStats: updatedStats };
     }),
     healHero: (amount) => set((state) => ({
         heroStats: { ...state.heroStats, hp: Math.min(state.heroStats.maxHp, state.heroStats.hp + amount) }
     })),
+    triggerGameOver: () => set((state) => {
+        const survivalTime = Math.floor((Date.now() - state.gameStartTime) / 1000); // in seconds
+        return {
+            stageState: 'gameover',
+            survivalTime,
+            characterAction: 'prone'
+        };
+    }),
     addExp: (amount) => set((state) => {
         let { heroExp, heroMaxExp, heroLevel } = state;
         heroExp += amount;
@@ -350,6 +373,25 @@ export const useGameStore = create<GameState>((set, get) => ({
     setWave: (wave) => set({ wave }),
     setStageState: (stageState) => set({ stageState }),
     setTimeScale: (timeScale) => set({ timeScale }),
+    incrementKillCount: () => set((state) => {
+        const newKillCount = state.killCount + 1;
+        const feverTimeReady = newKillCount >= 10;
+        return { killCount: newKillCount, feverTimeReady };
+    }),
+    useFeverTime: () => {
+        const { feverTimeReady, triggerSkill } = get();
+        if (!feverTimeReady) return;
+
+        // Get random ultimate skill
+        const ultimateSkills = SKILL_CATEGORIES.ultimate;
+        if (ultimateSkills && ultimateSkills.length > 0) {
+            const randomSkill = ultimateSkills[Math.floor(Math.random() * ultimateSkills.length)];
+            triggerSkill(randomSkill);
+        }
+
+        // Reset counter
+        set({ killCount: 0, feverTimeReady: false });
+    },
 
     setViewMode: (viewMode) => set({ viewMode }),
     setScanMode: (scanMode) => set({ scanMode }),
@@ -361,7 +403,6 @@ export const useGameStore = create<GameState>((set, get) => ({
         set({ inventory: newInventory });
     },
     setBackground: (background) => set({ currentBackground: background }),
-    setAppMode: (appMode) => set({ appMode }),
     setIsLoading: (isLoading) => set({ isLoading }),
     setLoadingProgress: (loadingProgress) => set({ loadingProgress }),
     setIsMenuOpen: (isMenuOpen) => set({ isMenuOpen }),
@@ -436,7 +477,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     startCrafting: () => set({ interactionMode: 'crafting', viewMode: 'camera', scanMode: 'craft' }),
     startSkillMode: () => set({ interactionMode: 'battle', viewMode: 'camera', scanMode: 'skill', tempMaterial: null }),
     // Enhancement Actions
-    startEnhancement: () => set({ interactionMode: 'enhancing', viewMode: 'camera', tempMaterial: null }),
+    startEnhancement: () => set({ interactionMode: 'enhancing', viewMode: 'camera', scanMode: 'enhance', tempMaterial: null }),
 
     scanMaterial: (data) => set((state) => {
         const grade = calculateGrade(data.rarity, state.sessionStartTime);
@@ -709,6 +750,27 @@ export const useGameStore = create<GameState>((set, get) => ({
     removeEffect: (id) => {
         set((state) => ({ activeEffects: state.activeEffects.filter(e => e.id !== id) }));
     },
+
+    setAppMode: (mode) => set((state) => {
+        if (mode === 'game') {
+            // Reset game state on new game start
+            return {
+                appMode: mode,
+                killCount: 0,
+                feverTimeReady: false,
+                wave: 1,
+                score: 0,
+                stageState: 'spawning',
+                gameStartTime: Date.now(),
+                survivalTime: 0,
+                heroStats: { ...state.heroStats, hp: state.heroStats.maxHp }, // Reset HP
+                monsters: [],
+                activeEffects: [],
+                damageNumbers: []
+            };
+        }
+        return { appMode: mode };
+    }),
 
     setCharacterAction: (action) => set({ characterAction: action }),
     triggerCharacterAttack: () => {

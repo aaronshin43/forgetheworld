@@ -19,6 +19,8 @@ const getSkillPath = (name: string) => {
 export const SkillEffect = ({ name, x, y, scale, onComplete }: SkillEffectProps) => {
     const duration = SKILL_DURATIONS[name] || 3000;
     const imagePath = getSkillPath(name);
+    const isUltimate = SKILL_CATEGORIES.ultimate.includes(name);
+    const hasSeparateBackground = name === 'souleclipse';
 
     // Use a ref to store the latest onComplete callback
     // This prevents the useEffect from re-running when the parent component re-renders
@@ -46,11 +48,24 @@ export const SkillEffect = ({ name, x, y, scale, onComplete }: SkillEffectProps)
                 height: '500px'
             }}
         >
+            {/* Background layer for skills with separate background */}
+            {hasSeparateBackground && (
+                <img
+                    src={`/skills/ultimate/${name}background.webp?t=${uniqueId}`}
+                    alt={`${name} background`}
+                    className="absolute inset-0 w-full h-full object-contain"
+                    draggable={false}
+                    style={{ zIndex: 0 }}
+                />
+            )}
+
+            {/* Main effect layer */}
             <img
                 src={`${imagePath}?t=${uniqueId}`}
                 alt={name}
                 className="w-full h-full object-contain mix-blend-screen"
                 draggable={false}
+                style={{ position: 'relative', zIndex: 1 }}
             />
         </div>
     );

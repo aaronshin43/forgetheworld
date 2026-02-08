@@ -35,10 +35,8 @@ export const SKILL_DURATIONS: Record<string, number> = {
     "shadower": 5100,
     "supercannonexplosion": 6540,
     "ren": 3480,
-    "cataclysm": 4590,
     "spiritcalibur": 7020,
     "souleclipse": 8340,
-    "combodefault": 4400,
 
     // Basic
     "blast": 960,
@@ -77,7 +75,7 @@ export const SKILL_DURATIONS: Record<string, number> = {
     "genesis": 2430,
     "gumgobong": 1530,
     "karmapury": 1650,
-    "laststanding": 4590,
+    "laststanding": 2295,
     "legendaryspear": 1440,
     "limitbreak": 1740,
     "lineinfentry": 5310,
@@ -85,9 +83,9 @@ export const SKILL_DURATIONS: Record<string, number> = {
     "loyalguard": 1170,
     "metalarmor": 4140,
     "mothership": 3600,
-    "needlebat": 2940,
+    "needlebat": 2000,
     "nightmare": 3180,
-    "nova": 3180,
+    "nova": 2000,
     "pachopung": 1170,
     "persilrade": 1440,
     "poisonregion": 3660,
@@ -100,21 +98,23 @@ export const SKILL_DURATIONS: Record<string, number> = {
     "superfistinrage": 810,
     "swordillustion": 3750,
     "takedown": 2100,
-    "thunderbreak": 3270,
+    "thunderbreak": 2400,
     "thunderpower": 1260,
     "thunderspear": 2970,
     "ultimateblast": 3420,
     "ultimatesniping": 1320,
     "uncountablearrow": 900,
     "wildvalcan": 2700,
-    "windofpray": 1680
+    "windofpray": 1680,
+    "cataclysm": 4590,
+    "combodefault": 2600
 };
 
 export const SKILL_CATEGORIES = {
     basic: ["blast", "blast2", "divinecharge", "divinecharge2", "divineswing"],
     buff: ["blueaura", "darkaura", "drainaura", "guardianspirit", "heavendoor", "installshield", "signusblessing", "unionaura", "valhalar", "windbooster", "yellowaura"],
-    deal: ["blizzard", "cannonbaguka", "cosmos", "crossthesticks", "darkimpaile", "darkspear", "deadlycharge", "demonimpact", "endlesspain", "fallingjustice", "foreverstervingbeast", "fourseason", "gambit", "genesis", "gumgobong", "karmapury", "laststanding", "legendaryspear", "limitbreak", "lineinfentry", "longrangetrueshoot", "loyalguard", "metalarmor", "mothership", "needlebat", "nightmare", "nova", "pachopung", "persilrade", "poisonregion", "primalrore", "purgerop", "robotlauncherRM7", "ruin", "smight", "soulpanetrition", "superfistinrage", "swordillustion", "takedown", "thunderbreak", "thunderpower", "thunderspear", "ultimateblast", "ultimatesniping", "uncountablearrow", "wildvalcan", "windofpray"],
-    ultimate: ["astralblitz", "durandal", "groundzero", "shadower", "supercannonexplosion", "ren", "cataclysm", "spiritcalibur", "souleclipse", "combodefault"]
+    deal: ["blizzard", "cannonbaguka", "cosmos", "crossthesticks", "darkimpaile", "darkspear", "deadlycharge", "demonimpact", "endlesspain", "fallingjustice", "foreverstervingbeast", "fourseason", "gambit", "genesis", "gumgobong", "karmapury", "laststanding", "legendaryspear", "limitbreak", "lineinfentry", "longrangetrueshoot", "loyalguard", "metalarmor", "mothership", "needlebat", "nightmare", "nova", "pachopung", "persilrade", "poisonregion", "primalrore", "purgerop", "robotlauncherRM7", "ruin", "smight", "soulpanetrition", "superfistinrage", "swordillustion", "takedown", "thunderbreak", "thunderpower", "thunderspear", "ultimateblast", "ultimatesniping", "uncountablearrow", "wildvalcan", "windofpray", "cataclysm", "combodefault"],
+    ultimate: ["astralblitz", "durandal", "groundzero", "shadower", "supercannonexplosion", "ren", "spiritcalibur", "souleclipse"]
 };
 
 export interface SkillConfig {
@@ -125,16 +125,14 @@ export interface SkillConfig {
 
 export const SKILL_CONFIGS: Record<string, SkillConfig> = {
     // Ultimate Defaults
-    "astralblitz": { x: 50, y: 55, scale: 1.3 },
-    "durandal": { x: 50, y: 55, scale: 1.3 },
-    "groundzero": { x: 50, y: 60, scale: 1.2 },
-    "shadower": { x: 50, y: 55, scale: 1.0 },
-    "supercannonexplosion": { x: 50, y: 55, scale: 0.8 },
-    "ren": { x: 50, y: 55, scale: 0.8 },
-    "cataclysm": { x: 50, y: 72, scale: 1.2 },
-    "spiritcalibur": { x: 50, y: 55, scale: 0.8 },
+    "astralblitz": { x: 50, y: 55, scale: 1.5 },
+    "durandal": { x: 50, y: 55, scale: 1.5 },
+    "groundzero": { x: 50, y: 55, scale: 1.4 },
+    "shadower": { x: 50, y: 55, scale: 1.2 },
+    "supercannonexplosion": { x: 50, y: 52, scale: 1.0 },
+    "ren": { x: 50, y: 55, scale: 1.0 },
+    "spiritcalibur": { x: 50, y: 53, scale: 0.9 },
     "souleclipse": { x: 55, y: 50, scale: 1.0 },
-    "combodefault": { x: 50, y: 55, scale: 0.8 },
 
     // Basic Defaults (Standard Hit)
     "blast": { x: 38, y: 68, scale: 1.0 },
@@ -203,7 +201,9 @@ export const SKILL_CONFIGS: Record<string, SkillConfig> = {
     "ultimatesniping": { x: 110, y: 80, scale: 2.5 },
     "uncountablearrow": { x: 60, y: 70, scale: 1.0 },
     "wildvalcan": { x: 60, y: 80, scale: 1.3 },
-    "windofpray": { x: 65, y: 65, scale: 1.0 }
+    "windofpray": { x: 65, y: 65, scale: 1.0 },
+    "combodefault": { x: 50, y: 55, scale: 1.4 },
+    "cataclysm": { x: 50, y: 66, scale: 1.7 }
 };
 
 export const ATTACK_ANIMATIONS = [
