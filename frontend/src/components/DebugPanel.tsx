@@ -3,7 +3,16 @@ import { SKILL_DURATIONS, SKILL_CONFIGS, MONSTER_LIST, BACKGROUND_LIST } from '.
 import { useGameStore } from '../store/gameStore';
 
 export const DebugPanel = () => {
-    const { addEffect, triggerCharacterAttack, spawnMonster, clearMonsters, currentBackground, setBackground } = useGameStore();
+    const { addEffect, triggerCharacterAttack, spawnWave, clearMonsters, currentBackground, setBackground } = useGameStore();
+
+    // ...
+
+    <button
+        onClick={() => spawnWave(1, selectedMonster)}
+        className="flex-1 bg-green-600/30 hover:bg-green-600/50 text-xs py-2 rounded transition-colors border border-green-500/30 text-green-200"
+    >
+        Spawn Wave (1)
+    </button>
 
     const [isOpen, setIsOpen] = useState(false);
     const [selectedSkill, setSelectedSkill] = useState(Object.keys(SKILL_DURATIONS)[0]);
@@ -130,10 +139,10 @@ export const DebugPanel = () => {
 
                     <div className="flex gap-2">
                         <button
-                            onClick={() => spawnMonster(selectedMonster)}
+                            onClick={() => spawnWave(1, selectedMonster)}
                             className="flex-1 bg-green-600/30 hover:bg-green-600/50 text-xs py-2 rounded transition-colors border border-green-500/30 text-green-200"
                         >
-                            Spawn
+                            Spawn Wave (1)
                         </button>
                         <button
                             onClick={clearMonsters}
