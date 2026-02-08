@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useGameStore } from '../store/gameStore';
-import { MONSTER_DURATIONS, ATTACK_ANIMATIONS } from '../constants/assetRegistry';
+import { MONSTER_DURATIONS, ATTACK_ANIMATIONS, SKILL_CATEGORIES } from '../constants/assetRegistry';
 
 export const AssetPreloader = () => {
     const { setLoadingProgress, setIsLoading } = useGameStore();
@@ -13,7 +13,7 @@ export const AssetPreloader = () => {
 
         const allAssets: string[] = [];
 
-        // 1. Collect Monster Assets
+        // 1. Collect Monster Assets (monster/[name]/[name]_[action].webp)
         Object.keys(MONSTER_DURATIONS).forEach(monsterName => {
             const actions = Object.keys(MONSTER_DURATIONS[monsterName]);
             actions.forEach(action => {
@@ -21,15 +21,39 @@ export const AssetPreloader = () => {
             });
         });
 
-        // 2. Collect Character Assets
-        const charBasics = ['alert', 'heal', 'jump', 'stand1', 'stand2', 'walk1', 'walk2'];
-        [...charBasics, ...ATTACK_ANIMATIONS].forEach(action => {
+        // 2. Collect Character Assets (character/[action].webp)
+        const charBasics = ['alert', 'heal', 'jump', 'stand1', 'stand2', 'walk1', 'walk2', 'prone', 'forge'];
+        const charAttacks = [...ATTACK_ANIMATIONS];
+        // Need to check if ATTACK_ANIMATIONS are just names or full paths? 
+        // Based on registry it seems they are action names like 'shoot1', 'swingO1'.
+        [...charBasics, ...charAttacks].forEach(action => {
             allAssets.push(`/character/${action}.webp`);
         });
 
-        // 3. UI/Background Assets (Optional but recommended)
-        allAssets.push('/ui/head.webp', '/ui/profile_box.webp', '/ui/goldenhammar.webp');
-        allAssets.push('/background/city.webp', '/background/city2.webp', '/background/subway.webp');
+        // 3. Collect Skill Assets (skills/[category]/[name].webp)
+        Object.entries(SKILL_CATEGORIES).forEach(([category, skills]) => {
+            skills.forEach(skillName => {
+                allAssets.push(`/skills/${category}/${skillName}.webp`);
+                // Special case for souleclipse background
+                if (skillName === 'souleclipse') {
+                    allAssets.push(`/skills/${category}/${skillName}background.webp`);
+                }
+            });
+        });
+
+        // 4. UI Assets
+        const uiAssets = [
+            'anvil.webp', 'anvil2.webp',
+            'craft_btn.webp', 'enhance_btn.webp', 'skill_btn.webp', 'start_btn.webp',
+            'goldenhammar.webp', 'head.webp', 'healthbar.webp',
+            'inventory.webp', 'itembox.webp', 'profile_box.webp',
+            'sword.webp', 'title_mobile.webp'
+        ];
+        uiAssets.forEach(asset => allAssets.push(`/ui/${asset}`));
+
+        // 5. Background Assets
+        const bgAssets = ['city.webp', 'city2.webp', 'intro.webp', 'subway.webp'];
+        bgAssets.forEach(asset => allAssets.push(`/background/${asset}`));
 
         const total = allAssets.length;
         if (total === 0) {
@@ -38,16 +62,19 @@ export const AssetPreloader = () => {
             return;
         }
 
+        console.log(`[AssetPreloader] Starting preload of ${total} assets...`);
+
         const updateProgress = () => {
             loadedCountRef.current += 1;
             const progress = Math.min(100, Math.floor((loadedCountRef.current / total) * 100));
             setLoadingProgress(progress);
 
             if (loadedCountRef.current >= total) {
-                // Small delay to ensure state update renders fully
+                console.log('[AssetPreloader] All assets loaded!');
+                // Minimal delay to show 100% before switching
                 setTimeout(() => {
                     setIsLoading(false);
-                }, 500);
+                }, 800);
             }
         };
 
@@ -56,8 +83,8 @@ export const AssetPreloader = () => {
             img.src = src;
             img.onload = updateProgress;
             img.onerror = () => {
-                console.warn(`Failed to preload asset: ${src}`);
-                updateProgress(); // Proceed anyway to avoid hanging
+                console.warn(`[AssetPreloader] Failed to load: ${src}`);
+                updateProgress(); // Proceed anyway
             };
         });
 
