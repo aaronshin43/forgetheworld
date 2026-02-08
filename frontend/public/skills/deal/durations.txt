@@ -45,3 +45,5 @@ ultimatesniping.webp: 1320.0
 uncountablearrow.webp: 900.0
 wildvalcan.webp: 2700.0
 windofpray.webp: 1680.0
+combodefault.webp: 4400.0
+cataclysm.webp: 4590.0
