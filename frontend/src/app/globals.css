@@ -123,3 +123,14 @@ body {
     transform: translateY(-55px) scale(0.8);
   }
 }
+
+/* Letterbox Slide Animation for Ultimate Skills */
+@keyframes letterboxSlide {
+  0% {
+    transform: scaleY(0);
+  }
+
+  100% {
+    transform: scaleY(1);
+  }
+}

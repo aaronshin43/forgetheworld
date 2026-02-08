@@ -75,7 +75,7 @@ export const SKILL_DURATIONS: Record<string, number> = {
     "genesis": 2430,
     "gumgobong": 1530,
     "karmapury": 1650,
-    "laststanding": 4590,
+    "laststanding": 2295,
     "legendaryspear": 1440,
     "limitbreak": 1740,
     "lineinfentry": 5310,
@@ -83,9 +83,9 @@ export const SKILL_DURATIONS: Record<string, number> = {
     "loyalguard": 1170,
     "metalarmor": 4140,
     "mothership": 3600,
-    "needlebat": 2940,
+    "needlebat": 2000,
     "nightmare": 3180,
-    "nova": 3180,
+    "nova": 2000,
     "pachopung": 1170,
     "persilrade": 1440,
     "poisonregion": 3660,
@@ -98,7 +98,7 @@ export const SKILL_DURATIONS: Record<string, number> = {
     "superfistinrage": 810,
     "swordillustion": 3750,
     "takedown": 2100,
-    "thunderbreak": 3270,
+    "thunderbreak": 2400,
     "thunderpower": 1260,
     "thunderspear": 2970,
     "ultimateblast": 3420,
@@ -107,7 +107,7 @@ export const SKILL_DURATIONS: Record<string, number> = {
     "wildvalcan": 2700,
     "windofpray": 1680,
     "cataclysm": 4590,
-    "combodefault": 4400
+    "combodefault": 2600
 };
 
 export const SKILL_CATEGORIES = {
@@ -125,13 +125,13 @@ export interface SkillConfig {
 
 export const SKILL_CONFIGS: Record<string, SkillConfig> = {
     // Ultimate Defaults
-    "astralblitz": { x: 50, y: 55, scale: 1.3 },
-    "durandal": { x: 50, y: 55, scale: 1.3 },
-    "groundzero": { x: 50, y: 60, scale: 1.2 },
-    "shadower": { x: 50, y: 55, scale: 1.0 },
-    "supercannonexplosion": { x: 50, y: 55, scale: 0.8 },
-    "ren": { x: 50, y: 55, scale: 0.8 },
-    "spiritcalibur": { x: 50, y: 55, scale: 0.8 },
+    "astralblitz": { x: 50, y: 55, scale: 1.5 },
+    "durandal": { x: 50, y: 55, scale: 1.5 },
+    "groundzero": { x: 50, y: 55, scale: 1.4 },
+    "shadower": { x: 50, y: 55, scale: 1.2 },
+    "supercannonexplosion": { x: 50, y: 52, scale: 1.0 },
+    "ren": { x: 50, y: 55, scale: 1.0 },
+    "spiritcalibur": { x: 50, y: 53, scale: 0.9 },
     "souleclipse": { x: 55, y: 50, scale: 1.0 },
 
     // Basic Defaults (Standard Hit)
@@ -202,8 +202,8 @@ export const SKILL_CONFIGS: Record<string, SkillConfig> = {
     "uncountablearrow": { x: 50, y: 50, scale: 1.0 },
     "wildvalcan": { x: 50, y: 50, scale: 1.0 },
     "windofpray": { x: 50, y: 50, scale: 1.0 },
-    "combodefault": { x: 50, y: 55, scale: 0.8 },
-    "cataclysm": { x: 50, y: 72, scale: 1.2 }
+    "combodefault": { x: 50, y: 55, scale: 1.4 },
+    "cataclysm": { x: 50, y: 66, scale: 1.7 }
 };
 
 export const ATTACK_ANIMATIONS = [

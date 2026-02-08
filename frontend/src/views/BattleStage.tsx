@@ -5,7 +5,7 @@ import { SkillEffect } from '../components/SkillEffect';
 import { Monster } from '../components/Monster';
 import { DamageNumber } from '../components/DamageNumber';
 import { useGameLoop } from '../hooks/useGameLoop';
-import { MONSTER_ANIMATION_OFFSETS } from '../constants/assetRegistry';
+import { MONSTER_ANIMATION_OFFSETS, SKILL_CATEGORIES } from '../constants/assetRegistry';
 
 export const BattleStage = () => {
     // Run the Game Loop
@@ -144,6 +144,28 @@ export const BattleStage = () => {
                     })}
                 </div>
             </div>
+
+            {/* Letterbox Effect for Ultimate Skills (Z-50) */}
+            {activeEffects.some(effect => SKILL_CATEGORIES.ultimate.includes(effect.name)) && (
+                <>
+                    {/* Top Black Bar */}
+                    <div
+                        className="absolute top-0 left-0 right-0 bg-black z-100 pointer-events-none"
+                        style={{
+                            height: '30%',
+                            animation: 'letterboxSlide 0.3s ease-out'
+                        }}
+                    />
+                    {/* Bottom Black Bar */}
+                    <div
+                        className="absolute bottom-0 left-0 right-0 bg-black z-100 pointer-events-none"
+                        style={{
+                            height: '30%',
+                            animation: 'letterboxSlide 0.3s ease-out'
+                        }}
+                    />
+                </>
+            )}
 
             {/* HUD Layer (Z-50) */}
             <div className="absolute top-4 left-2 flex gap-0 items-start z-50">
