@@ -91,9 +91,12 @@ export const BattleStage = () => {
             </div>
 
             {/* HUD Layer (Z-50) */}
-            <div className="absolute top-8 left-4 flex gap-3 items-start z-50">
-                <div className="w-14 h-14 bg-gray-800 rounded-full border-2 border-orange-500/50 shadow-lg shadow-orange-500/20 overflow-hidden relative mt-1">
-                    <img src="/ui/head.webp" alt="Character" className="absolute inset-0 w-full h-full object-cover object-center" />
+            <div className="absolute top-4 left-2 flex gap-3 items-start z-50">
+                <div className="relative w-[88px] h-[88px] flex-shrink-0 mt-1">
+                    <div className="absolute inset-0 flex items-center justify-center translate-y-1">
+                        <img src="/ui/head.webp" alt="Character" className="w-[70%] h-[70%] object-contain object-center" />
+                    </div>
+                    <img src="/ui/profile_box.webp" alt="" className="absolute inset-0 w-full h-full object-contain pointer-events-none" aria-hidden />
                 </div>
                 <div className="flex flex-col gap-0.5 drop-shadow-md">
                     {/* Combat Power (Moved Above) */}
