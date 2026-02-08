@@ -19,7 +19,10 @@ export const BattleStage = () => {
         damageNumbers,
         monsters,
         removeEffect,
-        currentBackground
+        currentBackground,
+        feverTimeReady,
+        useFeverTime,
+        killCount
     } = useGameStore();
 
     // Derived values for UI
@@ -144,11 +147,45 @@ export const BattleStage = () => {
 
             {/* HUD Layer (Z-50) */}
             <div className="absolute top-4 left-2 flex gap-0 items-start z-50">
-                <div className="relative w-[88px] h-[88px] flex-shrink-0 mt-1">
+                <div
+                    className={`relative w-[88px] h-[88px] flex-shrink-0 mt-1 ${feverTimeReady ? 'cursor-pointer hover:scale-105 active:scale-95 transition-transform duration-200' : ''
+                        }`}
+                    onClick={() => feverTimeReady && useFeverTime()}
+                >
+                    {/* Fever Time Glow Effect */}
+                    {feverTimeReady && (
+                        <div
+                            className="absolute left-1/2 top-1/2 animate-streak-rotate pointer-events-none z-0"
+                            style={{
+                                width: '110px',
+                                height: '110px',
+                                marginLeft: '-55px',
+                                marginTop: '-55px',
+                            }}
+                            aria-hidden
+                        >
+                            {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
+                                <div
+                                    key={deg}
+                                    className="absolute left-1/2 top-1/2 w-10 h-1/2 origin-bottom"
+                                    style={{
+                                        transform: `translate(-50%, -100%) rotate(${deg}deg)`,
+                                        background: `
+                                          linear-gradient(to right, transparent 0%, rgba(59,130,246,0.12) 30%, rgba(96,165,250,0.35) 50%, rgba(59,130,246,0.12) 70%, transparent 100%),
+                                          linear-gradient(to top, transparent 0%, rgba(59,130,246,0.1) 15%, rgba(96,165,250,0.32) 50%, rgba(59,130,246,0.08) 85%, transparent 100%)
+                                        `,
+                                        filter: 'blur(6px)',
+                                        boxShadow: '0 0 24px rgba(59,130,246,0.22), 0 0 48px rgba(96,165,250,0.12)',
+                                    }}
+                                />
+                            ))}
+                        </div>
+                    )}
                     <div className="absolute inset-0 flex items-center justify-center translate-y-1">
                         <img src="/ui/head.webp" alt="Character" className="w-[70%] h-[70%] object-contain object-center" />
                     </div>
                     <img src="/ui/profile_box.webp" alt="" className="absolute inset-0 w-full h-full object-contain pointer-events-none" aria-hidden />
+
                 </div>
                 <div className="flex flex-col gap-0.5 drop-shadow-md translate-y-2 -ml-1">
                     {/* Combat Power – Calculate & Animate */}

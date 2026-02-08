@@ -121,6 +121,8 @@ interface GameState {
     // Game Loop State
     wave: number;
     score: number;
+    killCount: number;
+    feverTimeReady: boolean;
     stageState: 'spawning' | 'walking' | 'fighting' | 'cleared' | 'gameover';
     timeScale: number;
 
@@ -157,6 +159,8 @@ interface GameState {
     setWave: (wave: number) => void;
     setStageState: (state: 'spawning' | 'walking' | 'fighting' | 'cleared' | 'gameover') => void;
     setTimeScale: (scale: number) => void;
+    incrementKillCount: () => void;
+    useFeverTime: () => void;
 
     setViewMode: (mode: 'battle' | 'camera') => void;
     setScanMode: (mode: 'craft' | 'skill' | 'enhance' | null) => void;
@@ -279,6 +283,8 @@ export const useGameStore = create<GameState>((set, get) => ({
     // Game Loop State
     wave: 1,
     score: 0,
+    killCount: 0,
+    feverTimeReady: false,
     stageState: 'spawning',
     timeScale: 1.0,
 
@@ -350,6 +356,25 @@ export const useGameStore = create<GameState>((set, get) => ({
     setWave: (wave) => set({ wave }),
     setStageState: (stageState) => set({ stageState }),
     setTimeScale: (timeScale) => set({ timeScale }),
+    incrementKillCount: () => set((state) => {
+        const newKillCount = state.killCount + 1;
+        const feverTimeReady = newKillCount >= 10;
+        return { killCount: newKillCount, feverTimeReady };
+    }),
+    useFeverTime: () => {
+        const { feverTimeReady, triggerSkill } = get();
+        if (!feverTimeReady) return;
+
+        // Get random ultimate skill
+        const ultimateSkills = SKILL_CATEGORIES.ultimate;
+        if (ultimateSkills && ultimateSkills.length > 0) {
+            const randomSkill = ultimateSkills[Math.floor(Math.random() * ultimateSkills.length)];
+            triggerSkill(randomSkill);
+        }
+
+        // Reset counter
+        set({ killCount: 0, feverTimeReady: false });
+    },
 
     setViewMode: (viewMode) => set({ viewMode }),
     setScanMode: (scanMode) => set({ scanMode }),

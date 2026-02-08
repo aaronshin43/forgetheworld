@@ -156,6 +156,8 @@ export const useGameLoop = () => {
                             useGameStore.setState(state => ({
                                 monsters: state.monsters.filter(m => m.id !== monster.id)
                             }));
+                            // Increment kill counter for fever time
+                            useGameStore.getState().incrementKillCount();
                             return;
                         }
 
