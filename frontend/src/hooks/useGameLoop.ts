@@ -72,12 +72,13 @@ export const useGameLoop = () => {
             else if (stageState === 'fighting') {
                 const currentMonsters = useGameStore.getState().monsters; // Live State
 
-                const { appMode } = useGameStore.getState();
+                const { appMode, viewMode, isAnalyzing, scanResult } = useGameStore.getState();
+                const isFrozen = viewMode === 'camera' || isAnalyzing || !!scanResult;
 
                 // Hero Attack Logic
                 const heroCooldown = 1000 / heroStats.spd;
-                // Only auto-attack if NOT in dev mode
-                if (appMode !== 'dev' && time - lastHeroAttackRef.current >= heroCooldown) {
+                // Only auto-attack if NOT in dev mode AND NOT frozen
+                if (appMode !== 'dev' && !isFrozen && time - lastHeroAttackRef.current >= heroCooldown) {
                     const target = currentMonsters[Math.floor(Math.random() * currentMonsters.length)];
                     if (target) {
                         triggerCharacterAttack();
@@ -114,6 +115,57 @@ export const useGameLoop = () => {
                 const now = Date.now();
 
                 currentMonsters.forEach(monster => {
+                    // GRACEFUL FREEZE LOGIC
+                    if (isFrozen) {
+                        // 1. If moving, stop immediately to stand
+                        if (monster.currentAction === 'move') {
+                            useGameStore.setState(state => ({
+                                monsters: state.monsters.map(m => m.id === monster.id ? {
+                                    ...m,
+                                    currentAction: 'stand',
+                                    stateStartTime: now,
+                                    standCycles: 0
+                                } : m)
+                            }));
+                            return;
+                        }
+
+                        const elapsed = now - (monster.stateStartTime || now);
+                        const currentDuration = MONSTER_DURATIONS[monster.name]?.[monster.currentAction] || 1000;
+
+                        if (elapsed >= currentDuration) {
+                            // 2. If 'stand' cycle finishes, just loop stand. DO NOT ATTACK.
+                            if (monster.currentAction === 'stand') {
+                                useGameStore.setState(state => ({
+                                    monsters: state.monsters.map(m => m.id === monster.id ? {
+                                        ...m,
+                                        stateStartTime: now,
+                                        standCycles: 0 // Reset cycles
+                                    } : m)
+                                }));
+                            }
+                            // 3. If Attack/Hit/Die finishes, go to stand
+                            else if (monster.currentAction.startsWith('attack') || monster.currentAction.startsWith('hit') || monster.currentAction === 'die1') {
+                                const nextAction = monster.currentAction === 'die1' ? 'REMOVE' : 'stand';
+
+                                if (nextAction === 'REMOVE') {
+                                    useGameStore.setState(state => ({
+                                        monsters: state.monsters.filter(m => m.id !== monster.id)
+                                    }));
+                                } else {
+                                    useGameStore.setState(state => ({
+                                        monsters: state.monsters.map(m => m.id === monster.id ? {
+                                            ...m,
+                                            currentAction: 'stand',
+                                            stateStartTime: now,
+                                            standCycles: 0
+                                        } : m)
+                                    }));
+                                }
+                            }
+                        }
+                        return; // Skip normal logic
+                    }
                     const elapsed = now - (monster.stateStartTime || now);
                     const currentDuration = MONSTER_DURATIONS[monster.name]?.[monster.currentAction] || 1000;
 
