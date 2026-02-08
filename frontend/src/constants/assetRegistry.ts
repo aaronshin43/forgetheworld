@@ -142,6 +142,80 @@ export const MONSTER_BASE_STATS: Record<string, { hp: number; atk: number; def: 
     "zombie": { hp: 180, atk: 14, def: 3, spd: 0.6, moveSpeed: 13, scale: 1.0 }
 };
 
+export const MONSTER_DURATIONS: Record<string, Record<string, number>> = {
+    "coffeemachine": {
+        "attack1": 1800,
+        "die1": 1440,
+        "hit1": 600,
+        "move": 1080,
+        "stand": 1080
+    },
+    "goblin": {
+        "attack1": 1580,
+        "die1": 820,
+        "hit1": 600,
+        "move": 600,
+        "stand": 780
+    },
+    "goblinking": {
+        "attack1": 2370,
+        "die1": 1740,
+        "hit1": 300,
+        "move": 1020,
+        "stand": 1200
+    },
+    "rockspirit": {
+        "attack1": 2160,
+        "attack2": 2190,
+        "attack3": 3780,
+        "die1": 1800,
+        "hit1": 600,
+        "move": 480,
+        "stand": 1200
+    },
+    "ultragray": {
+        "attack1": 1650,
+        "die1": 1140,
+        "hit1": 600,
+        "move": 480,
+        "stand": 2350
+    },
+    "wyvern": {
+        "attack1": 2160,
+        "attack2": 2160,
+        "die1": 1020,
+        "move": 720,
+        "stand": 720
+    },
+    "zombie": {
+        "attack1": 1500,
+        "attack2": 1620,
+        "die1": 1300,
+        "hit1": 600,
+        "move": 800,
+        "stand": 600
+    }
+};
+
+// Animation Offsets (in pixels, relative to center anchor)
+export const MONSTER_ANIMATION_OFFSETS: Record<string, Record<string, { x: number }>> = {
+    "goblinking": {
+        "die1": { x: 35 } // Example offset, user can tune
+    },
+    "rockspirit": {
+        "attack1": { x: -250 },
+        "attack2": { x: -100 },
+        "attack3": { x: -100 }
+    },
+    "coffeemachine": {
+        "attack1": { x: -60 },
+        "die1": { x: -10 }
+    },
+    "ultragray": {
+        "attack1": { x: -10 }
+    }
+};
+
 // Formations: y is % from top, xOffset is adder to baseline (75%)
 export const MONSTER_FORMATIONS: Record<number, Array<{ y: number, xOffset: number }>> = {
     1: [
