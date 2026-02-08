@@ -94,67 +94,105 @@ export const useGameLoop = () => {
                         const currentMonsterState = useGameStore.getState().monsters.find(m => m.id === target.id);
                         if (currentMonsterState && currentMonsterState.currentAction === 'stand') {
                             useGameStore.getState().setMonsterAction(target.id, 'hit1');
-                            setTimeout(() => {
-                                const m = useGameStore.getState().monsters.find(x => x.id === target.id);
-                                if (m && m.stats.hp > 0 && m.currentAction === 'hit1') {
-                                    useGameStore.getState().setMonsterAction(target.id, 'stand');
-                                }
-                            }, 400);
+                            // No timeout needed; loop handles transition back to stand
                         }
                     }
                     lastHeroAttackRef.current = time;
                 }
 
+                // Monster Logic (Cycle Based)
+                // We iterate monsters and check if their current animation cycle is complete.
+
+                // Need to use setMonsterAction which now resets startTime. 
+                // But we also need to increment standCycles sometimes WITHOUT changing action or resetting time?
+                // Actually, if we loop 'stand', we effectively restart it. So resetting startTime is correct for looping.
+                // But we need a way to increment standCycles. The store doesn't have a specific action for that.
+                // We can add one, or just do it manually via a custom setState here? 
+                // Better to add a helper or just do: 
+                // useGameStore.setState(s => ({ monsters: s.monsters.map(...) }))
+
+                const now = Date.now();
+
                 currentMonsters.forEach(monster => {
-                    const attackChance = monster.stats.spd * (scaledDelta / 1000);
+                    const elapsed = now - (monster.stateStartTime || now);
+                    const currentDuration = MONSTER_DURATIONS[monster.name]?.[monster.currentAction] || 1000;
 
-                    if (Math.random() < attackChance) {
-                        const attackAction = 'attack1';
-                        useGameStore.getState().setMonsterAction(monster.id, attackAction);
+                    if (elapsed >= currentDuration) {
+                        // Animation finished! Decision time.
+                        if (monster.currentAction === 'stand') {
+                            // Stand cycle finished.
+                            const newCycles = (monster.standCycles || 0) + 1;
 
-                        const duration = MONSTER_DURATIONS[monster.name]?.[attackAction] || 1000;
+                            if (newCycles >= monster.stats.spd) {
+                                // Attack!
+                                const attackAction = 'attack1';
+                                // Directly update state to Attack and rest cycles
+                                useGameStore.setState(state => ({
+                                    monsters: state.monsters.map(m => m.id === monster.id ? {
+                                        ...m,
+                                        currentAction: attackAction,
+                                        stateStartTime: now,
+                                        standCycles: 0
+                                    } : m)
+                                }));
 
-                        setTimeout(() => {
-                            const currentM = useGameStore.getState().monsters.find(m => m.id === monster.id);
-                            if (currentM && currentM.stats.hp > 0 && currentM.currentAction === attackAction) {
-                                useGameStore.getState().setMonsterAction(monster.id, 'stand');
+                                // Deal Damage Logic (Immediate or delayed? User asked for animation first?)
+                                // "Monster attack motion should play, THEN damage?" 
+                                // Usually damage is at impact point. For simplicity, let's deal damage at start or middle?
+                                // Let's deal it now for immediate feedback, or maybe schedule it. 
+                                // User said: "output attack motion after stand motion ends".
+                                // Let's simplify: Attack starts now. Damage happens now.
+                                const rawDmg = monster.stats.atk * (100 / (100 + heroStats.def));
+                                const variance = 0.95 + Math.random() * 0.1;
+                                let finalDmg = rawDmg * variance;
+                                damageHero(Math.ceil(finalDmg));
+
+                            } else {
+                                // Wait more. Replay stand.
+                                useGameStore.setState(state => ({
+                                    monsters: state.monsters.map(m => m.id === monster.id ? {
+                                        ...m,
+                                        currentAction: 'stand', // Re-set to trigger any effects if monitoring?
+                                        stateStartTime: now,
+                                        standCycles: newCycles
+                                    } : m)
+                                }));
                             }
-                        }, duration);
-
-                        const rawDmg = monster.stats.atk * (100 / (100 + heroStats.def));
-                        const variance = 0.95 + Math.random() * 0.1;
-                        let finalDmg = rawDmg * variance;
-                        damageHero(Math.ceil(finalDmg));
+                        }
+                        else if (monster.currentAction.startsWith('attack') || monster.currentAction.startsWith('hit')) {
+                            // Attack or Hit finished. Go back to stand.
+                            useGameStore.setState(state => ({
+                                monsters: state.monsters.map(m => m.id === monster.id ? {
+                                    ...m,
+                                    currentAction: 'stand',
+                                    stateStartTime: now,
+                                    // standCycles is already 0 from attack start, or preserved if hit?
+                                    // If hit interrupts stand, we probably should reset or keep? 
+                                    // Simple: Reset cycles on any interruption to be safe/fair.
+                                    standCycles: 0
+                                } : m)
+                            }));
+                        }
+                        else if (monster.currentAction === 'die1') {
+                            // Death animation finished. Remove monster.
+                            useGameStore.setState(state => ({
+                                monsters: state.monsters.filter(m => m.id !== monster.id)
+                            }));
+                        }
                     }
                 });
 
-                // Check for Deaths
-                // Filter out truly dead (HP <= 0) to know if we cleared
-                const aliveMonsters = currentMonsters.filter(m => m.stats.hp > 0);
-
-                // Handle Death Animation triggers for newly dead
-                const justDied = currentMonsters.filter(m => m.stats.hp <= 0 && m.currentAction !== 'die1');
-
-                justDied.forEach(m => {
-                    useGameStore.getState().setMonsterAction(m.id, 'die1');
-                    const dieDuration = MONSTER_DURATIONS[m.name]?.['die1'] || 1000;
-
-                    setTimeout(() => {
-                        // Remove from state completely
-                        useGameStore.setState(state => ({
-                            monsters: state.monsters.filter(monster => monster.id !== m.id)
-                        }));
-                    }, dieDuration);
+                // Handle Death Triggers (Transition alive -> die1)
+                // We check for monsters with HP <= 0 that are NOT yet in 'die1' action.
+                currentMonsters.forEach(m => {
+                    if (m.stats.hp <= 0 && m.currentAction !== 'die1') {
+                        useGameStore.getState().setMonsterAction(m.id, 'die1');
+                        // Loop will catch the end of 'die1' and remove them.
+                    }
                 });
 
-                if (aliveMonsters.length === 0 && justDied.length === 0 && currentMonsters.length === 0) {
-                    // Empty state -> Cleared (Wait a bit?)
-                    // If we just removed them, currentMonsters will be empty in NEXT frame.
-                    // But here, currentMonsters is the snapshot at start of frame.
-                    // If everything is dead and removed, we are cleared.
-                }
-
-                // Simple Check: If NO monsters left in the array, we are done.
+                // Check for Wave Clear
+                // If there are NO monsters left in the array, we are done.
                 if (currentMonsters.length === 0) {
                     setStageState('cleared');
                 }

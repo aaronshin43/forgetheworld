@@ -58,6 +58,7 @@ export const BattleStage = () => {
                                 action={monster.currentAction}
                                 scale={monster.stats.scale || 1.0}
                                 animXOffset={MONSTER_ANIMATION_OFFSETS[monster.name]?.[monster.currentAction]?.x || 0}
+                                animYOffset={MONSTER_ANIMATION_OFFSETS[monster.name]?.[monster.currentAction]?.y || 0}
                             />
                         </div>
                     ))}

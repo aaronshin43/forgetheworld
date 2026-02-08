@@ -30,6 +30,8 @@ export interface ActiveMonster {
     stats: EntityStats;
     currentAction: string;
     lastAttackTime: number;
+    standCycles: number;
+    stateStartTime: number;
 }
 
 export interface InventoryItem {
@@ -64,6 +66,8 @@ interface GameState {
     scanResult: any | null;
     inventory: (InventoryItem | null)[];
     appMode: 'intro' | 'game' | 'dev';
+    isLoading: boolean;
+    loadingProgress: number;
 
     // Visuals State
     activeEffects: ActiveEffect[];
@@ -108,6 +112,8 @@ interface GameState {
     setInventoryItem: (index: number, item: InventoryItem | null) => void;
     setBackground: (background: string) => void;
     setAppMode: (mode: 'intro' | 'game' | 'dev') => void;
+    setIsLoading: (isLoading: boolean) => void;
+    setLoadingProgress: (progress: number) => void;
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -142,13 +148,15 @@ export const useGameStore = create<GameState>((set, get) => ({
     isAnalyzing: false,
     scanResult: null,
     inventory: Array(6).fill(null),
+    appMode: 'intro',
+    isLoading: true,
+    loadingProgress: 0,
 
     activeEffects: [],
     monsters: [],
     monsterIdCounter: 0,
     characterAction: 'stand1',
     currentBackground: 'city',
-    appMode: 'intro',
 
     // Hero Actions
     setHeroStats: (stats) => set((state) => ({
@@ -212,6 +220,8 @@ export const useGameStore = create<GameState>((set, get) => ({
     },
     setBackground: (background) => set({ currentBackground: background }),
     setAppMode: (appMode) => set({ appMode }),
+    setIsLoading: (isLoading) => set({ isLoading }),
+    setLoadingProgress: (loadingProgress) => set({ loadingProgress }),
 
     // Monster Actions
     spawnMonster: (name, stats, x, y, targetX) => {
@@ -227,7 +237,9 @@ export const useGameStore = create<GameState>((set, get) => ({
                     targetX,
                     stats: { ...stats },
                     currentAction: 'move',
-                    lastAttackTime: 0
+                    lastAttackTime: 0,
+                    standCycles: 0,
+                    stateStartTime: Date.now()
                 }]
             };
         });
@@ -275,7 +287,18 @@ export const useGameStore = create<GameState>((set, get) => ({
         return { monsters: newMonsters };
     }),
     setMonsterAction: (id, action) => set((state) => ({
-        monsters: state.monsters.map(m => m.id === id ? { ...m, currentAction: action } : m)
+        monsters: state.monsters.map(m => {
+            if (m.id === id) {
+                // Only update if action is different to avoid resetting start time on redundant calls?
+                // The loop logic will handle redundancy. If we call this, we imply a change or restart.
+                return {
+                    ...m,
+                    currentAction: action,
+                    stateStartTime: Date.now()  // Reset time on action change
+                };
+            }
+            return m;
+        })
     })),
     clearMonsters: () => set({ monsters: [] }),
 
