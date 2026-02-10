@@ -302,9 +302,16 @@ export const useGameLoop = () => {
                         }
                     }
 
-                    // 2. If no target (or lost), pick the first valid one (sequential)
+                    // 2. If no target (or lost), pick the best valid one
                     if (!target && validTargets.length > 0) {
-                        // Sort by ID or X position? Array order is usually spawn order, which works for sequential.
+                        // Sort by X (closest to hero/left) then Y (bottom to top, assuming larger Y is lower)
+                        validTargets.sort((a, b) => {
+                            if (Math.abs(a.x - b.x) > 5) {
+                                return a.x - b.x; // Ascending X
+                            }
+                            return b.y - a.y; // Descending Y (Larger Y = Bottom)
+                        });
+
                         target = validTargets[0];
                         currentTargetIdRef.current = target.id;
                     }
