@@ -22,7 +22,7 @@ load_dotenv()
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 # Featherless / Vultr Inference
-FEATHERLESS_API_URL = os.getenv("FEATHERLESS_API_URL", "https://api.featherless.ai/v1/chat/completions")
+FEATHERLESS_API_URL = os.getenv("FEATHERLESS_API_URL")
 FEATHERLESS_API_KEY = os.getenv("FEATHERLESS_API_KEY")
 
 # FEATHERLESS_MODEL = "google/gemma-2-2b-it"
