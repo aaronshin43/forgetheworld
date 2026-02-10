@@ -20,7 +20,7 @@ export default function Home() {
   // For now, playing 'bgm.mp3' globally once loaded.
   useBGM('/skill_sound/bgm.mp3', {
     enabled: !isLoading, // Start after loading 
-    volume: isBgmMuted ? 0 : 0.3
+    volume: isBgmMuted ? 0 : 1.0
   });
 
   const renderContent = () => {

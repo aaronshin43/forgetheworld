@@ -18,7 +18,7 @@ export const useSkillSound = () => {
         const playAudio = (path: string): Promise<void> => {
             return new Promise((resolve, reject) => {
                 const audio = new Audio(path);
-                audio.volume = 0.5;
+                audio.volume = 0.4;
 
                 audio.onended = () => resolve();
 
