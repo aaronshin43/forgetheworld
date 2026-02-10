@@ -55,9 +55,9 @@ export default function Home() {
       <>
         {/* Battle Stage */}
         <div
-          className={`w-full overflow-hidden transition-all duration-300 shrink-0 ${viewMode === 'camera'
+          className={`w-full overflow-hidden transition-all duration-300 shrink-0 min-h-0 ${viewMode === 'camera'
             ? 'h-[40%]'
-            : 'h-1/2 max-h-[700px]:h-[40%] max-h-[600px]:h-[35%]'
+            : 'flex-1'
             }`}
         >
           <BattleStage />
@@ -67,7 +67,7 @@ export default function Home() {
         <div
           className={`w-full transition-all duration-300 min-h-0 ${viewMode === 'camera'
             ? 'h-[60%]'
-            : 'h-1/2 max-h-[700px]:h-[60%] max-h-[600px]:h-[65%]'
+            : 'h-auto flex-none'
             }`}
         >
           {viewMode === 'camera' ? <CameraView /> : <CommandCenter />}

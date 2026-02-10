@@ -16,10 +16,10 @@ export const CommandCenter = () => {
 
     return (
         <div className="h-full flex flex-col justify-center items-center border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.5)] z-20 overflow-hidden min-w-0 relative bg-zinc-900">
-            {/* Maintain 3:4 aspect ratio to ensure slots/buttons align with the background image */}
+            {/* Maintain exact image aspect ratio (1984 / 2144 ≈ 0.925) */}
             <div
                 className="w-full max-w-full h-full max-h-full flex flex-col min-h-0 relative"
-                style={{ aspectRatio: '3/4' }}
+                style={{ aspectRatio: '1984/2144' }}
             >
                 {/* Full frame background - contained within the box */}
                 <div
