@@ -17,6 +17,11 @@
 /.next/
 /out/
 
+# Production
+.next
+# Security
+src/utils/assetSecurity.ts
+
 # production
 /build
 
