@@ -135,11 +135,11 @@ export const SKILL_CONFIGS: Record<string, SkillConfig> = {
     "souleclipse": { x: 55, y: 50, scale: 1.0 },
 
     // Basic Defaults (Standard Hit)
-    "blast": { x: 38, y: 68, scale: 1.0 },
-    "blast2": { x: 43, y: 72, scale: 1.0 },
-    "divinecharge": { x: 40, y: 70, scale: 1.0 },
-    "divinecharge2": { x: 45, y: 70, scale: 1.0 },
-    "divineswing": { x: 40, y: 75, scale: 1.0 },
+    "blast": { x: 38, y: 73, scale: 1.0 },
+    "blast2": { x: 43, y: 77, scale: 1.0 },
+    "divinecharge": { x: 40, y: 80, scale: 1.0 },
+    "divinecharge2": { x: 45, y: 80, scale: 1.0 },
+    "divineswing": { x: 40, y: 82, scale: 1.0 },
 
     // Buff Defaults (Aura/Self)
     "blueaura": { x: 17, y: 80, scale: 0.5 },
