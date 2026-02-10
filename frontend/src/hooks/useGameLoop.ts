@@ -146,18 +146,6 @@ export const useGameLoop = () => {
                     if (elapsed >= currentDuration) {
                         // Animation finished! Decision time.
 
-                        // 0. HIT ANIMATION FINISHED
-                        if (monster.currentAction.startsWith('hit')) {
-                            if (monster.stats.hp <= 0) {
-                                // Dead -> Die
-                                useGameStore.getState().setMonsterAction(monster.id, 'die1');
-                            } else {
-                                // Alive -> Stand
-                                useGameStore.getState().setMonsterAction(monster.id, 'stand');
-                            }
-                            return;
-                        }
-
                         // 1. DIE ANIMATION FINISHED
                         if (monster.currentAction === 'die1') {
                             useGameStore.setState(state => ({
@@ -243,15 +231,48 @@ export const useGameLoop = () => {
                         }
                         else if (monster.currentAction.startsWith('hit')) {
                             // Hit finished.
-                            const nextAction = monster.stats.hp <= 0 ? 'die1' : 'stand';
-                            useGameStore.setState(state => ({
-                                monsters: state.monsters.map(m => m.id === monster.id ? {
-                                    ...m,
-                                    currentAction: nextAction,
-                                    stateStartTime: now,
-                                    standCycles: 0
-                                } : m)
-                            }));
+                            if (monster.stats.hp <= 0) {
+                                useGameStore.setState(state => ({
+                                    monsters: state.monsters.map(m => m.id === monster.id ? {
+                                        ...m,
+                                        currentAction: 'die1',
+                                        stateStartTime: now,
+                                        standCycles: 0
+                                    } : m)
+                                }));
+                            } else {
+                                // Alive. Increment cycles (Getting hit counts as waiting/charging!)
+                                const newCycles = (monster.standCycles || 0) + 1;
+
+                                if (newCycles >= monster.stats.spd) {
+                                    // Attack! (Counter-attack after hit)
+                                    const attackAction = 'attack1';
+                                    useGameStore.setState(state => ({
+                                        monsters: state.monsters.map(m => m.id === monster.id ? {
+                                            ...m,
+                                            currentAction: attackAction,
+                                            stateStartTime: now,
+                                            standCycles: 0
+                                        } : m)
+                                    }));
+
+                                    // Deal Damage Logic
+                                    const rawDmg = monster.stats.atk * (100 / (100 + heroStats.def));
+                                    const variance = 0.95 + Math.random() * 0.1;
+                                    let finalDmg = rawDmg * variance;
+                                    damageHero(Math.ceil(finalDmg));
+                                } else {
+                                    // Go to stand with increased cycles
+                                    useGameStore.setState(state => ({
+                                        monsters: state.monsters.map(m => m.id === monster.id ? {
+                                            ...m,
+                                            currentAction: 'stand',
+                                            stateStartTime: now,
+                                            standCycles: newCycles
+                                        } : m)
+                                    }));
+                                }
+                            }
                         }
                         else if (monster.currentAction === 'die1') {
                             // Death animation finished. Remove monster.

@@ -232,12 +232,12 @@ export const BACKGROUND_LIST = [
 ];
 
 export const MONSTER_BASE_STATS: Record<string, { hp: number; atk: number; def: number; spd: number; moveSpeed: number; scale: number }> = {
-    "coffeemachine": { hp: 150, atk: 15, def: 5, spd: 2, moveSpeed: 12, scale: 0.8 },
-    "goblin": { hp: 80, atk: 12, def: 2, spd: 1, moveSpeed: 15, scale: 1.0 },
+    "coffeemachine": { hp: 150, atk: 15, def: 5, spd: 3, moveSpeed: 12, scale: 0.8 },
+    "goblin": { hp: 80, atk: 12, def: 2, spd: 2, moveSpeed: 15, scale: 1.0 },
     "goblinking": { hp: 300, atk: 25, def: 10, spd: 2, moveSpeed: 11, scale: 1.0 },
     "rockspirit": { hp: 200, atk: 10, def: 20, spd: 2, moveSpeed: 18, scale: 1.0 },
-    "ultragray": { hp: 120, atk: 18, def: 5, spd: 1, moveSpeed: 16, scale: 1.0 },
-    "wyvern": { hp: 100, atk: 20, def: 8, spd: 2, moveSpeed: 17, scale: 0.8 },
+    "ultragray": { hp: 120, atk: 18, def: 5, spd: 2, moveSpeed: 16, scale: 1.0 },
+    "wyvern": { hp: 100, atk: 20, def: 8, spd: 3, moveSpeed: 17, scale: 0.8 },
     "zombie": { hp: 180, atk: 14, def: 3, spd: 2, moveSpeed: 13, scale: 1.0 }
 };
 
