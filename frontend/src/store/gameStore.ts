@@ -570,7 +570,8 @@ export const useGameStore = create<GameState>((set, get) => ({
         set({ isAnalyzing: true, viewMode: 'battle', interactionMode: 'enhancing' });
 
         try {
-            const response = await fetch("http://localhost:8000/evolve", {
+            const apiBase = process.env.NEXT_PUBLIC_API_BASE ?? "";
+            const response = await fetch(`${apiBase}/evolve`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
