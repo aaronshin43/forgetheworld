@@ -8,6 +8,8 @@ interface SkillEffectProps {
     x: number;
     y: number;
     scale: number;
+    stageScale?: number; // Added prop
+    verticalShift?: number; // Added prop: Pixels to move UP
     onComplete?: () => void;
 }
 
@@ -18,7 +20,7 @@ const getSkillPath = (name: string) => {
     return `/skills/ultimate/${name}.webp`; // Default to ultimate
 };
 
-export const SkillEffect = ({ name, x, y, scale, onComplete }: SkillEffectProps) => {
+export const SkillEffect = ({ name, x, y, scale, stageScale = 1.0, verticalShift = 0, onComplete }: SkillEffectProps) => {
     const duration = SKILL_DURATIONS[name] || 3000;
     const imagePath = getSkillPath(name);
     const isUltimate = SKILL_CATEGORIES.ultimate.includes(name);
@@ -59,8 +61,9 @@ export const SkillEffect = ({ name, x, y, scale, onComplete }: SkillEffectProps)
         <div
             className="flex items-center justify-center p-0 m-0"
             style={{
-                width: '500px',
-                height: '500px'
+                width: `${500 * stageScale * scale}px`,
+                height: `${500 * stageScale * scale}px`,
+                marginTop: `-${verticalShift}px` // Apply vertical correction
             }}
         >
             {/* Background layer for skills with separate background */}

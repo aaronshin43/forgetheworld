@@ -48,6 +48,41 @@ export const BattleStage = () => {
         }
     }, [currentCP]);
 
+    // Dynamic Scaling Logic
+    const stageRef = useRef<HTMLDivElement>(null);
+    // Initialize with 1.0, but will update immediately on mount
+    const [stageScale, setStageScale] = useState(1.0);
+    const [verticalShift, setVerticalShift] = useState(0);
+
+    useEffect(() => {
+        if (!stageRef.current) return;
+
+        const observer = new ResizeObserver((entries) => {
+            for (const entry of entries) {
+                if (entry.contentRect) {
+                    const currentWidth = entry.contentRect.width;
+                    const currentHeight = entry.contentRect.height;
+
+                    // Reference width is 428px (Mobile Viewport)
+                    if (currentWidth > 0) {
+                        setStageScale(currentWidth / 428);
+                    }
+
+                    // Reference height is 468px (Mobile Viewport)
+                    // If shorter, move effect UP (positive shift value to be subtracted)
+                    if (currentHeight > 0) {
+                        const shift = Math.max(0, 468 - currentHeight) * 0.5;
+                        setVerticalShift(shift);
+                    }
+                }
+            }
+        });
+
+        observer.observe(stageRef.current);
+
+        return () => observer.disconnect();
+    }, []);
+
     // Stand image heights for damage number positioning (in px)
     const MONSTER_STAND_HEIGHTS: Record<string, number> = {
         'goblinking': 180,
@@ -63,7 +98,7 @@ export const BattleStage = () => {
         <div className="h-full bg-gray-900 relative flex items-center justify-center z-10">
 
             {/* Game World Clipping Container */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div ref={stageRef} className="absolute inset-0 overflow-hidden pointer-events-none">
                 {/* Background Image */}
                 <div className="absolute inset-0 z-0">
                     <img
@@ -116,13 +151,14 @@ export const BattleStage = () => {
                                 transform: 'translate(-50%, -50%)'
                             }}
                         >
-                            <div style={{ transform: `scale(${effect.scale})` }}>
-                                <SkillEffect
-                                    name={effect.name}
-                                    x={0} y={0} scale={1}
-                                    onComplete={() => removeEffect(effect.id)}
-                                />
-                            </div>
+                            <SkillEffect
+                                name={effect.name}
+                                x={0} y={0}
+                                scale={effect.scale}
+                                stageScale={stageScale}
+                                verticalShift={verticalShift}
+                                onComplete={() => removeEffect(effect.id)}
+                            />
                         </div>
                     ))}
                 </div>
