@@ -92,6 +92,7 @@ interface GameState {
     sessionStartTime: number;
     interactionMode: 'battle' | 'crafting' | 'enhancing';
     tempMaterial: MaterialData | null;
+    isBgmMuted: boolean;
 
     // Hero State
     heroStats: EntityStats;
@@ -185,10 +186,10 @@ interface GameState {
 
     triggerCharacterAttack: () => void;
     setCharacterAction: (action: string) => void;
-
     setInventoryItem: (index: number, item: InventoryItem | null) => void;
     setBackground: (background: string) => void;
     setAppMode: (mode: 'intro' | 'game' | 'dev') => void;
+    toggleBgmMute: () => void;
     setIsLoading: (isLoading: boolean) => void;
     setLoadingProgress: (progress: number) => void;
     setIsMenuOpen: (isMenuOpen: boolean) => void;
@@ -751,6 +752,8 @@ export const useGameStore = create<GameState>((set, get) => ({
         set((state) => ({ activeEffects: state.activeEffects.filter(e => e.id !== id) }));
     },
 
+    isBgmMuted: false,
+
     setAppMode: (mode) => set((state) => {
         if (mode === 'game') {
             // Reset game state on new game start
@@ -771,6 +774,8 @@ export const useGameStore = create<GameState>((set, get) => ({
         }
         return { appMode: mode };
     }),
+
+    toggleBgmMute: () => set((state) => ({ isBgmMuted: !state.isBgmMuted })),
 
     setCharacterAction: (action) => set({ characterAction: action }),
     triggerCharacterAttack: () => {

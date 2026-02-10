@@ -75,6 +75,29 @@ export const IntroScreen = () => {
                     DEV MODE
                 </button> */}
             </div>
+
+            {/* Mute Button (Top Right) */}
+            <button
+                onClick={useGameStore.getState().toggleBgmMute}
+                className="absolute top-4 right-4 z-50 p-3 bg-black/40 hover:bg-black/60 backdrop-blur-md rounded-full text-white/80 hover:text-white transition-all border border-white/10"
+                aria-label={useGameStore(state => state.isBgmMuted) ? "Unmute BGM" : "Mute BGM"}
+            >
+                {useGameStore(state => state.isBgmMuted) ? (
+                    // Mute Icon
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                        <line x1="23" y1="9" x2="17" y2="15" />
+                        <line x1="17" y1="9" x2="23" y2="15" />
+                    </svg>
+                ) : (
+                    // Music/Sound Icon
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M9 18V5l12-2v13" />
+                        <circle cx="6" cy="18" r="3" />
+                        <circle cx="18" cy="16" r="3" />
+                    </svg>
+                )}
+            </button>
         </div>
     );
 };

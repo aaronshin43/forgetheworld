@@ -14,13 +14,13 @@ import { useGameStore } from '../store/gameStore';
 import { useBGM } from '../hooks/useBGM';
 
 export default function Home() {
-  const { viewMode, appMode, isLoading, loadingProgress } = useGameStore();
+  const { viewMode, appMode, isLoading, loadingProgress, isBgmMuted } = useGameStore();
 
   // BGM: Starts at Intro, persists (or stops if we want separate tracks)
   // For now, playing 'bgm.mp3' globally once loaded.
   useBGM('/skill_sound/bgm.mp3', {
     enabled: !isLoading, // Start after loading 
-    volume: 0.3
+    volume: isBgmMuted ? 0 : 0.3
   });
 
   const renderContent = () => {
