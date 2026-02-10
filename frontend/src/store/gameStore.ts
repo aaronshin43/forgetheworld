@@ -272,9 +272,9 @@ export const useGameStore = create<GameState>((set, get) => ({
 
     // Hero Initial State
     heroStats: {
-        hp: 1000,
-        maxHp: 1000,
-        atk: 3000,
+        hp: 100,
+        maxHp: 100,
+        atk: 30,
         def: 5,
         spd: 0.7, // Attacks per second
         critRate: 0.1, // 10%
