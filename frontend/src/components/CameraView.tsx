@@ -75,7 +75,7 @@ export const CameraView = () => {
                 // Return to battle immediately so overlay shows there
                 useGameStore.getState().setViewMode('battle');
 
-                const apiBase = process.env.NEXT_PUBLIC_API_BASE ?? "";
+                const apiBase = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
                 const endpoint = scanMode === 'skill'
                     ? `${apiBase}/scan-skill`
                     : `${apiBase}/scan`;
@@ -153,7 +153,7 @@ export const CameraView = () => {
 
     const generateImage = async (prompt: string, index: number, itemId: string) => {
         try {
-            const apiBase = process.env.NEXT_PUBLIC_API_BASE ?? "";
+            const apiBase = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
             const response = await fetch(`${apiBase}/generate-image`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
