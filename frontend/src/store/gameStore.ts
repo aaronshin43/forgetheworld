@@ -54,6 +54,7 @@ export interface ActiveMonster {
     standCycles: number;
     stateStartTime: number;
     actionId: number; // For forcing unique animation per action event
+    lastHitTime?: number;
 }
 
 export interface InventoryItemStats {
@@ -707,13 +708,24 @@ export const useGameStore = create<GameState>((set, get) => ({
                     if (m.currentAction === 'die1') return m;
 
                     const newHp = Math.max(0, m.stats.hp - finalAmount);
+
+                    // If attacking, don't interrupt. Just queue hit time.
+                    if (m.currentAction.startsWith('attack')) {
+                        return {
+                            ...m,
+                            stats: { ...m.stats, hp: newHp },
+                            lastHitTime: Date.now()
+                        };
+                    }
+
+                    // Otherwise, force hit reaction immediately
                     return {
                         ...m,
                         stats: { ...m.stats, hp: newHp },
-                        // FORCE HIT REACTION (Interrupts everything)
                         currentAction: 'hit1',
                         stateStartTime: Date.now(),
-                        actionId: (m.actionId || 0) + 1
+                        actionId: (m.actionId || 0) + 1,
+                        lastHitTime: Date.now()
                     };
                 }
                 return m;

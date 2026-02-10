@@ -203,16 +203,52 @@ export const useGameLoop = () => {
                                 }));
                             }
                         }
-                        else if (monster.currentAction.startsWith('attack') || monster.currentAction.startsWith('hit')) {
-                            // Attack or Hit finished. Go back to stand.
+                        else if (monster.currentAction.startsWith('attack')) {
+                            // Attack finished. Did we get hit during attack?
+                            let nextAction = 'stand';
+                            let nextStateTime = now;
+
+                            if (monster.lastHitTime) {
+                                const hitDuration = MONSTER_DURATIONS[monster.name]?.['hit1'] || 500;
+                                const timeSinceHit = now - monster.lastHitTime;
+
+                                // If hit fits within the "recent enough to show" window
+                                // AND the hit duration hasn't fully elapsed yet?
+                                // User said: "if duration remains, show for remaining time".
+                                if (timeSinceHit < hitDuration) {
+                                    nextAction = 'hit1';
+                                    nextStateTime = monster.lastHitTime; // Resume hit animation from actual hit time
+                                }
+                            }
+
+                            // If not transitioning to hit, check death or stand
+                            if (nextAction !== 'hit1') {
+                                if (monster.stats.hp <= 0) {
+                                    nextAction = 'die1';
+                                }
+                            }
+
                             useGameStore.setState(state => ({
                                 monsters: state.monsters.map(m => m.id === monster.id ? {
                                     ...m,
-                                    currentAction: 'stand',
+                                    currentAction: nextAction,
+                                    stateStartTime: nextStateTime,
+                                    standCycles: 0,
+                                    // Clear lastHitTime if we consumed it or it expired? 
+                                    // Maybe safely clear it to prevent re-triggering?
+                                    // If we transition to hit1, we use it. If we skip, we ignore.
+                                    lastHitTime: nextAction === 'hit1' ? m.lastHitTime : undefined
+                                } : m)
+                            }));
+                        }
+                        else if (monster.currentAction.startsWith('hit')) {
+                            // Hit finished.
+                            const nextAction = monster.stats.hp <= 0 ? 'die1' : 'stand';
+                            useGameStore.setState(state => ({
+                                monsters: state.monsters.map(m => m.id === monster.id ? {
+                                    ...m,
+                                    currentAction: nextAction,
                                     stateStartTime: now,
-                                    // standCycles is already 0 from attack start, or preserved if hit?
-                                    // If hit interrupts stand, we probably should reset or keep? 
-                                    // Simple: Reset cycles on any interruption to be safe/fair.
                                     standCycles: 0
                                 } : m)
                             }));
