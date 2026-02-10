@@ -8,7 +8,7 @@ interface Props {
 }
 
 export const EnhancementSelectionModal = ({ onSelect, onCancel }: Props) => {
-    const { inventory } = useGameStore();
+    const { inventory, getAssetUrl } = useGameStore();
     const validItems = inventory.filter(item => item !== null);
 
     const gradeColors: Record<string, string> = {
@@ -45,7 +45,7 @@ export const EnhancementSelectionModal = ({ onSelect, onCancel }: Props) => {
                             >
                                 <div className="w-12 h-12 bg-gray-900 rounded border border-gray-700 overflow-hidden flex-shrink-0 relative">
                                     {item!.image ? (
-                                        <img src={item!.image} alt={item!.name} className="w-full h-full object-cover" />
+                                        <img src={getAssetUrl(item!.image)} alt={item!.name} className="w-full h-full object-cover" />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center text-gray-600 text-xs">?</div>
                                     )}

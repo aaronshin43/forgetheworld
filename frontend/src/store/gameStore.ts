@@ -197,6 +197,11 @@ interface GameState {
     resetGame: () => void;
     devEquipRandomItem: () => void;
     craftItem: (index: number, itemData: { id: string, name: string, description?: string, rarity: number, affectedStats: string[] }) => void;
+
+    // Asset Obfuscation Cache
+    assetCache: Record<string, string>;
+    setAssetUrl: (path: string, url: string) => void;
+    getAssetUrl: (path: string) => string;
 }
 
 const GRADE_THRESHOLDS = { Legendary: 14, Epic: 11, Unique: 8, Rare: 5, Common: 0 };
@@ -267,9 +272,9 @@ export const useGameStore = create<GameState>((set, get) => ({
 
     // Hero Initial State
     heroStats: {
-        hp: 100,
-        maxHp: 100,
-        atk: 30,
+        hp: 1000,
+        maxHp: 1000,
+        atk: 3000,
         def: 5,
         spd: 0.7, // Attacks per second
         critRate: 0.1, // 10%
@@ -305,6 +310,15 @@ export const useGameStore = create<GameState>((set, get) => ({
     isLoading: true,
     loadingProgress: 0,
     isMenuOpen: false,
+
+    // Asset Cache Implementation
+    assetCache: {},
+    setAssetUrl: (path, url) => set((state) => ({
+        assetCache: { ...state.assetCache, [path]: url }
+    })),
+    getAssetUrl: (path) => {
+        return get().assetCache[path] || path;
+    },
 
     activeEffects: [],
     damageNumbers: [],

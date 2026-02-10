@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { SKILL_DURATIONS, SKILL_CATEGORIES } from '../constants/assetRegistry';
 import { useSkillSound } from '../hooks/useSkillSound';
+import { useGameStore } from '../store/gameStore';
 
 interface SkillEffectProps {
     name: string;
@@ -23,6 +24,7 @@ export const SkillEffect = ({ name, x, y, scale, onComplete }: SkillEffectProps)
     const isUltimate = SKILL_CATEGORIES.ultimate.includes(name);
     const hasSeparateBackground = name === 'souleclipse';
     const { playSound } = useSkillSound();
+    const { getAssetUrl } = useGameStore();
 
     // Use a ref to store the latest onComplete callback
     const onCompleteRef = useRef(onComplete);
@@ -64,7 +66,7 @@ export const SkillEffect = ({ name, x, y, scale, onComplete }: SkillEffectProps)
             {/* Background layer for skills with separate background */}
             {hasSeparateBackground && (
                 <img
-                    src={`/skills/ultimate/${name}background.webp?t=${uniqueId}`}
+                    src={getAssetUrl(`/skills/ultimate/${name}background.webp`)}
                     alt={`${name} background`}
                     className="absolute inset-0 w-full h-full object-contain"
                     draggable={false}
@@ -74,7 +76,7 @@ export const SkillEffect = ({ name, x, y, scale, onComplete }: SkillEffectProps)
 
             {/* Main effect layer */}
             <img
-                src={`${imagePath}?t=${uniqueId}`}
+                src={getAssetUrl(imagePath)}
                 alt={name}
                 className="w-full h-full object-contain mix-blend-screen"
                 draggable={false}

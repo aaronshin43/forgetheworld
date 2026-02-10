@@ -22,7 +22,8 @@ export const BattleStage = () => {
         currentBackground,
         feverTimeReady,
         useFeverTime,
-        killCount
+        killCount,
+        getAssetUrl
     } = useGameStore();
 
     // Derived values for UI
@@ -66,7 +67,7 @@ export const BattleStage = () => {
                 {/* Background Image */}
                 <div className="absolute inset-0 z-0">
                     <img
-                        src={`/background/${currentBackground}.webp`}
+                        src={getAssetUrl(`/background/${currentBackground}.webp`)}
                         alt="Background"
                         className="w-full h-full object-cover object-top opacity-80"
                     />
@@ -204,15 +205,15 @@ export const BattleStage = () => {
                         </div>
                     )}
                     <div className="absolute inset-0 flex items-center justify-center translate-y-1">
-                        <img src="/ui/head.webp" alt="Character" className="w-[70%] h-[70%] object-contain object-center" />
+                        <img src={getAssetUrl("/ui/head.webp")} alt="Character" className="w-[70%] h-[70%] object-contain object-center" />
                     </div>
-                    <img src="/ui/profile_box.webp" alt="" className="absolute inset-0 w-full h-full object-contain pointer-events-none" aria-hidden />
+                    <img src={getAssetUrl("/ui/profile_box.webp")} alt="" className="absolute inset-0 w-full h-full object-contain pointer-events-none" aria-hidden />
 
                 </div>
                 <div className="flex flex-col gap-0.5 drop-shadow-md translate-y-2 -ml-1">
                     {/* Combat Power – Calculate & Animate */}
                     <div className="flex items-center gap-1.5 ml-1">
-                        <img src="/ui/sword.webp" alt="" className="w-5 h-5 object-contain flex-shrink-0" aria-hidden />
+                        <img src={getAssetUrl("/ui/sword.webp")} alt="" className="w-5 h-5 object-contain flex-shrink-0" aria-hidden />
                         <span
                             className={`text-sm font-metallic-emboss transition-all duration-300 ${animateCP ? 'scale-125 text-yellow-300 drop-shadow-[0_0_8px_rgba(253,224,71,0.8)]' : 'text-white'}`}
                         >
@@ -231,7 +232,7 @@ export const BattleStage = () => {
                         </div>
                         {/* healthbar.webp – 맨 앞(위) 레이어 */}
                         <img
-                            src="/ui/healthbar.webp"
+                            src={getAssetUrl("/ui/healthbar.webp")}
                             alt=""
                             className="absolute inset-0 w-full h-full object-fill object-top pointer-events-none z-10"
                             aria-hidden
@@ -243,7 +244,7 @@ export const BattleStage = () => {
                         {Array.from({ length: maxFilm }).map((_, i) => (
                             <img
                                 key={i}
-                                src="/ui/goldenhammar.webp"
+                                src={getAssetUrl("/ui/goldenhammar.webp")}
                                 alt=""
                                 aria-hidden
                                 className={`w-5 h-5 object-contain drop-shadow-lg transition-all duration-300 ${i < storeFilm ? 'opacity-100 scale-110' : 'opacity-40 scale-90 grayscale'}`}

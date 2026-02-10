@@ -8,9 +8,11 @@ const BTN_CLASS =
     'relative w-full min-w-0 h-full min-h-0 flex items-center justify-center active:scale-95 transition-transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 rounded overflow-hidden';
 
 export const CommandCenter = () => {
-    const { inventory } = useGameStore();
+    const { inventory, getAssetUrl, startCrafting, startSkillMode, startEnhancement } = useGameStore();
     const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
     const hasItems = inventory.some(item => item !== null);
+
+    const inventoryBg = getAssetUrl('/ui/inventory.webp');
 
     return (
         <div className="h-full flex flex-col justify-center items-center border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.5)] z-20 overflow-hidden min-w-0 relative bg-zinc-900">
@@ -22,7 +24,7 @@ export const CommandCenter = () => {
                 {/* Full frame background - contained within the box */}
                 <div
                     className="absolute inset-0 bg-no-repeat bg-center bg-cover"
-                    style={{ backgroundImage: 'url(/ui/inventory.webp)' }}
+                    style={{ backgroundImage: `url(${inventoryBg})` }}
                     aria-hidden
                 />
                 {/* Overlay: Title spacing + Slots + Buttons */}
@@ -56,7 +58,7 @@ export const CommandCenter = () => {
                                                     <div className="w-6 h-6 flex-shrink-0 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
                                                 </div>
                                             ) : item.image ? (
-                                                <img src={item.image} alt={item.name} className="w-full h-full object-contain pointer-events-none" />
+                                                <img src={getAssetUrl(item.image)} alt={item.name} className="w-full h-full object-contain pointer-events-none" />
                                             ) : (
                                                 <span className="text-xs font-bold text-amber-200 drop-shadow-md text-center px-1 truncate w-full min-w-0 block">
                                                     {item.name}
@@ -65,7 +67,7 @@ export const CommandCenter = () => {
                                         </>
                                     ) : (
                                         <img
-                                            src="/ui/anvil.webp"
+                                            src={getAssetUrl("/ui/anvil.webp")}
                                             alt="Empty Slot"
                                             className="w-1/2 h-1/2 object-contain opacity-30 grayscale group-hover:grayscale-0 group-hover:opacity-50 transition-all duration-300 pointer-events-none"
                                         />
@@ -73,7 +75,7 @@ export const CommandCenter = () => {
                                 </div>
                                 {/* Layer 2: Itembox Frame - rendered on top to simulate item inside box */}
                                 <img
-                                    src="/ui/itembox.webp"
+                                    src={getAssetUrl("/ui/itembox.webp")}
                                     alt=""
                                     className="absolute inset-0 z-10 w-full h-full object-contain pointer-events-none"
                                     aria-hidden
@@ -92,29 +94,29 @@ export const CommandCenter = () => {
                     >
                         <button
                             type="button"
-                            onClick={useGameStore.getState().startCrafting}
+                            onClick={startCrafting}
                             className={BTN_CLASS}
                             aria-label="Craft"
                         >
-                            <img src="/ui/craft_btn.webp" alt="Craft" className="w-full h-full object-contain pointer-events-none" />
+                            <img src={getAssetUrl("/ui/craft_btn.webp")} alt="Craft" className="w-full h-full object-contain pointer-events-none" />
                         </button>
                         <button
                             type="button"
-                            onClick={useGameStore.getState().startSkillMode}
+                            onClick={startSkillMode}
                             className={BTN_CLASS}
                             aria-label="Skill"
                         >
-                            <img src="/ui/skill_btn.webp" alt="Skill" className="w-full h-full object-contain pointer-events-none" />
+                            <img src={getAssetUrl("/ui/skill_btn.webp")} alt="Skill" className="w-full h-full object-contain pointer-events-none" />
                         </button>
                         <button
                             type="button"
-                            onClick={hasItems ? useGameStore.getState().startEnhancement : undefined}
+                            onClick={hasItems ? startEnhancement : undefined}
                             disabled={!hasItems}
                             className={`${BTN_CLASS} ${!hasItems ? '!opacity-30 !grayscale !cursor-not-allowed hover:!scale-100 active:!scale-100' : ''}`}
                             aria-label="Enhance"
                             title={!hasItems ? "Craft an item first!" : "Enhance Item"}
                         >
-                            <img src="/ui/enhance_btn.webp" alt="Enhance" className="w-full h-full object-contain pointer-events-none" />
+                            <img src={getAssetUrl("/ui/enhance_btn.webp")} alt="Enhance" className="w-full h-full object-contain pointer-events-none" />
                         </button>
                     </div>
                 </div>

@@ -1,7 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useGameStore } from '../store/gameStore';
 
 export const AnalysisOverlay = () => {
+    const { getAssetUrl } = useGameStore();
+
     return (
         <div className="absolute inset-0 z-50 flex flex-col items-center justify-center p-8 overflow-hidden">
             {/* Dark blurred backdrop */}
@@ -27,7 +30,7 @@ export const AnalysisOverlay = () => {
                 >
                     <div className="relative w-32 h-32 sm:w-40 sm:h-40 flex items-center justify-center">
                         <img
-                            src="/character/forge.webp"
+                            src={getAssetUrl("/character/forge.webp")}
                             alt=""
                             className="w-full h-full object-contain object-center scale-110"
                         />

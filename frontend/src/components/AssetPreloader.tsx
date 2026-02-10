@@ -1,9 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { MONSTER_DURATIONS, ATTACK_ANIMATIONS, SKILL_CATEGORIES } from '../constants/assetRegistry';
+import { fetchAndDecrypt } from '../utils/assetSecurity';
 
 export const AssetPreloader = () => {
-    const { setLoadingProgress, setIsLoading } = useGameStore();
+    const { setLoadingProgress, setIsLoading, setAssetUrl } = useGameStore();
     const loadedCountRef = useRef(0);
     const hasStartedRef = useRef(false);
 
@@ -24,8 +25,6 @@ export const AssetPreloader = () => {
         // 2. Collect Character Assets (character/[action].webp)
         const charBasics = ['alert', 'heal', 'jump', 'stand1', 'stand2', 'walk1', 'walk2', 'prone', 'forge'];
         const charAttacks = [...ATTACK_ANIMATIONS];
-        // Need to check if ATTACK_ANIMATIONS are just names or full paths? 
-        // Based on registry it seems they are action names like 'shoot1', 'swingO1'.
         [...charBasics, ...charAttacks].forEach(action => {
             allAssets.push(`/character/${action}.webp`);
         });
@@ -52,27 +51,8 @@ export const AssetPreloader = () => {
         uiAssets.forEach(asset => allAssets.push(`/ui/${asset}`));
 
         // 5. Background Assets
-        const bgAssets = ['city.webp', 'city2.webp', 'intro.webp', 'subway.webp'];
+        const bgAssets = ['city.webp', 'intro.webp'];
         bgAssets.forEach(asset => allAssets.push(`/background/${asset}`));
-
-        // 6. Skill Sounds (Optional - browsers might lazy load audio, but preloading helps)
-        // Check for 'use', 'use2', 'special', 'hit' for each skill
-        const soundSuffixes = ['use', 'use2', 'special', 'hit'];
-        Object.entries(SKILL_CATEGORIES).forEach(([category, skills]) => {
-            skills.forEach(skillName => {
-                soundSuffixes.forEach(suffix => {
-                    // Note: Not all combinations exist, but browser cache will handle 404s gracefully if we just try new Audio()
-                    // or we can just preload common ones. For now, let's skip explicit audio preloading to avoid 404 console spam
-                    // unless we know for sure they exist. 
-                    // Given the dynamic nature, we'll let Audio() handle loading on demand or preload silently.
-                    // If we strictly want to preload, we'd need a registry of existing files.
-                    // Let's at least preload 'use' which exists for most.
-                    if (suffix === 'use') {
-                        // allAssets.push(`/skill_sound/${category}/${skillName}_${suffix}.mp3`);
-                    }
-                });
-            });
-        });
 
         const total = allAssets.length;
         if (total === 0) {
@@ -90,24 +70,33 @@ export const AssetPreloader = () => {
 
             if (loadedCountRef.current >= total) {
                 console.log('[AssetPreloader] All assets loaded!');
-                // Minimal delay to show 100% before switching
                 setTimeout(() => {
                     setIsLoading(false);
                 }, 800);
             }
         };
 
-        allAssets.forEach(src => {
-            const img = new Image();
-            img.src = src;
-            img.onload = updateProgress;
-            img.onerror = () => {
-                console.warn(`[AssetPreloader] Failed to load: ${src}`);
-                updateProgress(); // Proceed anyway
-            };
+        // Secure Loading Logic: Fetch .bin, Decrypt, Store Blob URL
+        allAssets.forEach(async (path) => {
+            try {
+                const blobUrl = await fetchAndDecrypt(path);
+                setAssetUrl(path, blobUrl);
+
+                // Preload the image from Blob URL to browser cache
+                const img = new Image();
+                img.src = blobUrl;
+                img.onload = updateProgress;
+                img.onerror = () => {
+                    console.warn(`[AssetPreloader] Failed to render blob: ${path}`);
+                    updateProgress();
+                };
+            } catch (e) {
+                console.error(`[AssetPreloader] Failed to decrypt: ${path}`, e);
+                updateProgress();
+            }
         });
 
-    }, [setLoadingProgress, setIsLoading]);
+    }, [setLoadingProgress, setIsLoading, setAssetUrl]);
 
     return null;
 };

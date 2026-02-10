@@ -2,14 +2,14 @@ import React from 'react';
 import { useGameStore } from '../store/gameStore';
 
 export const IntroScreen = () => {
-    const { setAppMode } = useGameStore();
+    const { setAppMode, getAssetUrl } = useGameStore();
 
     return (
         <div className="h-full w-full min-h-0 overflow-hidden relative flex flex-col items-center justify-center">
             {/* Intro Background – 화면 비율에 맞게 꽉 차게, 스크롤 없음 */}
             <div className="absolute inset-0 z-0 overflow-hidden">
                 <img
-                    src="/background/intro.webp"
+                    src={getAssetUrl("/background/intro.webp")}
                     alt="Intro"
                     className="absolute inset-0 w-full h-full object-cover object-center"
                 />
@@ -49,7 +49,7 @@ export const IntroScreen = () => {
                     </div>
                     {/* 타이틀: 예전 구조처럼 이미지가 곧 블록 크기 (패딩/중첩 없음) */}
                     <img
-                        src="/ui/title_mobile.webp"
+                        src={getAssetUrl("/ui/title_mobile.webp")}
                         alt="FORGE the WORLD"
                         className="relative z-10 block w-full max-w-[560px] max-h-[65vh] object-contain object-center drop-shadow-[0_4px_12px_rgba(0,0,0,0.6)] animate-float"
                     />
@@ -62,7 +62,7 @@ export const IntroScreen = () => {
                     aria-label="Start Game"
                 >
                     <img
-                        src="/ui/start_btn.webp"
+                        src={getAssetUrl("/ui/start_btn.webp")}
                         alt="Start Game"
                         className="h-auto w-full max-w-[280px] object-contain pointer-events-none"
                     />

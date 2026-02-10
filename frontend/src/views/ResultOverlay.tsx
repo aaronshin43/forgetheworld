@@ -22,7 +22,7 @@ function normalizeFlavor(flavor: unknown): { name: string; description: string }
 }
 
 export const ResultOverlay = () => {
-    const { scanResult, setScanResult, setViewMode, setTimeScale, setIsAnalyzing, inventory, interactionMode, enhanceItem, triggerSkill, scanMode, stageState, survivalTime, killCount, heroStats, score, setAppMode, resetGame } = useGameStore();
+    const { scanResult, setScanResult, setViewMode, setTimeScale, setIsAnalyzing, inventory, interactionMode, enhanceItem, triggerSkill, scanMode, stageState, survivalTime, killCount, heroStats, score, setAppMode, resetGame, getAssetUrl } = useGameStore();
     const [showEnhanceSelect, setShowEnhanceSelect] = useState(false);
     const [selectedItem, setSelectedItem] = useState<any | null>(null);
 
@@ -96,7 +96,7 @@ export const ResultOverlay = () => {
                                 {item ? (
                                     <>
                                         {item.image ? (
-                                            <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                            <img src={getAssetUrl(item.image)} alt={item.name} className="w-full h-full object-cover" />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center">
                                                 <span className="text-xs text-gray-400 text-center px-1">{item.name}</span>
@@ -105,7 +105,7 @@ export const ResultOverlay = () => {
                                     </>
                                 ) : (
                                     <img
-                                        src="/ui/anvil.webp"
+                                        src={getAssetUrl("/ui/anvil.webp")}
                                         alt="Empty"
                                         className="w-1/2 h-1/2 object-contain opacity-20 absolute inset-0 m-auto"
                                     />
@@ -207,7 +207,7 @@ export const ResultOverlay = () => {
                     {interactionMode === 'enhancing' ? (
                         <div className="flex flex-col items-center justify-center h-full">
                             <motion.img
-                                src="/ui/anvil2.webp"
+                                src={getAssetUrl("/ui/anvil2.webp")}
                                 alt="Material"
                                 className="w-48 h-48 object-contain drop-shadow-[0_0_15px_rgba(99,102,241,0.6)]"
                                 animate={{ scale: [1, 1.05, 1] }}
@@ -217,7 +217,7 @@ export const ResultOverlay = () => {
                     ) : isSkill ? (
                         <div className="flex flex-col items-center justify-center h-full">
                             <motion.img
-                                src={`/skills/${scanResult.analysis.skill_type || 'deal'}/${flavor.name}.webp`}
+                                src={getAssetUrl(`/skills/${scanResult.analysis.skill_type || 'deal'}/${flavor.name}.webp`)}
                                 alt="Skill"
                                 className="w-48 h-48 object-contain drop-shadow-[0_0_20px_rgba(59,130,246,0.8)]"
                                 animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
@@ -228,14 +228,14 @@ export const ResultOverlay = () => {
                         <motion.img
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            src={displayImage}
+                            src={getAssetUrl(displayImage)}
                             alt="Generated Item"
                             className="relative z-10 w-48 h-48 object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]"
                         />
                     ) : (
                         <div className="relative z-10 flex flex-col items-center">
                             <motion.img
-                                src="/character/forge.webp"
+                                src={getAssetUrl("/character/forge.webp")}
                                 alt=""
                                 className="w-24 h-24 object-contain mb-4 drop-shadow-[0_0_12px_rgba(251,191,36,0.4)]"
                                 animate={{ opacity: [0.7, 1, 0.7] }}

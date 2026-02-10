@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import type { InventoryItem } from '../store/gameStore';
+import { useGameStore } from '../store/gameStore';
 
 interface ItemDetailModalProps {
     item: InventoryItem;
@@ -11,6 +12,7 @@ interface ItemDetailModalProps {
 
 export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({ item, onClose }) => {
     const { name, image, description, stats } = item;
+    const { getAssetUrl } = useGameStore();
     const atk = stats?.atk ?? 0;
     const def = stats?.def ?? 0;
     const hp = stats?.hp ?? 0;
@@ -37,7 +39,7 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({ item, onClose 
                     <div className="w-40 h-40 rounded-xl bg-zinc-900/90 border border-amber-500/30 flex items-center justify-center overflow-hidden mb-4 shadow-inner">
                         {image ? (
                             <img
-                                src={image}
+                                src={getAssetUrl(image)}
                                 alt={name}
                                 className="w-full h-full object-contain"
                             />
@@ -96,12 +98,12 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({ item, onClose 
                             <div className="flex flex-wrap justify-center gap-1">
                                 {item.absorbedMaterials.map((mat, idx) => (
                                     <span key={idx} className={`text-[10px] px-2 py-1 bg-zinc-800 border border-zinc-700 rounded-full ${{
-                                            Legendary: 'text-orange-400',
-                                            Epic: 'text-rose-500',
-                                            Unique: 'text-purple-400',
-                                            Rare: 'text-blue-400',
-                                            Common: 'text-gray-400',
-                                        }[mat.grade] || 'text-gray-400'
+                                        Legendary: 'text-orange-400',
+                                        Epic: 'text-rose-500',
+                                        Unique: 'text-purple-400',
+                                        Rare: 'text-blue-400',
+                                        Common: 'text-gray-400',
+                                    }[mat.grade] || 'text-gray-400'
                                         }`}>
                                         {mat.name}
                                     </span>
