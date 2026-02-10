@@ -110,7 +110,7 @@ uncountablearrow;Arrow, Feather, Wind, Light;Rapid, Flurry, Red, Sharp
 wildvalcan;Gatling_Gun, Beast_Fur, Metal, Bullet;Rapid, Wild, Jaguar, Hunting
 windofpray;Wind, Feather, Leaf, Light;Green, Healing, Soft, Nature
 cataclysm;Meteor, Rock, Fire, Sky;Falling, Massive, Destruction, Apocalyptic
-combodefault;Blade, Light, Slash, Energy;Cutting, Swift, Diagonal, Splitting
+combodefault;Blade, Light, Slash, Half;Cutting, Swift, Diagonal, Splitting
 guardianspirit;Nature, Spirit, Light, Shield;Healing, Protection, Green, Soft
 heavendoor;Gate, Light, Holy, Dimension;Resurrection, AOE, Divine, Gold
 installshield;Metal, Shield, Tech, Barrier;Defense, Invincible, Blue, Robotic
