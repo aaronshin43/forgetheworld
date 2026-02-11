@@ -62,60 +62,60 @@ Task:
 
 SKILL_DATABASE = """
 Skill;Material;Attribute
-blizzard;Ice, Snow, Magic, Crystal;Cold, Freezing, Storm
-cannonbaguka;Metal, Gunpowder, Iron, Smoke;Heavy, Explosive, Fire, Cylinder
-cosmos;Star, Light, Galaxy, Energy;Space, Mysterious, Violet, Infinite
-crossthesticks;Soul, Dark_Energy, Star, Galaxy;Space, Cosmic, Violet
-darkimpaile;Dark_Matter, Spear, Metal, Phantom;Evil, Pierce, Sharp, Violet
-darkspear;Shadow, Spear, Void, Energy;Throwing, Pierce, Dark, Sharp
-deadlycharge;Metal, Light, Armo;Dash, Holy, Impact, Valiant
-demonimpact;Demon, Obsidian, Rock, Magma;Crushing, Dark, Explosive, Purple
-endlesspain;Curse, Blood, Chains, Venom;Agony, Eternal, Dark, Torment
-fallingjustice;Light, Hammer, Gold, Energy;Holy, Judgement, Vertical, Righteous
-foreverstervingbeast;Flesh, Teeth, Void, Abyss;Hunger, Ravenous, Beastly, Red
-fourseason;Shuriken, Wind, Metal;Cyclic, Ninja, Fast
-gambit;Train, Magic, Cube;Tricky, Gambling, Modern
-genesis;Light, Holy_Ray, Dragon_Scale, Heaven;Divine, Ultimate, Destruction, Bright
-gumgobong;Gold, Iron, Wood, Magic;Giant, Blunt, Heavy, Oriental
-karmapury;Blade, Steel, Shadow, Blood;Dual, Rapid, Chaos, Sharp
-laststanding;Iron, Shield, Rock, Willpower;Swing, Sturdy, Unbreakable, Solo
-legendaryspear;Magic, Leaf, Elf_Steel, Wind;Royal, Pink, Aerial, Piercing
-limitbreak;Time, Glass, Dimension, Clock;Chrono, Freeze, Burst, Transcendent
-lineinfentry;Metal, Robot, Plastic, Oil;Military, Stationary, Shooting, Army
-longrangetrueshoot;Arrow, Lens, Steel, Wind;Precise, Sniper, Distant, Focusing
-loyalguard;Light, Shield, Gold, Aura;Guard, Counter, Holy, Reflective
-metalarmor;Steel, Alloy, Circuit, Engine;Robotic, Heavy, Pilot, Sci-Fi
-mothership;Spaceship, Metal, Beam, Fuel;Massive, Sci-Fi, Aerial, Command
-needlebat;Wood, Nail, Iron, Leather;Blunt, Spiky, Painful, Crude
-nightmare;Mist, Shadow, Moon, Dream;Sleep, Purple, Illusory, Ghostly
-nova;Cube, Plastic, Telekinesis;Explosive, White, Black, Burst
-pachopung;Fan, Wind, Paper, Leaf;Gale, Green, Knockback, Oriental
-persilrade;Bullet, Gunpowder, Tentacle, Water;Ocean, Rapid, Shooting, Pirate
-poisonregion;Gas, Slime, Poison, Bubble;Toxic, Green, Hazard, Area
-primalrore;Soundwave, Pink_Light, Heart, Soul;Dragon, Cute, Loud, Sonic
-purgerop;Steel, Beam, Aircraft;Robotic, Blue, Razor, Sci-Fi
-robotlauncherRM7;Metal, Missile, Fire, Smoke;Homing, Explosive, Robotic, Tech
-ruin;Magic_Sword, Ether, Light, Crystal;Destruction, Massive, Vertical, Royal
-smight;Hammer, Thunder, Light, Gold;Binding, Crushing, Holy, Shock
-soulpanetrition;Soul, Light, Sword, Star;Piercing, Aerial, Binding, Celestial
-superfistinrage;Dragon, Fist, Energy, Muscle;Punch, Fast, Blue, Physical
-swordillustion;Sword, Hologram, Dragon_Soul, Fire;Copy, Fast, Warrior
-takedown;Wood, Nail, Iron, Chain;Blunt, Spiky, Painful, Crude
-thunderbreak;Lightning, Water, Electricity, Shark;Chain, Blue, Shocking, Storm
-thunderpower;Spark, Plasma, Anchor, Light;Electric, Blue,  Lightening, Bright
-thunderspear;Lightning, Spear, Plasma, Magic;Electric, Piercing, Stun, Blue
-ultimateblast;Energy, Beam, Heat, Violet;Ultimate, Straight, Heavy, Impact
-ultimatesniping;Metal, Scope, Arrow, Light;Critical, One-Shot, Precise, Deadly
-uncountablearrow;Arrow, Feather, Wind, Light;Rapid, Flurry, Red, Sharp
-wildvalcan;Gatling_Gun, Beast_Fur, Metal, Bullet;Rapid, Wild, Jaguar, Hunting
-windofpray;Wind, Feather, Leaf, Light;Green, Healing, Soft, Nature
-cataclysm;Meteor, Rock, Fire, Sky;Falling, Massive, Destruction, Apocalyptic
-combodefault;Blade, Light, Slash, Half;Cutting, Swift, Diagonal, Splitting
-guardianspirit;Nature, Spirit, Light, Shield;Healing, Protection, Green, Soft
-heavendoor;Gate, Light, Holy, Dimension;Resurrection, AOE, Divine, Gold
-installshield;Metal, Shield, Tech, Barrier;Defense, Invincible, Blue, Robotic
-signusblessing;Royal, Light, Sword, Queen;Stat Buff, Ultimate, Ascension, Holy
-valhalar;Warrior, Sword, Shout, Spirit;Attack Buff, Viking, Red, Berserk
+blizzard;Ice, Snow, Frost, Crystal;Cold, Freezing, Storm, Wide-Area
+cannonbaguka;Cannonball, Gunpowder, Iron, Smoke;Heavy, Explosive, Fire, Cylinder
+cosmos;Star, Nebula, Galaxy, Matter;Cosmic, Spherical, Infinite, Expanding
+crossthesticks;Soul, Underworld, River, Acheron;Death, Heavy, Cleave, Violet
+darkimpaile;Dark_Energy, Spear, Phantom, Aura;Evil, Pierce, Sharp, Corrupted
+darkspear;Shadow, Void, Spear_of_Night, Evil_Eye;Throwing, Piercing, Relentless, Dark
+deadlycharge;Steel, Light, Armor, Emblem;Dash, Holy, Impact, Valiant
+demonimpact;Demon_Aura, Obsidian, Rock, Magma;Crushing, Demonic, Explosive, Purple
+endlesspain;Curse, Blood, Chains, Venom;Agony, Eternal, Torment, Sinister
+fallingjustice;Hammer, Ray_of_Light, Gold, Sky;Judgement, Vertical, Righteous, Smite
+foreverstervingbeast;Flesh, Teeth, Void_Creature, Abyss;Hunger, Ravenous, Beastly, Creepy
+fourseason;Shuriken, Charm, Amulet, Scroll;Cyclic, Ninja, Fast, Seasonal
+gambit;Train, Card, Chess_Piece;Tricky, Crash, Modern, Psychic
+genesis;Holy_Ray, Dragon_Scale, Heaven, Divine_Aura;Sacred, Ultimate, Destruction, Bright
+gumgobong;Gold, Iron, Wood, Cloud;Giant, Blunt, Heavy, Oriental
+karmapury;Dagger, Steel, Shadow, Blood;Dual, Rapid, Chaos, Furious
+laststanding;Shield_Barrier, Rock, Willpower, Aura;Stance, Sturdy, Unbreakable, Solo
+legendaryspear;Magic, Leaf, Elf_Steel, Pegasus;Royal, Pink, Aerial, Graceful
+limitbreak;Time, Glass, Dimension, Clock;Chrono, Freeze, Transcendent, Shatter
+lineinfentry;Flintlock, Crew, Wooden_Deck, Flag;Military, Stationary, Firing_Squad, Army
+longrangetrueshoot;Crossbow_Bolt, Lens, String, Wind;Precise, Sniper, Distant, Penetrating
+loyalguard;Royal_Shield, Light, Gold, Crest;Guard, Counter, Deflect, Reflective
+metalarmor;Alloy, Circuit, Engine, Cockpit;Mech, Armored, Pilot, Sci-Fi
+mothership;Spaceship, Hull, Beam, Thruster;Massive, Hovering, Aerial, Command
+needlebat;Wood, Nail, Wire, Bat;Blunt, Spiky, Bleeding, Crude
+nightmare;Blunt_Weapon, Shadow, Moon, Dreamcatcher;Sleep, Illusory, Ghostly, Haunting
+nova;Cube, Plastic, Energy_Cube, Telekinesis;Explosive, Burst, Black, White
+pachopung;Giant_Fan, Wind, Paper, Bamboo;Gale, Knockback, Oriental, Sweeping
+persilrade;Cannonball, Gunpowder, Seawater;Ocean, Blast, Pirate, Wide
+poisonregion;Gas, Slime, Toxin, Bubble;Poisonous, Green, Hazard
+primalrore;Soundwave, Pink_Light, Ribbon, Microphone;Idol, Loud, Sonic, Cute
+purgerop;Energy_Core, Beam, Aircraft, Hologram;Targeting, Cybernetic, Laser, Razor
+robotlauncherRM7;Rocket, Artillery, Fire, Exhaust;Homing, Bombardment, Robotic, Tech
+ruin;Magic_Sword, Ether, Spatial_Crack, Crystal;Destruction, Massive, Sword_Summon, Grand
+smight;Hammer, Thunder, Aura;Binding, Shock, Divine, Suppressive
+soulpanetrition;Soul_Fragment, Light, Star, Constellation;Pinning, Celestial, Aerial, Paralyze
+superfistinrage;Dragon_Aura, Fist, Energy, Muscle;Punch, Combo, Physical, Brutal
+swordillustion;Sword_Aura, Hologram, Dragon_Soul, Fire;Copy, Mirage, Warrior, Flurry
+takedown;Chain, Anchor, Metal_Link, Iron;Grapple, Binding, Slam, Brutal
+thunderbreak;Lightning, Water, Rain, Cloud;Surging, Advancing, Crash, Torrent
+thunderpower;Anchor, Plasma, Steel, Spark;Dropping, Heavy, Magnetic, Electrified
+thunderspear;Lightning, Spear, Static;Piercing, Stun, Focused, Yellow
+ultimateblast;Energy, Beam, Heat, Spectrum;Ultimate, Straight, Annihilation, Impact
+ultimatesniping;Metal, Scope, Laser_Sight, Light;Critical, One-Shot, Flawless, Deadly
+uncountablearrow;Arrow_Storm, Illusion, Feather, Magic;Flurry, Omnidirectional, Swift, Barrage
+wildvalcan;Gatling_Gun, Beast_Fur, Brass, Bullet;Rapid-fire, Wild, Jaguar, Hunting
+windofpray;Zephyr, Petal, Sunlight, Breeze;Soothing, Recovery, Gentle, Nature
+cataclysm;Meteor, Magma, Fire, Sky;Falling, Apocalyptic, Eruption, Devastating
+combodefault;Greatsword, Light, Slash, Void;Cutting, Swift, Diagonal, Splitting
+guardianspirit;Ethereal_Form, Spirit, Wisp, Forest;Protection, Invulnerable, Aura, Verdant
+heavendoor;Gate, Marble, Cloud, Heaven;Resurrection, Sacred, Divine, Majestic
+installshield;Forcefield, Tech, Barrier, Generator;Defense, Drone, Blue, Cybernetic
+signusblessing;Royal_Crest, Light, Sword, Queen;Empowerment, Ultimate, Ascension, Holy
+valhalar;Warrior_Spirit, Sword, Shout, Rune;Buff, Viking, Berserk, Indomitable
 """
 
 SKILL_ANALYSIS_PROMPT = """
@@ -130,12 +130,9 @@ Analyze the image provided.
    - If it's a weapon-like object, pick a weapon skill.
    - If it's nature-related, pick a nature skill.
    - Use the 'Material' and 'Attribute' columns for matching.
-3. Determine if this skill is primarily 'buff' or 'deal' (damage).
-   - Most in the list are 'deal', but check reasoning (e.g., healing/shielding = buff).
 
 Return ONLY JSON:
 {{
-    "skill_name": "exact_skill_name_from_db",
-    "type": "deal", // or "buff"
+    "skill_name": "exact_skill_name_from_db"
 }}
 """
