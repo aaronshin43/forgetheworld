@@ -49,3 +49,5 @@ next-env.d.ts
 *.webp
 *.mp3
 *.bin
+
+public/*.js
