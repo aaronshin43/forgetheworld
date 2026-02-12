@@ -5,8 +5,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
+    # ports:
+    #   - "3000:3000"  <-- Handled by Caddy
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -15,9 +15,26 @@ services:
 
   backend:
     build: ./backend
-    ports:
-      - "8000:8000"
+    # ports:
+    #   - "8000:8000" <-- Handled by Caddy
     volumes:
       - ./backend:/app
     environment:
       - PYTHONUNBUFFERED=1
+
+  caddy:
+    image: caddy:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+      - backend
+
+volumes:
+  caddy_data:
+  caddy_config:

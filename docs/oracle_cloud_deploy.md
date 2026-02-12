@@ -174,37 +174,62 @@ Open your browser and visit:
     git pull
     docker compose up --build -d
     ```
-## 6. Port Forwarding (Connect via Port 80)
+## 6. HTTPS Setup (Automatic SSL with Caddy)
 
-To access the frontend directly via the server's Public IP without specifying a port number (using default Port 80), add the following configuration.
+We will use **Caddy** as a reverse proxy to automatically handle SSL certificates (Let's Encrypt) and serve your site via HTTPS.
 
-### Change Docker Compose Port
+### 1. Update Code & Config
 
-Modify the port mapping for the frontend service in your `docker-compose.yml` file to `80:3000`.
+Run `git pull` to fetch the updated `docker-compose.yml` and `Caddyfile`.
 
-**Before:**
-```yaml
-  frontend:
-    # ...
-    ports:
-      - "3000:3000"
+### 2. Configure Domain
+
+Open the `Caddyfile` on your server and ensure your domain is correct.
+
+```bash
+nano Caddyfile
 ```
 
-**After:**
-```yaml
-  frontend:
-    # ...
-    ports:
-      - "80:3000"  # Map host port 80 to container port 3000
+Make sure it looks like this (replace with your actual email):
+
+```caddyfile
+{
+    email your-email@example.com
+}
+
+forgetheworld.duckdns.org {
+    reverse_proxy frontend:3000
+    
+    # Proxy API calls to backend
+    handle /api/* {
+        reverse_proxy backend:8000
+    }
+    handle /docs* {
+        reverse_proxy backend:8000
+    }
+    handle /openapi.json {
+        reverse_proxy backend:8000
+    }
+}
 ```
 
-### Restart Containers
+### 3. Open Port 443
 
-Once the configuration is complete, rebuild and restart the Docker containers.
+HTTPS uses port 443. Open it in the server firewall.
+
+```bash
+# Open port 443
+sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 443 -j ACCEPT
+sudo netfilter-persistent save
+```
+
+*(Ensure Port 443 is also open in the Oracle Cloud VCN Security List, just like you did for Port 80).*
+
+### 4. Restart Containers
 
 ```bash
 docker compose down
 docker compose up -d --build
 ```
 
-You can now access the game by entering `http://<SERVER_PUBLIC_IP>` directly in your browser's address bar.
+Wait a few moments for Caddy to obtain the certificate. You can now access your game securely.
