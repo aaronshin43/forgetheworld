@@ -97,12 +97,11 @@ export const CameraView = () => {
 
                 // ENHANCE LOGIC
                 if (interactionMode === 'enhancing') {
-                    const flavor = data.flavor || { name: data.analysis?.item, description: '' };
                     scanMaterial({
-                        name: flavor.name || data.analysis?.item || 'Unknown Material',
-                        rarity: data.analysis?.rarity_score || 1,
-                        affectedStats: data.analysis?.affected_stats || ['atk', 'def', 'hp'],
-                        description: flavor.description
+                        name: data.name || 'Unknown Material',
+                        rarity: data.rarity_score || 1,
+                        affectedStats: data.affected_stats || ['atk', 'def', 'hp'],
+                        description: data.description || ''
                     });
                     setIsAnalyzing(false);
                     return;
@@ -110,19 +109,15 @@ export const CameraView = () => {
 
                 // CRAFT / ENHANCE LOGIC
                 // 3. Add Placeholder to Inventory
-                // Find first empty slot or overwrite last? Let's find first empty.
                 let targetIndex = inventory.findIndex(item => item === null);
-                if (targetIndex === -1) targetIndex = 0; // Overwrite first if full
+                if (targetIndex === -1) targetIndex = 0;
 
                 const newItemId = Date.now().toString();
-                const flavor = data.flavor && typeof data.flavor === 'object'
-                    ? { name: data.flavor.name ?? data.analysis?.item, description: data.flavor.description ?? '' }
-                    : { name: data.analysis?.item ?? '—', description: '' };
 
-                const rarity = data.analysis?.rarity_score || 1;
-                let affectedStats = data.analysis?.affected_stats;
+                const rarity = data.rarity_score || 1;
+                let affectedStats = data.affected_stats;
 
-                // Fallback stats if backend fails
+                // Fallback stats 
                 if (!affectedStats || !Array.isArray(affectedStats) || affectedStats.length < 3) {
                     const allStats = ['atk', 'def', 'maxHp', 'spd', 'critRate'];
                     affectedStats = allStats.sort(() => 0.5 - Math.random()).slice(0, 3);
@@ -131,17 +126,33 @@ export const CameraView = () => {
                 // Set Loading State & Apply Stats Immediately
                 craftItem(targetIndex, {
                     id: newItemId,
-                    name: flavor.name || data.analysis?.item || '—',
-                    description: flavor.description || undefined,
+                    name: data.name || '—',
+                    description: data.description || undefined,
                     rarity: rarity,
                     affectedStats: affectedStats
                 });
 
-                setScanResult(data);
+                // Reconstruct the nested structure expected by gameStore and ResultOverlay
+                const structuredData = {
+                    analysis: {
+                        item: data.name || 'Unknown Item',
+                        rarity_score: rarity,
+                        affected_stats: affectedStats,
+                        stats: {}, // Scan result doesn't usually have stats calculated until craft/scanMaterial
+                        type: 'material' // Defaulting type since prompt doesn't strictly return it anymore
+                    },
+                    flavor: {
+                        name: data.name || 'Unknown Item',
+                        description: data.description || 'No description available.'
+                    }
+                };
+
+                // For ResultOverlay to work, it needs structuredData
+                setScanResult(structuredData);
                 setIsAnalyzing(false);
 
                 // 4. Trigger Image Generation (Async)
-                generateImage(data.flavor.description || data.analysis.item, targetIndex, newItemId);
+                generateImage(structuredData.flavor.description, targetIndex, newItemId);
 
             } catch (err) {
                 console.error("Scan failed", err);
@@ -152,6 +163,7 @@ export const CameraView = () => {
     }, [webcamRef, film, setIsAnalyzing, setScanResult, setTimeScale, useFilm, inventory]);
 
     const generateImage = async (prompt: string, index: number, itemId: string) => {
+        if (!prompt) return; // Guard against empty prompt
         try {
             const apiBase = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
             const response = await fetch(`${apiBase}/generate-image`, {

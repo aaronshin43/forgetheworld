@@ -269,7 +269,7 @@ export const ResultOverlay = () => {
                                     <span>TYPE: {scanResult.analysis.skill_type?.toUpperCase() || 'DEAL'}</span>
                                 </span>
                             ) : (
-                                (scanResult.analysis.affected_stats || ['atk', 'def', 'maxHp']).map((stat: string) => {
+                                (scanResult.analysis?.affected_stats || ['atk', 'def', 'maxHp']).map((stat: string) => {
                                     // For material, values are in scanResult.analysis.stats (if I added it in scanMaterial store action)
                                     // In `scanMaterial` store action, I did: `analysis: { ...data, stats: itemStats ... }`
                                     // So `scanResult.analysis.stats` should exist.
