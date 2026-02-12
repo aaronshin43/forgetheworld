@@ -5,11 +5,9 @@ import base64
 from PIL import Image
 from google import genai
 from google.genai import types
-import requests
 from dotenv import load_dotenv
 from prompts import (
     GEMINI_SYSTEM_PROMPT,
-    get_flavor_text_prompt,
     get_image_generation_prompt,
     EVOLUTION_PROMPT,
     SKILL_ANALYSIS_PROMPT,
@@ -21,16 +19,11 @@ load_dotenv()
 # Configure Gemini Client
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
-# Featherless / Vultr Inference
-FEATHERLESS_API_URL = os.getenv("FEATHERLESS_API_URL")
-FEATHERLESS_API_KEY = os.getenv("FEATHERLESS_API_KEY")
-
-# FEATHERLESS_MODEL = "google/gemma-2-2b-it"
-FEATHERLESS_MODEL = "deepseek-ai/DeepSeek-V3-0324"
-# FEATHERLESS_MODEL = "microsoft/Phi-4-mini-instruct"
-
-
 async def analyze_image_with_gemini(image_bytes: bytes, mode: str):
+    """
+    Analyzes the image and generates flavor text in a single pass using Gemini 2.5 Flash Lite.
+    Returns flat JSON: { name, description, rarity_score, affected_stats }
+    """
     try:
         response = client.models.generate_content(
             model="gemini-2.5-flash-lite", 
@@ -49,95 +42,40 @@ async def analyze_image_with_gemini(image_bytes: bytes, mode: str):
                 temperature=0.7,
             ),
         )
-        print(f"Gemini Response: {response.text}")
-        return json.loads(response.text)
-    except Exception as e:
-        print(f"Gemini Error: {e}")
-        return {
-            "item": "Unknown Artifact",
-            "material": "Unknown",
-            "attribute": "Void",
-            "type": "weapon" if mode == 'craft' else "skill",
-            "rarity_score": 1,
-            "affected_stats": ["atk", "def", "maxHp"]
-        }
-
-async def generate_flavor_text_with_featherless(item_data: dict):
-    if not FEATHERLESS_API_KEY:
-        return {
-            "name": f"Ancient {item_data['item']}",
-            "description": f"A mysterious {item_data['item']} found in the void. It resonates with {item_data['attribute']} energy."
-        }
-
-    prompt = get_flavor_text_prompt(item_data)
-    
-    try:
-        headers = {
-            "Authorization": f"Bearer {FEATHERLESS_API_KEY}",
-            "Content-Type": "application/json"
-        }
-        data = {
-            "model": FEATHERLESS_MODEL,
-            "messages": [
-                {"role": "system", "content": "You are a dramatic fantasy system. Return JSON only."},
-                {"role": "user", "content": prompt}
-            ],
-            "response_format": {"type": "json_object"}
-        }
+        print(f"Gemini Scan Response: {response.text}")
+        result = json.loads(response.text)
         
-        response = requests.post(FEATHERLESS_API_URL, headers=headers, json=data)
-        return response.json()['choices'][0]['message']['content']
+        # Ensure we have the required fields; fallback if missing
+        if "name" not in result:
+             # Fallback if structure is wrong (e.g. model failed to follow strict JSON)
+             return {
+                 "name": result.get("item", "Unknown Item"),
+                 "description": "A mysterious object from the void.",
+                 "rarity_score": result.get("rarity_score", 1),
+                 "affected_stats": result.get("affected_stats", ["atk", "def", "maxHp"])
+             }
+        
+        # Compatibility: Frontend `gameStore` uses `data.rarity`.
+        # The prompt returns `rarity_score`. We map it to `rarity` to be safe.
+        if "rarity" not in result and "rarity_score" in result:
+            result["rarity"] = result["rarity_score"]
+
+        return result
+
     except Exception as e:
-        print(f"Featherless Error: {e}")
+        print(f"Gemini Scan Error: {e}")
         return {
-             "name": f"Legendary {item_data['item']}",
-             "description": "The description was lost in translation."
+            "name": "Glithced Object",
+            "description": "The scanner failed to identify this object.",
+            "rarity_score": 1,
+            "rarity": 1,
+            "affected_stats": ["atk", "def", "maxHp"]
         }
 
 async def generate_item_image(prompt: str):
     try:
-        # 1. Generate Image with Imagen
-        print(f"Generating image for: {prompt}")
-        
-        full_prompt = get_image_generation_prompt(prompt)
-
-        # Generate with Imagen
-        response = client.models.generate_images(
-            model='imagen-4.0-generate-001', 
-            prompt=full_prompt,
-            config=types.GenerateImagesConfig(
-                number_of_images=1,
-                aspect_ratio="1:1",
-                output_mime_type="image/jpeg"
-            )
-        )
-
-        # # Generate with NanoBanana
-        # response = client.models.generate_content(
-        #     model='gemini-2.5-flash-image', 
-        #     contents=full_prompt,
-        #     config=types.GenerateContentConfig(
-        #         image_config=types.ImageConfig(
-        #             aspect_ratio="1:1",
-        #         ),
-        #     )
-        # )
-
-        if not response.generated_images:
-            return None
-
-        # 2. Process Image (Resize & Convert to WebP)
-        image_bytes = response.generated_images[0].image.image_bytes
-        return process_image_bytes(image_bytes)
-
-    except Exception as e:
-        print(f"Imagen Error: {e}")
-        return None
-
-async def generate_item_image_v2(prompt: str):
-    try:
         # 1. Generate Image with Gemini (Flash Image)
-        print(f"Generating image (v2) for: {prompt}")
+        print(f"Generating image for: {prompt}")
         
         full_prompt = get_image_generation_prompt(prompt)
 
@@ -184,7 +122,6 @@ def process_image_bytes(image_bytes):
     new_image.save(buffered, format="WEBP", quality=90)
     img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
     
-    
     return f"data:image/webp;base64,{img_str}"
 
 async def generate_evolution_concept(base_item: dict, materials: list):
@@ -199,7 +136,7 @@ async def generate_evolution_concept(base_item: dict, materials: list):
         )
 
         response = client.models.generate_content(
-            model="gemini-2.0-flash", 
+            model="gemini-2.5-flash-lite", 
             contents=prompt,
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
@@ -226,7 +163,7 @@ async def analyze_skill_image(image_data: bytes):
         prompt = SKILL_ANALYSIS_PROMPT.format(skill_database=SKILL_DATABASE)
 
         response = client.models.generate_content(
-            model="gemini-2.0-flash", 
+            model="gemini-2.5-flash-lite", 
             contents=[prompt, image_part],
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",

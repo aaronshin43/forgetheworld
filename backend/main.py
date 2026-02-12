@@ -20,7 +20,7 @@ import re
 from fastapi import UploadFile, File, Form
 from fastapi import UploadFile, File, Form, Body
 from pydantic import BaseModel
-from ai_service import analyze_image_with_gemini, generate_flavor_text_with_featherless, generate_item_image, generate_item_image_v2, generate_evolution_concept, analyze_skill_image
+from ai_service import analyze_image_with_gemini, generate_item_image, generate_evolution_concept, analyze_skill_image
 
 class ImageRequest(BaseModel):
     prompt: str
@@ -37,39 +37,15 @@ async def scan_item(
 ):
     contents = await file.read()
     
-    # 1. Vision Analysis (Gemini)
-    gemini_result = await analyze_image_with_gemini(contents, mode)
+    # 1. Consolidated Scan (Gemini 2.5 Flash Lite)
+    # Returns both analysis and flavor text
+    scan_result = await analyze_image_with_gemini(contents, mode)
     
-    if skip_image_generation:
-        return {
-            "analysis": gemini_result,
-            "flavor": {
-                "name": gemini_result.get("item", "Unknown Material"),
-                "description": "A material used for enhancing items."
-            }
-        }
-
-    # 2. Flavor Text (Featherless)
-    flavor_text = await generate_flavor_text_with_featherless(gemini_result)
-    if isinstance(flavor_text, str):
-        raw = flavor_text.strip()
-        # parse json
-        if raw.startswith("```"):
-            raw = re.sub(r"^```(?:json)?\s*", "", raw)
-            raw = re.sub(r"\s*```$", "", raw)
-        try:
-            flavor_text = json.loads(raw)
-        except Exception:
-            flavor_text = {"name": gemini_result["item"], "description": flavor_text}
-
-    return {
-        "analysis": gemini_result,
-        "flavor": flavor_text
-    }
+    return scan_result
 
 @app.post("/generate-image")
 async def generate_image(request: ImageRequest):
-    image_url = await generate_item_image_v2(request.prompt)
+    image_url = await generate_item_image(request.prompt)
     return {"image": image_url}
 
 @app.post("/evolve")
@@ -80,7 +56,7 @@ async def evolve_item(request: EvolutionRequest):
     # 2. Image Generation (Gemini/Imagen)
     image_url = None
     if concept and "visual_prompt" in concept:
-        image_url = await generate_item_image_v2(concept["visual_prompt"])
+        image_url = await generate_item_image(concept["visual_prompt"])
         
     return {
         "name": concept.get("name", "Unknown Evolution"),
