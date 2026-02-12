@@ -20,7 +20,7 @@ export const useBGM = (src: string, options: { loop?: boolean; volume?: number; 
         const play = async () => {
             try {
                 await audio.play();
-                console.log('[useBGM] Playing:', src);
+                // console.log('[useBGM] Playing:', src);
             } catch (err) {
                 console.warn('[useBGM] Autoplay blocked, waiting for interaction:', err);
                 const onInteract = () => {
