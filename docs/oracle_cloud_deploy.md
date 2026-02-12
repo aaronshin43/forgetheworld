@@ -174,3 +174,37 @@ Open your browser and visit:
     git pull
     docker compose up --build -d
     ```
+## 6. Port Forwarding (Connect via Port 80)
+
+To access the frontend directly via the server's Public IP without specifying a port number (using default Port 80), add the following configuration.
+
+### Change Docker Compose Port
+
+Modify the port mapping for the frontend service in your `docker-compose.yml` file to `80:3000`.
+
+**Before:**
+```yaml
+  frontend:
+    # ...
+    ports:
+      - "3000:3000"
+```
+
+**After:**
+```yaml
+  frontend:
+    # ...
+    ports:
+      - "80:3000"  # Map host port 80 to container port 3000
+```
+
+### Restart Containers
+
+Once the configuration is complete, rebuild and restart the Docker containers.
+
+```bash
+docker compose down
+docker compose up -d --build
+```
+
+You can now access the game by entering `http://<SERVER_PUBLIC_IP>` directly in your browser's address bar.
