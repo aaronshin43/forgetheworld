@@ -237,7 +237,6 @@ const generateItemStats = (baseStats: EntityStats, grade: string, affectedStats:
         if (key === 'atk') baseVal = 50;
         if (key === 'def') baseVal = 20;
         if (key === 'maxHp') baseVal = 100;
-        if (key === 'sp') baseVal = 0.1; // Typo fix: spd
         if (key === 'spd') baseVal = 0.1;
         if (key === 'critRate') baseVal = 0.05;
         if (key === 'critDmg') baseVal = 0.1;
@@ -469,7 +468,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         const grade = calculateGrade(itemData.rarity, state.sessionStartTime);
         const { newStats, changes, itemStats } = generateItemStats(state.heroStats, grade, itemData.affectedStats);
 
-        console.log(`[Crafted] ${itemData.name} (Grade ${grade})`, changes);
+        // console.log(`[Crafted] ${itemData.name} (Grade ${grade})`, changes);
 
         const newItem: InventoryItem = {
             id: itemData.id,
@@ -533,7 +532,7 @@ export const useGameStore = create<GameState>((set, get) => ({
                 const newAbsorbed = [...(item.absorbedMaterials || []), { name: tempMaterial.name, grade: tempMaterial.grade }];
                 const newLevel = (item.enhancementLevel || 0) + 1;
 
-                console.log(`[Enhanced] ${item.name} +${newLevel} (Absorbed ${tempMaterial.name})`);
+                // console.log(`[Enhanced] ${item.name} +${newLevel} (Absorbed ${tempMaterial.name})`);
 
                 if (newLevel > 0 && newLevel % 3 === 0) {
                     shouldEvolve = true;
