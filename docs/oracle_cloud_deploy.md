@@ -233,3 +233,27 @@ docker compose up -d --build
 ```
 
 Wait a few moments for Caddy to obtain the certificate. You can now access your game securely.
+
+### 5. Update Frontend Environment Variables (Important!)
+
+To fix "Mixed Content" errors (browser blocking insecure HTTP API calls), you must update the frontend to use the HTTPS URL.
+
+1.  Edit `frontend/.env` on the server:
+    ```bash
+    nano frontend/.env
+    ```
+
+2.  Update `NEXT_PUBLIC_API_BASE`:
+    ```env
+    # OLD: http://<IP>:8000
+    # NEW: Use your domain (no port)
+    NEXT_PUBLIC_API_BASE=https://forgetheworld.duckdns.org
+    ```
+
+3.  Save and Exit (`Ctrl+O`, `Enter`, `Ctrl+X`).
+
+4.  **Rebuild Frontend**:
+    ```bash
+    docker compose up -d --build frontend
+    ```
+

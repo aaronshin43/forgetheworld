@@ -3,22 +3,14 @@
 }
 
 forgetheworld.duckdns.org {
+    # Backend Endpoints
+    @backend_paths {
+        path /scan /generate-image /evolve /scan-skill /docs* /openapi.json
+    }
+    handle @backend_paths {
+        reverse_proxy backend:8000
+    }
+
+    # Frontend (Default)
     reverse_proxy frontend:3000
-    
-    # Optional: Route /api/* to backend directly if needed, 
-    # but currently frontend proxies api calls or connects directly?
-    # Based on .env NEXT_PUBLIC_API_BASE, frontend connects to backend via public URL.
-    # If we want to serve backend on same domain:
-    
-    handle /api/* {
-        reverse_proxy backend:8000
-    }
-    
-    handle /docs* {
-        reverse_proxy backend:8000
-    }
-    
-    handle /openapi.json {
-        reverse_proxy backend:8000
-    }
 }
