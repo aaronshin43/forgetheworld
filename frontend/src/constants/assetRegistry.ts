@@ -283,6 +283,7 @@ export const MONSTER_DURATIONS: Record<string, Record<string, number>> = {
         "attack1": 2160,
         "attack2": 2160,
         "die1": 1020,
+        "hit1": 600,
         "move": 720,
         "stand": 720
     },
