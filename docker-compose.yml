@@ -12,6 +12,8 @@ services:
       - /app/node_modules
     environment:
       - WATCHPACK_POLLING=true
+    env_file:
+      - ./frontend/.env
 
   backend:
     build: ./backend
